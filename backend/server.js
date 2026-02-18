@@ -31,9 +31,11 @@ const User = require("./model/userModel");
 
 // Import routes
 const userRoutes = require("./router/userRoutes");
+const propertyRoutes = require("./router/propertyRoutes");
 
 // Use routes
 app.use("/api/users", userRoutes);
+app.use("/api/properties", propertyRoutes);
 
 // Test route (optional)
 app.get("/", (req, res) => {
