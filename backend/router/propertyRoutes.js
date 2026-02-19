@@ -22,6 +22,7 @@ router.get("/:id", getPropertyById);
 
 // Landlord-only
 router.post("/", protect, landlordOnly, createPropertyValidation, createProperty);
+
 router.get("/my/list", protect, landlordOnly, getMyProperties);
 router.put("/:id", protect, landlordOnly, updatePropertyValidation, updateProperty);
 router.delete("/:id", protect, landlordOnly, deleteProperty);
