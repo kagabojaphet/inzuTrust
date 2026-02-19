@@ -1,31 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const path = require("path");
 
 dotenv.config();
 
-console.log("env summary:", {
-  DB_NAME: process.env.DB_NAME ? "<set>" : "<missing>",
-  DB_USER: process.env.DB_USER ? "<set>" : "<missing>",
-  DB_PASSWORD: process.env.DB_PASSWORD ? "<set>" : "<missing>",
-  DB_HOST: process.env.DB_HOST ? "<set>" : "<missing>",
-  JWT_SECRET: process.env.JWT_SECRET ? "<set>" : "<missing>",
-});
-
 const sequelize = require("./config/database");
-
-if (!process.env.JWT_SECRET) {
-  console.error(
-    "Environment variable JWT_SECRET is not set. Set JWT_SECRET in .env."
-  );
-  process.exit(1);
-}
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
 const bcrypt = require("bcryptjs");
 const User = require("./model/userModel");
 
@@ -33,15 +13,31 @@ const User = require("./model/userModel");
 const userRoutes = require("./router/userRoutes");
 const propertyRoutes = require("./router/propertyRoutes");
 
-// Use routes
+if (!process.env.JWT_SECRET) {
+  console.error("JWT_SECRET is not set in .env");
+  process.exit(1);
+}
+
+const app = express();
+
+// Middlewares
+app.use(cors());
+app.use(express.json()); // ✅ only once
+app.use(express.urlencoded({ extended: true }));
+
+// Static folder for uploads
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Routes
 app.use("/api/users", userRoutes);
 app.use("/api/properties", propertyRoutes);
 
-// Test route (optional)
+// Test route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+// Database connection
 sequelize
   .authenticate()
   .then(() => {
@@ -51,7 +47,7 @@ sequelize
   .then(async () => {
     console.log("Database synced...");
 
-    // Ensure default admin exists
+    // Default Admin
     const defaultAdmin = {
       firstName: "mudage",
       lastName: "bruno",
@@ -62,29 +58,23 @@ sequelize
       nationalId: "120677078890",
     };
 
-    try {
-      const existing = await User.findOne({
-        where: { email: defaultAdmin.email },
+    const existing = await User.findOne({
+      where: { email: defaultAdmin.email },
+    });
+
+    if (!existing) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(defaultAdmin.password, salt);
+
+      await User.create({
+        ...defaultAdmin,
+        password: hashedPassword,
+        isVerified: true,
       });
-      if (existing) {
-        console.log("Default admin already exists:", defaultAdmin.email);
-      } else {
-        const salt = await bcrypt.genSalt(10);
-        const hashed = await bcrypt.hash(defaultAdmin.password, salt);
-        await User.create({
-          firstName: defaultAdmin.firstName,
-          lastName: defaultAdmin.lastName,
-          email: defaultAdmin.email,
-          password: hashed,
-          phone: defaultAdmin.phone,
-          role: defaultAdmin.role,
-          nationalId: defaultAdmin.nationalId,
-          isVerified: true,
-        });
-        console.log("Default admin created:", defaultAdmin.email);
-      }
-    } catch (err) {
-      console.error("Error ensuring default admin:", err.message || err);
+
+      console.log("Default admin created");
+    } else {
+      console.log("Default admin already exists");
     }
 
     app.listen(process.env.PORT || 5000, () => {

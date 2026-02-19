@@ -1,5 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+sequelize.sync({ alter: true });
+
 
 const Property = sequelize.define(
   "Property",
@@ -10,7 +12,6 @@ const Property = sequelize.define(
       primaryKey: true,
     },
 
-    // Who owns this property (landlord user)
     landlordId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -67,6 +68,17 @@ const Property = sequelize.define(
     status: {
       type: DataTypes.ENUM("available", "occupied"),
       defaultValue: "available",
+    },
+
+    // 🔥 IMAGE FIELDS
+    mainImage: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    images: {
+      type: DataTypes.JSON,  // array of image URLs
+      allowNull: true,
     },
   },
   {
