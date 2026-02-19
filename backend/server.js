@@ -25,7 +25,7 @@ sequelize
   .authenticate()
   .then(() => {
     console.log("Database connected...");
-    return sequelize.sync();
+    return sequelize.sync({ force: true }); // Force sync to recreate tables with new columns
   })
   .then(() => {
     console.log("Database synced...");
