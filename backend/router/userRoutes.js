@@ -9,6 +9,8 @@ const {
   updateUserProfile,
   getAllUsers,
   deleteUser,
+  verifyOTP,
+  resendOTP,
 } = require("../controllers/userController");
 
 const { protect, adminOnly } = require("../middleware/authMiddleware");
@@ -25,6 +27,7 @@ router.post("/login", loginValidation, loginUser);
 router.post("/verify-otp", otpValidation, verifyOtp);
 
 // ─── Protected Routes (logged-in users) ──────────────────────────────────────
+router.post("/logout", protect, logoutUser);
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
 
@@ -32,4 +35,4 @@ router.put("/profile", protect, updateUserProfile);
 router.get("/", protect, adminOnly, getAllUsers);
 router.delete("/:id", protect, adminOnly, deleteUser);
 
-module.exports = router;
+module.exports = router;module.exports = router;

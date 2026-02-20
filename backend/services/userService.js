@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const otpGenerator = require("otp-generator");
 const User = require("../model/userModel");
 const generateToken = require("../utils/generateToken");
 const { sendOtpEmail } = require("../config/emailConfig");
@@ -73,7 +74,7 @@ const registerUser = async ({
 };
 
 // Login user
-const loginUser = async ({ email, password }) => {
+const loginUser = async ({ email, password, otp = null }) => {
   // Find user by email
   const user = await User.findOne({ where: { email } });
   if (!user) {
@@ -215,6 +216,88 @@ const deleteUser = async (id) => {
   await user.destroy();
 };
 
+// Verify OTP
+const verifyOTP = async (email, otp) => {
+  const user = await User.findOne({ where: { email } });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Check if OTP is expired
+  if (new Date() > user.otpExpiry) {
+    throw new Error("OTP has expired");
+  }
+
+  // Check if OTP matches
+  if (user.otp !== otp) {
+    throw new Error("Invalid OTP");
+  }
+
+  // Mark user as verified
+  await user.update({
+    isVerified: true,
+    otp: null,
+    otpExpiry: null,
+  });
+
+  // Generate token for verified user
+  const token = generateToken(user.id);
+
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    isVerified: user.isVerified,
+    token,
+    message: "Email verified successfully",
+  };
+};
+
+// Resend OTP
+const resendOTP = async (email) => {
+  const user = await User.findOne({ where: { email } });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.isVerified) {
+    throw new Error("User is already verified");
+  }
+
+  // Generate new OTP
+  const otp = otpGenerator.generate(6, {
+    upperCaseAlphabets: false,
+    lowerCaseAlphabets: false,
+    specialChars: false,
+  });
+
+  // Set OTP expiry time (10 minutes)
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+  // Update user with new OTP
+  await user.update({
+    otp,
+    otpExpiry,
+  });
+
+  // Send OTP email
+  try {
+    await sendOTPEmail(email, otp, user.firstName);
+  } catch (error) {
+    console.error("OTP email send failed:", error);
+    throw new Error("Failed to send OTP email");
+  }
+
+  return {
+    message: "OTP resent successfully to your email",
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -223,4 +306,6 @@ module.exports = {
   updateUser,
   getAllUsers,
   deleteUser,
+  verifyOTP,
+  resendOTP,
 };
