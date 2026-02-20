@@ -13,13 +13,11 @@ const User = sequelize.define(
     firstName: {
       type: DataTypes.STRING,
       allowNull: false,
-      trim: true,
     },
 
     lastName: {
       type: DataTypes.STRING,
       allowNull: false,
-      trim: true,
     },
 
     email: {
@@ -55,11 +53,21 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+
+    // OTP Fields
+    otp: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    otpExpiry: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",
     timestamps: true,
-   
   }
 );
 

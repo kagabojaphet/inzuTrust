@@ -1,6 +1,17 @@
 const bcrypt = require("bcryptjs");
 const User = require("../model/userModel");
 const generateToken = require("../utils/generateToken");
+const { sendOtpEmail } = require("../config/emailConfig");
+const otpGenerator = require("otp-generator");
+
+// Generate 6-digit OTP
+const generateOTP = () => {
+  return otpGenerator.generate(6, {
+    upperCaseAlphabets: false,
+    specialChars: false,
+    lowerCaseAlphabets: false,
+  });
+};
 
 // Register a new user
 const registerUser = async ({
@@ -22,7 +33,11 @@ const registerUser = async ({
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  // Create user
+  // Generate OTP
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
+
+  // Create user with OTP
   const user = await User.create({
     firstName,
     lastName,
@@ -31,10 +46,19 @@ const registerUser = async ({
     phone,
     role: role || "tenant",
     nationalId,
+    otp,
+    otpExpiry,
+    isVerified: false,
   });
 
-  // Return user data + token (exclude password)
-  const token = generateToken(user.id);
+  // Send OTP to email
+  try {
+    await sendOtpEmail(email, otp);
+  } catch (error) {
+    // Delete user if email fails to send
+    await user.destroy();
+    throw new Error("Failed to send verification code. Please try again.");
+  }
 
   return {
     id: user.id,
@@ -44,7 +68,7 @@ const registerUser = async ({
     phone: user.phone,
     role: user.role,
     nationalId: user.nationalId,
-    token,
+    message: "Registration successful. Please check your email for OTP verification code.",
   };
 };
 
@@ -62,6 +86,11 @@ const loginUser = async ({ email, password }) => {
     throw new Error("Invalid email or password");
   }
 
+  // Check if user is verified
+  if (!user.isVerified) {
+    throw new Error("Please verify your email first");
+  }
+
   // Generate token
   const token = generateToken(user.id);
 
@@ -73,6 +102,50 @@ const loginUser = async ({ email, password }) => {
     phone: user.phone,
     role: user.role,
     token,
+  };
+};
+
+// Verify OTP
+const verifyOtp = async ({ email, otp }) => {
+  // Find user by email
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Check if user already verified
+  if (user.isVerified) {
+    throw new Error("User already verified");
+  }
+
+  // Check if OTP is expired
+  if (!user.otpExpiry || new Date() > user.otpExpiry) {
+    throw new Error("OTP has expired. Please request a new one.");
+  }
+
+  // Check if OTP matches
+  if (user.otp !== otp) {
+    throw new Error("Invalid OTP");
+  }
+
+  // Mark user as verified
+  user.isVerified = true;
+  user.otp = null;
+  user.otpExpiry = null;
+  await user.save();
+
+  // Generate token
+  const token = generateToken(user.id);
+
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    token,
+    message: "Email verified successfully",
   };
 };
 
@@ -145,6 +218,7 @@ const deleteUser = async (id) => {
 module.exports = {
   registerUser,
   loginUser,
+  verifyOtp,
   getUserById,
   updateUser,
   getAllUsers,

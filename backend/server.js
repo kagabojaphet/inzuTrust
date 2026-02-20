@@ -12,6 +12,9 @@ const User = require("./model/userModel");
 const userRoutes = require("./router/userRoutes");
 const propertyRoutes = require("./router/propertyRoutes");
 
+// Cloudinary (health check)
+const cloudinary = require("./config/cloudinary");
+
 const app = express();
 
 /**
@@ -30,8 +33,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /**
- * Static folder for uploads (still useful even if you later use Cloudinary,
- * because multer temporarily stores files locally)
+ * Static folder for uploads
+ * (still useful even when using Cloudinary because multer stores files locally first)
  */
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
@@ -46,14 +49,15 @@ app.get("/", (_req, res) => {
 });
 
 /**
- * Global error handler (prevents server crash and ECONNRESET)
+ * Cloudinary test route
  */
-app.use((err, _req, res, _next) => {
-  console.error("❌ Unhandled error:", err);
-  return res.status(500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
+app.get("/cloudinary-test", async (_req, res) => {
+  try {
+    const result = await cloudinary.api.ping();
+    return res.json({ success: true, result });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 /**
@@ -71,7 +75,6 @@ async function ensureDefaultAdmin() {
   };
 
   const existing = await User.findOne({ where: { email: defaultAdmin.email } });
-
   if (existing) {
     console.log("✅ Default admin already exists");
     return;
@@ -89,31 +92,46 @@ async function ensureDefaultAdmin() {
 }
 
 /**
+ * 404 Handler (for unknown routes)
+ */
+app.use((req, res) => {
+  return res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
+/**
+ * Global error handler (prevents crash / ECONNRESET)
+ */
+app.use((err, _req, res, _next) => {
+  console.error("❌ Unhandled error:", err);
+  return res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
+
+/**
  * Start server (DB first, then listen)
  */
 async function start() {
-  await connectDB();          // uses your polished database.js
-  await sequelize.sync();     // sync models (consider migrations later)
+  try {
+    await connectDB();
 
-  console.log("✅ Database synced");
+    // DEV ONLY: updates tables to match models without dropping data
+    await sequelize.sync({ alter: true });
 
-  await ensureDefaultAdmin();
+    console.log("✅ Database synced");
 
-  const PORT = Number(process.env.PORT) || 5000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    await ensureDefaultAdmin();
+
+    const PORT = Number(process.env.PORT) || 5000;
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  } catch (err) {
+    console.error("❌ Failed to start server:", err);
+    process.exit(1);
+  }
 }
 
-start().catch((err) => {
-  console.error("❌ Failed to start server:", err);
-  process.exit(1);
-});
-const cloudinary = require("./config/cloudinary");
-
-app.get("/cloudinary-test", async (req, res) => {
-  try {
-    const result = await cloudinary.api.ping();
-    res.json({ success: true, result });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+start();
