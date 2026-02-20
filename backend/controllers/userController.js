@@ -212,9 +212,29 @@ const resendOTP = async (req, res) => {
   }
 };
 
+// @desc    Logout user
+// @route   POST /api/users/logout
+// @access  Private (requires valid token)
+const logoutUser = async (req, res) => {
+  try {
+    // JWT is stateless; logout is handled client-side by discarding token
+    // This endpoint confirms logout on the server and can be extended with token blacklisting later
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully. Please discard your token.",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Logout failed",
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
   getUserProfile,
   updateUserProfile,
   getAllUsers,

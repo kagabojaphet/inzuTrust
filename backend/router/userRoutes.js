@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   registerUser,
   loginUser,
+  logoutUser,
   getUserProfile,
   updateUserProfile,
   getAllUsers,
@@ -26,6 +27,7 @@ router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOTP);
 
 // ─── Protected Routes (logged-in users) ──────────────────────────────────────
+router.post("/logout", protect, logoutUser);
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
 
@@ -33,4 +35,4 @@ router.put("/profile", protect, updateUserProfile);
 router.get("/", protect, adminOnly, getAllUsers);
 router.delete("/:id", protect, adminOnly, deleteUser);
 
-module.exports = router;
+module.exports = router;module.exports = router;
