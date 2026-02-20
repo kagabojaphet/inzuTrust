@@ -1,84 +1,137 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const path = require("path");
-
-dotenv.config();
-
-const sequelize = require("./config/database");
 const bcrypt = require("bcryptjs");
+
+const { sequelize, connectDB } = require("./config/database");
 const User = require("./model/userModel");
 
-// Import routes
+// Routes
 const userRoutes = require("./router/userRoutes");
 const propertyRoutes = require("./router/propertyRoutes");
 
-if (!process.env.JWT_SECRET) {
-  console.error("JWT_SECRET is not set in .env");
-  process.exit(1);
-}
+// Cloudinary (health check)
+const cloudinary = require("./config/cloudinary");
 
 const app = express();
 
-// Middlewares
+/**
+ * Validate critical env vars early
+ */
+if (!process.env.JWT_SECRET) {
+  console.error("❌ JWT_SECRET is not set in .env");
+  process.exit(1);
+}
+
+/**
+ * Middlewares
+ */
 app.use(cors());
-app.use(express.json()); // ✅ only once
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static folder for uploads
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+/**
+ * Static folder for uploads
+ * (still useful even when using Cloudinary because multer stores files locally first)
+ */
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// Routes
+/**
+ * Routes
+ */
 app.use("/api/users", userRoutes);
 app.use("/api/properties", propertyRoutes);
 
-// Test route
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("API is running...");
 });
 
-// Database connection
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("Database connected...");
-    return sequelize.sync({ force: true }); // Force sync to recreate tables with new columns
-  })
-  .then(async () => {
-    console.log("Database synced...");
+/**
+ * Cloudinary test route
+ */
+app.get("/cloudinary-test", async (_req, res) => {
+  try {
+    const result = await cloudinary.api.ping();
+    return res.json({ success: true, result });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
 
-    // Default Admin
-    const defaultAdmin = {
-      firstName: "mudage",
-      lastName: "bruno",
-      email: "mudagebruno76@gmail.com",
-      password: "mudagel4@1",
-      phone: "07323435781",
-      role: "admin",
-      nationalId: "120677078890",
-    };
+/**
+ * Ensure default admin exists
+ */
+async function ensureDefaultAdmin() {
+  const defaultAdmin = {
+    firstName: "mudage",
+    lastName: "bruno",
+    email: "mudagebruno76@gmail.com",
+    password: "mudagel4@1",
+    phone: "07323435781",
+    role: "admin",
+    nationalId: "120677078890",
+  };
 
-    const existing = await User.findOne({
-      where: { email: defaultAdmin.email },
-    });
+  const existing = await User.findOne({ where: { email: defaultAdmin.email } });
+  if (existing) {
+    console.log("✅ Default admin already exists");
+    return;
+  }
 
-    if (!existing) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(defaultAdmin.password, salt);
+  const hashedPassword = await bcrypt.hash(defaultAdmin.password, 10);
 
-      await User.create({
-        ...defaultAdmin,
-        password: hashedPassword,
-        isVerified: true,
-      });
+  await User.create({
+    ...defaultAdmin,
+    password: hashedPassword,
+    isVerified: true,
+  });
 
-      console.log("Default admin created");
-    } else {
-      console.log("Default admin already exists");
-    }
+  console.log("✅ Default admin created");
+}
 
-    app.listen(process.env.PORT || 5000, () => {
-      console.log(`Server running on port ${process.env.PORT || 5000}`);
-    });
-  })
-  .catch((err) => console.log("Database error:", err));
+/**
+ * 404 Handler (for unknown routes)
+ */
+app.use((req, res) => {
+  return res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
+/**
+ * Global error handler (prevents crash / ECONNRESET)
+ */
+app.use((err, _req, res, _next) => {
+  console.error("❌ Unhandled error:", err);
+  return res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
+
+/**
+ * Start server (DB first, then listen)
+ */
+async function start() {
+  try {
+    await connectDB();
+
+    // DEV ONLY: updates tables to match models without dropping data
+    await sequelize.sync({ alter: true });
+
+    console.log("✅ Database synced");
+
+    await ensureDefaultAdmin();
+
+    const PORT = Number(process.env.PORT) || 5000;
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  } catch (err) {
+    console.error("❌ Failed to start server:", err);
+    process.exit(1);
+  }
+}
+
+start();

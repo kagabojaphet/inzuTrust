@@ -1,10 +1,38 @@
 const Property = require("../model/propertyModel");
 
+// Helper: remove undefined keys so updates don't wipe fields
+const cleanUndefined = (obj) => {
+  const cleaned = {};
+  Object.keys(obj || {}).forEach((k) => {
+    if (obj[k] !== undefined) cleaned[k] = obj[k];
+  });
+  return cleaned;
+};
+
+// Helper: normalize numeric inputs (form-data sends strings)
+const normalizePayload = (payload) => {
+  const p = { ...payload };
+
+  if (p.rentAmount !== undefined && p.rentAmount !== null && p.rentAmount !== "")
+    p.rentAmount = Number(p.rentAmount);
+
+  if (p.bedrooms !== undefined && p.bedrooms !== null && p.bedrooms !== "")
+    p.bedrooms = Number(p.bedrooms);
+
+  if (p.bathrooms !== undefined && p.bathrooms !== null && p.bathrooms !== "")
+    p.bathrooms = Number(p.bathrooms);
+
+  return p;
+};
+
 const createProperty = async (landlordId, payload) => {
+  const normalized = normalizePayload(payload);
+
   const created = await Property.create({
-    ...payload,
+    ...normalized,
     landlordId,
   });
+
   return created;
 };
 
@@ -29,12 +57,21 @@ const updateProperty = async (id, landlordId, updates) => {
   const property = await Property.findByPk(id);
   if (!property) throw new Error("Property not found");
 
-  // Only owner landlord (or admin if you add that logic later)
   if (property.landlordId !== landlordId) {
     throw new Error("Not authorized to update this property");
   }
 
-  await property.update(updates);
+  // normalize + don't overwrite with undefined
+  const normalized = normalizePayload(updates);
+  const safeUpdates = cleanUndefined(normalized);
+
+  // OPTIONAL: if you want to MERGE images instead of replacing, uncomment:
+  // if (safeUpdates.images && Array.isArray(safeUpdates.images)) {
+  //   const existing = Array.isArray(property.images) ? property.images : [];
+  //   safeUpdates.images = [...existing, ...safeUpdates.images];
+  // }
+
+  await property.update(safeUpdates);
   return property;
 };
 
@@ -47,6 +84,7 @@ const deleteProperty = async (id, landlordId) => {
   }
 
   await property.destroy();
+  return true;
 };
 
 module.exports = {

@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+const { sequelize } = require("../config/database");
 
 const User = sequelize.define(
   "User",
@@ -9,14 +9,17 @@ const User = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+
     firstName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     lastName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -25,30 +28,38 @@ const User = sequelize.define(
         isEmail: true,
       },
     },
+
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     phone: {
       type: DataTypes.STRING,
       allowNull: true,
     },
+
     role: {
       type: DataTypes.ENUM("tenant", "landlord", "admin"),
       defaultValue: "tenant",
     },
+
     nationalId: {
       type: DataTypes.STRING,
       allowNull: true,
     },
+
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+
+    // OTP Fields
     otp: {
       type: DataTypes.STRING,
       allowNull: true,
     },
+
     otpExpiry: {
       type: DataTypes.DATE,
       allowNull: true,
