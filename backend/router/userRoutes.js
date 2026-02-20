@@ -4,7 +4,7 @@ const router = express.Router();
 const {
   registerUser,
   loginUser,
-  logoutUser,
+  verifyOtp,
   getUserProfile,
   updateUserProfile,
   getAllUsers,
@@ -18,13 +18,13 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
 const {
   registerValidation,
   loginValidation,
+  otpValidation,
 } = require("../validator/userValidator");
 
 // ─── Public Routes ────────────────────────────────────────────────────────────
 router.post("/register", registerValidation, registerUser);
 router.post("/login", loginValidation, loginUser);
-router.post("/verify-otp", verifyOTP);
-router.post("/resend-otp", resendOTP);
+router.post("/verify-otp", otpValidation, verifyOtp);
 
 // ─── Protected Routes (logged-in users) ──────────────────────────────────────
 router.post("/logout", protect, logoutUser);

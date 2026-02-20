@@ -2,7 +2,17 @@ const bcrypt = require("bcryptjs");
 const otpGenerator = require("otp-generator");
 const User = require("../model/userModel");
 const generateToken = require("../utils/generateToken");
-const { sendOTPEmail } = require("./emailService");
+const { sendOtpEmail } = require("../config/emailConfig");
+const otpGenerator = require("otp-generator");
+
+// Generate 6-digit OTP
+const generateOTP = () => {
+  return otpGenerator.generate(6, {
+    upperCaseAlphabets: false,
+    specialChars: false,
+    lowerCaseAlphabets: false,
+  });
+};
 
 // Register a new user
 const registerUser = async ({
@@ -25,16 +35,10 @@ const registerUser = async ({
   const hashedPassword = await bcrypt.hash(password, salt);
 
   // Generate OTP
-  const otp = otpGenerator.generate(6, {
-    upperCaseAlphabets: false,
-    lowerCaseAlphabets: false,
-    specialChars: false,
-  });
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
 
-  // Set OTP expiry time (10 minutes)
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-
-  // Create user
+  // Create user with OTP
   const user = await User.create({
     firstName,
     lastName,
@@ -48,18 +52,13 @@ const registerUser = async ({
     isVerified: false,
   });
 
-  // Send OTP email
+  // Send OTP to email
   try {
-    await sendOTPEmail(email, otp, firstName);
+    await sendOtpEmail(email, otp);
   } catch (error) {
-    // If email fails, delete created user to avoid orphan unverified accounts
-    console.error("OTP email send failed, rolling back user create:", error && error.message ? error.message : error);
-    try {
-      await user.destroy();
-    } catch (delErr) {
-      console.error("Failed to delete user after email send failure:", delErr && delErr.message ? delErr.message : delErr);
-    }
-    throw new Error("Failed to send OTP email. Registration aborted.");
+    // Delete user if email fails to send
+    await user.destroy();
+    throw new Error("Failed to send verification code. Please try again.");
   }
 
   return {
@@ -70,8 +69,7 @@ const registerUser = async ({
     phone: user.phone,
     role: user.role,
     nationalId: user.nationalId,
-    isVerified: user.isVerified,
-    message: "User registered successfully. Check your email for OTP verification.",
+    message: "Registration successful. Please check your email for OTP verification code.",
   };
 };
 
@@ -89,23 +87,9 @@ const loginUser = async ({ email, password, otp = null }) => {
     throw new Error("Invalid email or password");
   }
 
-  // If user not verified, allow verifying with OTP provided at login
+  // Check if user is verified
   if (!user.isVerified) {
-    if (otp) {
-      // Check OTP expiry
-      if (new Date() > user.otpExpiry) {
-        throw new Error("OTP has expired");
-      }
-
-      if (user.otp !== otp) {
-        throw new Error("Invalid OTP");
-      }
-
-      // Mark verified
-      await user.update({ isVerified: true, otp: null, otpExpiry: null });
-    } else {
-      throw new Error("Email not verified. Please verify using the OTP sent to your email or resend OTP.");
-    }
+    throw new Error("Please verify your email first");
   }
 
   // Generate token
@@ -119,6 +103,50 @@ const loginUser = async ({ email, password, otp = null }) => {
     phone: user.phone,
     role: user.role,
     token,
+  };
+};
+
+// Verify OTP
+const verifyOtp = async ({ email, otp }) => {
+  // Find user by email
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Check if user already verified
+  if (user.isVerified) {
+    throw new Error("User already verified");
+  }
+
+  // Check if OTP is expired
+  if (!user.otpExpiry || new Date() > user.otpExpiry) {
+    throw new Error("OTP has expired. Please request a new one.");
+  }
+
+  // Check if OTP matches
+  if (user.otp !== otp) {
+    throw new Error("Invalid OTP");
+  }
+
+  // Mark user as verified
+  user.isVerified = true;
+  user.otp = null;
+  user.otpExpiry = null;
+  await user.save();
+
+  // Generate token
+  const token = generateToken(user.id);
+
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    token,
+    message: "Email verified successfully",
   };
 };
 
@@ -273,6 +301,7 @@ const resendOTP = async (email) => {
 module.exports = {
   registerUser,
   loginUser,
+  verifyOtp,
   getUserById,
   updateUser,
   getAllUsers,
