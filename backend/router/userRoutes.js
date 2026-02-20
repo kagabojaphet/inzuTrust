@@ -8,6 +8,8 @@ const {
   updateUserProfile,
   getAllUsers,
   deleteUser,
+  verifyOTP,
+  resendOTP,
 } = require("../controllers/userController");
 
 const { protect, adminOnly } = require("../middleware/authMiddleware");
@@ -20,6 +22,8 @@ const {
 // ─── Public Routes ────────────────────────────────────────────────────────────
 router.post("/register", registerValidation, registerUser);
 router.post("/login", loginValidation, loginUser);
+router.post("/verify-otp", verifyOTP);
+router.post("/resend-otp", resendOTP);
 
 // ─── Protected Routes (logged-in users) ──────────────────────────────────────
 router.get("/profile", protect, getUserProfile);

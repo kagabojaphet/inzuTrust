@@ -13,6 +13,7 @@ console.log("env summary:", {
 });
 
 const sequelize = require("./config/database");
+const { verifyTransport } = require("./services/emailService");
 
 if (!process.env.JWT_SECRET) {
   console.error(
@@ -20,6 +21,11 @@ if (!process.env.JWT_SECRET) {
   );
   process.exit(1);
 }
+
+// Verify email transporter (non-blocking, logs warning on failure)
+verifyTransport().catch((err) => {
+  console.warn("Email transporter verification failed at startup:", err && err.message ? err.message : err);
+});
 
 const app = express();
 
@@ -44,7 +50,7 @@ sequelize
   .authenticate()
   .then(() => {
     console.log("Database connected...");
-    return sequelize.sync();
+    return sequelize.sync({ alter: true });
   })
   .then(async () => {
     console.log("Database synced...");
