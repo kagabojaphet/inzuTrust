@@ -1,7 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
-sequelize.sync({ alter: true });
-
+const { sequelize } = require("../config/database");
 
 const Property = sequelize.define(
   "Property",
@@ -70,20 +68,21 @@ const Property = sequelize.define(
       defaultValue: "available",
     },
 
-    // 🔥 IMAGE FIELDS
     mainImage: {
       type: DataTypes.STRING,
       allowNull: true,
     },
 
     images: {
-      type: DataTypes.JSON,  // array of image URLs
+      type: DataTypes.JSON, // array of Cloudinary URLs
       allowNull: true,
+      defaultValue: [],
     },
   },
   {
     tableName: "properties",
     timestamps: true,
+    
   }
 );
 
