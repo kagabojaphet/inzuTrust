@@ -23,7 +23,7 @@ const Home = () => {
     <main className="w-full">
       <Hero images={heroImages} />
       <Features />
-<HowItWorks />
+      <HowItWorks />
       <Partners />
       <AdminFeatures />
       <AdminAnalytics />
