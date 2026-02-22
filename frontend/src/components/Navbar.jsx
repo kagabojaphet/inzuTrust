@@ -6,11 +6,9 @@ export default function Navbar() {
   const [lang, setLang] = useState('EN');
 
   const aboutLinks = [
-    { name: "About Us", href: "#" },
-    { name: "Mission", href: "#" },
-    { name: "Vision", href: "#" },
-    { name: "Services", href: "#" },
-    { name: "Board", href: "#" },
+    { name: "About Us", href: "/about" },
+    { name: "Services", href: "/services" },
+    { name: "Board", href: "/board" },
   ];
 
   return (
@@ -46,9 +44,10 @@ export default function Navbar() {
           </div>
         </div>
 
-        <a href="#" className="hover:text-brand-blue-bright transition-colors">Properties</a>
-        <a href="#" className="hover:text-brand-blue-bright transition-colors">Prices</a>
-        <a href="#" className="hover:text-brand-blue-bright transition-colors">Careers</a>
+        {/* Updated Navigational Hrefs */}
+        <a href="/properties" className="hover:text-brand-blue-bright transition-colors">Properties</a>
+        <a href="/prices" className="hover:text-brand-blue-bright transition-colors">Prices</a>
+        <a href="/careers" className="hover:text-brand-blue-bright transition-colors">Careers</a>
       </div>
 
       {/* Right Actions */}
