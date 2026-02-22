@@ -43,10 +43,10 @@ const AdminFeatures = () => {
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-[1.1] tracking-tight">
             Manage your rentals <br className="hidden md:block" /> like a pro
           </h2>
-          <p className="text-slate-900 text-lg md:text-xl mb-10 font-semibold opacity-70 leading-relaxed">
+          <p className="text-black text-lg md:text-xl mb-10 leading-relaxed">
             Our dashboard provides all the professional tools you need to communicate, verify, and support your rental business in one place.
           </p>
-          <button className="bg-brand-blue-bright text-white px-10 py-4 rounded-lg font-black shadow-xl shadow-slate-200/50 hover:bg-brand-blue-bright transition-all transform hover:-translate-y-1 uppercase text-sm tracking-widest">
+          <button className=" bg-brand-blue-bright text-white px-8 py-4 rounded-lg font-black shadow-xl shadow-slate-200/50 hover:bg-brand-blue-bright transition-all transform hover:-translate-y-1 text-sm tracking-widest">
             Explore
           </button>
         </div>
@@ -75,7 +75,7 @@ const AdminFeatures = () => {
               <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">
                 {tool.title}
               </h3>
-              <p className="text-slate-900 text-lg leading-relaxed font-semibold opacity-70">
+              <p className="text-black text-lg leading-relaxed">
                 {tool.desc}
               </p>
             </div>

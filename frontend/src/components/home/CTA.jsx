@@ -3,10 +3,10 @@ import { HiArrowRight } from "react-icons/hi";
 
 const CTA = () => {
   return (
-    /* Full-width section with no outer padding to reach edges */
-    <section className="w-full relative overflow-hidden h-[600px] flex items-center justify-center">
+    /* Full-width section with height adjusted to match the scale in the reference */
+    <section className="w-full relative overflow-hidden h-[500px] flex items-center justify-center">
       
-      {/* Background Image Layer (Cityscape) */}
+      {/* Background Image Layer */}
       <div 
         className="absolute inset-0 z-0"
         style={{
@@ -16,30 +16,33 @@ const CTA = () => {
         }}
       />
 
-      {/* Blue Theme Overlay */}
-      <div className="absolute inset-0 bg-blue-600/90 mix-blend-multiply z-10"></div>
+      {/* Primary Color Overlay - Using brand-blue-bright */}
+      <div className="absolute inset-0 bg-brand-blue-bright/90 z-10"></div>
 
-      {/* Content Container */}
-      <div className="relative z-20 text-center text-white px-6 md:px-12 max-w-5xl mx-auto">
-        <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight tracking-tight">
+      {/* Content Container - Centered as requested */}
+      <div className="relative z-20 text-center text-white px-6 md:px-12 w-full max-w-5xl mx-auto">
+        
+        {/* Decreased Font Size (text-3xl to 5xl) */}
+        <h2 className="text-3xl md:text-5xl font-black mb-6 leading-tight tracking-tight">
           Ready to upgrade your rental experience?
         </h2>
         
-        <p className="text-xl md:text-2xl font-semibold opacity-80 mb-12 max-w-3xl mx-auto leading-relaxed">
+        {/* Decreased Font Size (text-lg to xl) */}
+        <p className="text-lg md:text-xl font-medium opacity-90 mb-10 max-w-3xl mx-auto leading-relaxed">
           Join thousands of tenants and landlords in Rwanda who are enjoying a safer, 
           faster, and more transparent rental process.
         </p>
         
-        <div className="flex flex-wrap justify-center items-center gap-10">
-          {/* Main Action Button with rounded-lg */}
-          <button className="bg-white text-blue-600 font-black px-12 py-5 rounded-lg text-lg shadow-2xl hover:bg-slate-50 transition-all transform hover:-translate-y-1">
+        <div className="flex flex-wrap justify-center items-center gap-8">
+          {/* Action Button with rounded-lg to match FAQ CTA */}
+          <button className="bg-white text-brand-blue-bright font-bold px-10 py-4 rounded-lg text-md shadow-xl hover:bg-slate-50 transition-all active:scale-95">
             Get Started for Free
           </button>
           
-          {/* Secondary Link */}
-          <button className="flex items-center gap-3 text-white font-black text-lg hover:gap-5 transition-all group">
+          {/* Secondary Link matching the reference */}
+          <button className="flex items-center gap-2 text-white font-bold text-md hover:gap-4 transition-all group">
             Contact Sales 
-            <HiArrowRight className="text-2xl transition-transform" /> 
+            <HiArrowRight className="text-xl transition-transform" /> 
           </button>
         </div>
       </div>

@@ -61,23 +61,24 @@ const News = () => {
     }
   ];
 
-  // Total sets of 3 cards
   const totalPages = Math.ceil(articles.length / 3);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentPage((prev) => (prev + 1) % totalPages);
-    }, 5000); // 5 Seconds Rotation
+    }, 5000); 
     return () => clearInterval(timer);
   }, [totalPages]);
 
   return (
     <section className="w-full py-24 bg-white font-sans overflow-hidden">
-      <div className="w-full px-6 md:px-12 flex justify-between items-end mb-16">
-        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+      {/* Header - Changed from flex-justify-between to flex-col/start for left alignment */}
+      <div className="w-full px-6 md:px-12 mb-16 flex flex-col items-start gap-8">
+        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight text-left">
           Latest News & Insights
         </h2>
         
+        {/* Navigation buttons aligned left */}
         <div className="flex gap-4">
           <button 
             onClick={() => setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)}
@@ -99,7 +100,6 @@ const News = () => {
           className="flex transition-transform duration-1000 ease-in-out"
           style={{ transform: `translateX(-${currentPage * 100}%)` }}
         >
-          {/* Mapping through articles and grouping them into full-width screens */}
           <div className="flex min-w-full gap-8">
             {articles.map((post) => (
               <article 
@@ -114,7 +114,7 @@ const News = () => {
 
                 <div className={`absolute inset-0 bg-gradient-to-b ${post.gradient} opacity-90 group-hover:opacity-85 transition-opacity`}></div>
                 
-                <div className="relative h-full w-full flex flex-col p-10 text-white z-10">
+                <div className="relative h-full w-full flex flex-col p-10 text-white z-10 text-left">
                   <span className="text-xs font-black uppercase tracking-[0.2em] mb-6 opacity-80">
                     {post.category} • {post.date}
                   </span>
@@ -127,7 +127,6 @@ const News = () => {
                     {post.desc}
                   </p>
 
-                  {/* Full-Width Background Button that slides up */}
                   <div className="mt-auto -mx-10 -mb-10 overflow-hidden">
                     <div className="transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
                       <button className="w-full bg-slate-900/90 backdrop-blur-md text-white py-6 px-10 flex items-center justify-between font-black text-sm uppercase tracking-widest border-t border-white/10">
@@ -143,8 +142,8 @@ const News = () => {
         </div>
       </div>
 
-      {/* Page Indicators */}
-      <div className="flex justify-center gap-2 mt-12">
+      {/* Page Indicators - Aligned Left */}
+      <div className="w-full px-6 md:px-12 flex justify-start gap-2 mt-12">
         {[...Array(totalPages)].map((_, i) => (
           <div 
             key={i} 

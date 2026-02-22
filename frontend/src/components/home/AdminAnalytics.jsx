@@ -10,7 +10,7 @@ const AdminAnalytics = () => {
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-4 mb-6 leading-tight tracking-tight">
             Your Dashboard, Your Data, Your Growth
           </h2>
-          <p className="text-slate-900 text-lg md:text-xl font-semibold opacity-80 leading-relaxed max-w-3xl">
+          <p className="text-black text-lg md:text-xl leading-relaxed max-w-3xl">
             Track property performance, tenant behavior, and financial trends with our integrated analytical engine.
           </p>
         </div>

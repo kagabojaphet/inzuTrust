@@ -30,7 +30,7 @@ export default function Footer() {
       <div className="w-full mb-20 p-8 md:p-12 bg-slate-50 rounded-lg flex flex-col lg:flex-row items-center justify-between gap-8 border border-slate-100 shadow-xl shadow-slate-200/30">
         <div className="max-w-md text-left">
           <h3 className="text-2xl font-black text-slate-900 mb-2">Subscribe to our newsletter</h3>
-          <p className="text-slate-600 font-medium text-sm">Join our community for property insights and digital rental tips.</p>
+          <p className="text-black font-semibold">Join our community for property insights and digital rental tips.</p>
         </div>
         <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-3">
           <div className="relative">
@@ -38,10 +38,11 @@ export default function Footer() {
             <input 
               type="email" 
               placeholder="Your email address" 
-              className="w-full sm:w-72 pl-12 pr-4 py-4 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all font-medium text-slate-900"
+              className="w-full sm:w-72 pl-12 pr-4 py-4 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all font-bold text-black"
             />
           </div>
-          <button className="bg-slate-900 text-white px-8 py-4 rounded-lg font-black hover:bg-blue-600 transition-all shadow-lg uppercase text-[11px] tracking-[0.15em]">
+          {/* Removed uppercase and tracking from button */}
+          <button className="bg-brand-blue-bright text-white px-8 py-4 rounded-lg font-bold hover:bg-blue-700 transition-all shadow-lg text-md">
             Subscribe
           </button>
         </div>
@@ -57,9 +58,9 @@ export default function Footer() {
               alt="InzuTrust Logo" 
               className="h-9 w-auto object-contain rounded" 
             />
-            <span className="text-slate-900 font-black text-xl tracking-tighter">InzuTrust</span>
+            <span className="text-black font-black text-xl tracking-tighter">InzuTrust</span>
           </div>
-          <p className="text-slate-500 text-sm leading-relaxed max-w-xs font-medium opacity-80">
+          <p className="text-black text-sm leading-relaxed max-w-xs font-bold opacity-80">
             Making renting secure, transparent, and easy for everyone in East Africa.
           </p>
         </div>
@@ -67,15 +68,14 @@ export default function Footer() {
         {/* Links Columns */}
         {footerSections.map((section) => (
           <div key={section.title} className="text-left">
-            {/* Title: Bold & Uppercase */}
-            <h4 className="font-black text-slate-900 mb-8 uppercase text-[11px] tracking-[0.25em] opacity-90">
+            {/* Title: Removed uppercase and tracking */}
+            <h4 className="font-black text-black mb-8 text-lg">
               {section.title}
             </h4>
-            {/* Links: Small & Clean */}
-            <ul className="space-y-4 text-slate-500 text-sm font-semibold">
+            <ul className="space-y-4 text-black text-sm font-bold">
               {section.links.map((link) => (
                 <li key={link}>
-                  <a href="#" className="hover:text-blue-600 transition-colors duration-300">
+                  <a href="#" className="hover:text-brand-blue-bright transition-colors duration-300">
                     {link}
                   </a>
                 </li>
@@ -87,8 +87,8 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="w-full pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="flex items-center gap-3 text-slate-400 text-[13px] font-bold">
-          <div className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-[10px]">
+        <div className="flex items-center gap-3 text-black text-[13px] font-bold">
+          <div className="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-[10px]">
             ©
           </div>
           <span>
@@ -97,10 +97,10 @@ export default function Footer() {
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="flex gap-6 text-slate-300 text-xl">
-            <a href="#" className="hover:text-slate-900 transition-all"><FaXTwitter /></a>
-            <a href="#" className="hover:text-slate-900 transition-all"><FaInstagram /></a>
-            <a href="#" className="hover:text-slate-900 transition-all"><FaFacebookF /></a>
+          <div className="flex gap-6 text-black/60 text-xl">
+            <a href="#" className="hover:text-brand-blue-bright transition-all"><FaXTwitter /></a>
+            <a href="#" className="hover:text-brand-blue-bright transition-all"><FaInstagram /></a>
+            <a href="#" className="hover:text-brand-blue-bright transition-all"><FaFacebookF /></a>
           </div>
         </div>
       </div>

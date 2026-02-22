@@ -99,7 +99,7 @@ const AIChatbot = () => {
       {/* Blue Trigger Button with Icons */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all text-white active:scale-95 animate-in zoom-in-0 duration-500"
+        className="w-16 h-16 bg-brand-blue-bright rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all text-white active:scale-95 animate-in zoom-in-0 duration-500"
       >
         {isOpen ? (
           <HiX className="text-3xl" />
