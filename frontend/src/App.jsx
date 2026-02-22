@@ -11,10 +11,11 @@ import RegisterLandlord from './pages/RegisterLandlord'
 import Dashboard from './pages/Dashboard'
 import Properties from './pages/Properties'
 import Profile from './pages/Profile'
+import AIChatbot from './components/AIChatbot';
+import BackToTop from './components/BackToTop';
 
 import './App.css'
 
-// The Layout handles the Navbar and Footer globally
 function Layout({ children, showFooter = true }) {
   return (
     <div className="flex flex-col min-h-screen">
@@ -31,6 +32,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <AIChatbot /> 
+        <BackToTop />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Layout><Home /></Layout>} />
