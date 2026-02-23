@@ -23,6 +23,12 @@ const verifyTransport = async () => {
 
 // Send OTP email
 const sendOTPEmail = async (email, otp, firstName) => {
+  // In development mode, log OTP to console instead of sending email
+  if (process.env.NODE_ENV === "development") {
+    console.log(`\n✅ [DEV MODE] OTP for ${email}: ${otp}\n`);
+    return { messageId: "dev-mode" };
+  }
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
