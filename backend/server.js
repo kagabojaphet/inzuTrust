@@ -11,6 +11,8 @@ const User = require("./model/userModel");
 // Routes
 const userRoutes = require("./router/userRoutes");
 const propertyRoutes = require("./router/propertyRoutes");
+const contactRoutes = require("./router/contactRoutes");
+const newsRoutes = require("./router/newsRoutes"); // ✅ added
 
 // Cloudinary (health check)
 const cloudinary = require("./config/cloudinary");
@@ -34,7 +36,6 @@ app.use(express.urlencoded({ extended: true }));
 
 /**
  * Static folder for uploads
- * (still useful even when using Cloudinary because multer stores files locally first)
  */
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
@@ -43,6 +44,8 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
  */
 app.use("/api/users", userRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/news", newsRoutes); // ✅ added here
 
 app.get("/", (_req, res) => {
   res.send("API is running...");
@@ -92,7 +95,7 @@ async function ensureDefaultAdmin() {
 }
 
 /**
- * 404 Handler (for unknown routes)
+ * 404 Handler
  */
 app.use((req, res) => {
   return res.status(404).json({
@@ -102,7 +105,7 @@ app.use((req, res) => {
 });
 
 /**
- * Global error handler (prevents crash / ECONNRESET)
+ * Global error handler
  */
 app.use((err, _req, res, _next) => {
   console.error("❌ Unhandled error:", err);
@@ -113,13 +116,11 @@ app.use((err, _req, res, _next) => {
 });
 
 /**
- * Start server (DB first, then listen)
+ * Start server
  */
 async function start() {
   try {
     await connectDB();
-
-    // DEV ONLY: updates tables to match models without dropping data
     await sequelize.sync({ alter: true });
 
     console.log("✅ Database synced");
@@ -127,7 +128,9 @@ async function start() {
     await ensureDefaultAdmin();
 
     const PORT = Number(process.env.PORT) || 5000;
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   } catch (err) {
     console.error("❌ Failed to start server:", err);
     process.exit(1);
