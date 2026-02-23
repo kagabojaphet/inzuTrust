@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
-
+const verifyTransport = require("./services/emailService").verifyTransport;
 dotenv.config();
 
 const sequelize = require("./config/database");
