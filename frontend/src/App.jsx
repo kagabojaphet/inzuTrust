@@ -14,6 +14,12 @@ import Profile from './pages/Profile'
 import AIChatbot from './components/AIChatbot';
 import BackToTop from './components/BackToTop';
 
+import AboutUs from './pages/AboutUs';
+import Services from './pages/Services';
+import Board from './pages/Board';
+import Careers from './pages/Careers';
+import Pricing from './pages/Pricing'
+
 import './App.css'
 
 function Layout({ children, showFooter = true }) {
@@ -41,6 +47,12 @@ export default function App() {
           <Route path="/register/tenant" element={<RegisterTenant />} />
           <Route path="/register/landlord" element={<RegisterLandlord />} />
           <Route path="/properties" element={<Layout><Properties /></Layout>} />
+          <Route path="/about" element={<Layout><AboutUs /></Layout>} />
+          <Route path="/services" element={<Layout><Services /></Layout>} />
+          <Route path="/board" element={<Layout><Board /></Layout>} />
+          <Route path="/careers" element={<Layout><Careers /></Layout>} />
+          <Route path="/prices" element={<Layout><Pricing /></Layout>} />
+
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={

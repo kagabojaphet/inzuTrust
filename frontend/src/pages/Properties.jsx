@@ -1,167 +1,220 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { HiOutlineLocationMarker, HiOutlineAdjustments, HiOutlineSearch, HiCheck, HiX, HiShieldCheck, HiPlus, HiDuplicate } from "react-icons/hi";
 
-const DEMO_PROPERTIES = [
-  { id:1, title:'Modern Apartment', location:'Kigali, Gisozi', price:120000, bedrooms:2, bathrooms:1, type:'Apartment', verified:true, image:'🏢' },
-  { id:2, title:'Studio in Kimihurura', location:'Kigali, Kimihurura', price:80000, bedrooms:1, bathrooms:1, type:'Studio', verified:true, image:'🏠' },
-  { id:3, title:'Spacious Family House', location:'Kigali, Nyamirambo', price:200000, bedrooms:4, bathrooms:2, type:'House', verified:false, image:'🏡' },
-  { id:4, title:'CBD Office Space', location:'Kigali, CBD', price:350000, bedrooms:0, bathrooms:1, type:'Office', verified:true, image:'🏛️' },
-  { id:5, title:'Cozy 1BR Apartment', location:'Kigali, Remera', price:70000, bedrooms:1, bathrooms:1, type:'Apartment', verified:true, image:'🏢' },
-  { id:6, title:'Luxury Villa', location:'Kigali, Nyarutarama', price:500000, bedrooms:5, bathrooms:3, type:'House', verified:true, image:'🏰' },
-]
+const Properties = () => {
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [showFilters, setShowFilters] = useState(false);
+  const [comparisonList, setComparisonList] = useState([]);
 
-const TYPES = ['All', 'Apartment', 'Studio', 'House', 'Office']
+  const propertyList = [
+    {
+      id: 1,
+      title: "Luxury Villa - Vision City",
+      price: 2500000,
+      level: "High",
+      trustScore: 98,
+      province: "Kigali",
+      sector: "Gacuriro",
+      cell: "Rukiri",
+      img: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      id: 2,
+      title: "Modern Apartment",
+      price: 450000,
+      level: "Medium",
+      trustScore: 85,
+      province: "Kigali",
+      sector: "Kicukiro",
+      cell: "Niboye",
+      img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      id: 3,
+      title: "Cozy Studio Hub",
+      price: 150000,
+      level: "Low",
+      trustScore: 92,
+      province: "Kigali",
+      sector: "Nyarugenge",
+      cell: "Kiyovu",
+      img: "https://images.unsplash.com/photo-1536376074432-af715b91c683?q=80&w=800&auto=format&fit=crop"
+    }
+  ];
 
-export default function Properties() {
-  const [search, setSearch]       = useState('')
-  const [typeFilter, setType]     = useState('All')
-  const [maxPrice, setMaxPrice]   = useState(600000)
-
-  const filtered = DEMO_PROPERTIES.filter(p => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) ||
-                        p.location.toLowerCase().includes(search.toLowerCase())
-    const matchType   = typeFilter === 'All' || p.type === typeFilter
-    const matchPrice  = p.price <= maxPrice
-    return matchSearch && matchType && matchPrice
-  })
+  const toggleComparison = (property) => {
+    if (comparisonList.find(p => p.id === property.id)) {
+      setComparisonList(comparisonList.filter(p => p.id !== property.id));
+    } else if (comparisonList.length < 3) {
+      setComparisonList([...comparisonList, property]);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-ink-50">
-
-      {/* Header */}
-      <div className="bg-gradient-to-br from-ink-900 to-ink-800 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold text-white mb-3">Find Your Home</h1>
-          <p className="text-ink-300 text-lg mb-8">Browse verified properties across Rwanda</p>
-
-          {/* Search bar */}
-          <div className="max-w-xl mx-auto relative">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by name or location..."
-              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-ink-900 text-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
-            />
+    <div className="bg-[#F8FAFC] min-h-screen font-sans pb-32">
+      {/* 1. Header */}
+      <section className="pt-32 pb-16 px-6 md:px-12 bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-[#0F172A] mb-10 tracking-tight leading-tight">
+            Discover Your <br/><span className="text-brand-blue-bright">Perfect Trust-Match.</span>
+          </h1>
+          
+          <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-2 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100">
+            <div className="flex-grow relative w-full">
+              <HiOutlineSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-2xl" />
+              <input 
+                type="text" 
+                placeholder="Search by Sector, Cell or Property..." 
+                className="w-full pl-16 pr-6 py-5 bg-transparent outline-none font-medium text-lg text-slate-800 placeholder:text-slate-400"
+              />
+            </div>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`w-full md:w-auto px-10 py-5 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all duration-300 ${
+                showFilters ? 'bg-slate-100 text-slate-900' : 'bg-brand-blue-bright text-white hover:shadow-lg hover:shadow-brand-blue-bright/30'
+              }`}
+            >
+              {showFilters ? <HiX className="text-2xl" /> : <HiOutlineAdjustments className="text-2xl" />}
+              {showFilters ? 'Close' : 'Filters'}
+            </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col lg:flex-row gap-8">
-
-          {/* Sidebar filters */}
-          <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-2xl border border-ink-100 shadow-sm p-6 sticky top-20">
-              <h3 className="font-bold text-ink-900 mb-5">Filters</h3>
-
-              {/* Type */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-ink-700 mb-3">Property Type</label>
-                <div className="flex flex-wrap gap-2">
-                  {TYPES.map(t => (
-                    <button key={t} onClick={() => setType(t)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                        typeFilter === t
-                          ? 'bg-brand-600 text-white'
-                          : 'bg-ink-100 text-ink-600 hover:bg-ink-200'}`}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-ink-700 mb-3">
-                  Max Price: <span className="text-brand-600">{(maxPrice/1000).toFixed(0)}K RWF</span>
-                </label>
-                <input type="range" min={50000} max={600000} step={10000}
-                  value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))}
-                  className="w-full accent-brand-600" />
-                <div className="flex justify-between text-xs text-ink-400 mt-1">
-                  <span>50K</span><span>600K</span>
-                </div>
-              </div>
-
-              <button onClick={() => { setSearch(''); setType('All'); setMaxPrice(600000) }}
-                className="w-full text-sm text-ink-500 hover:text-red-500 transition-colors font-medium">
-                Clear Filters
+      {/* 2. Filter Bar */}
+      <section className="py-5 px-6 md:px-12 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+            {['All', 'Low', 'Medium', 'High'].map((level) => (
+              <button
+                key={level}
+                onClick={() => setActiveFilter(level)}
+                className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 whitespace-nowrap ${
+                  activeFilter === level ? 'bg-brand-green-mid text-black shadow-sm' : 'text-slate-500 hover:bg-slate-50'
+                }`}
+              >
+                {level} Level
               </button>
-            </div>
-          </aside>
+            ))}
+          </div>
+          <span className="hidden md:block text-sm font-bold text-slate-400">
+            Comparing <span className="text-brand-blue-bright">{comparisonList.length}/3</span> Properties
+          </span>
+        </div>
+      </section>
 
-          {/* Property grid */}
-          <main className="flex-1">
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-ink-500">
-                <span className="font-semibold text-ink-800">{filtered.length}</span> properties found
-              </p>
-            </div>
+      {/* 3. Property Grid */}
+      <section className="py-16 px-6 md:px-12 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {propertyList.map((item) => {
+            const isComparing = comparisonList.find(p => p.id === item.id);
+            return (
+              <div key={item.id} className="group bg-white rounded-[32px] overflow-hidden border border-slate-100 hover:shadow-2xl transition-all duration-500 flex flex-col relative">
+                
+                {/* Image & Overlays */}
+                <div className="relative aspect-[4/3] overflow-hidden m-3 rounded-[24px]">
+                  <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  
+                  {/* Compare Toggle Button */}
+                  <button 
+                    onClick={() => toggleComparison(item)}
+                    className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all border ${
+                      isComparing 
+                      ? 'bg-brand-blue-bright text-white border-white/20 scale-110 shadow-lg' 
+                      : 'bg-white/80 text-slate-600 border-white/50 hover:bg-white'
+                    }`}
+                  >
+                    {isComparing ? <HiCheck className="text-xl" /> : <HiPlus className="text-xl" />}
+                  </button>
 
-            {filtered.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-2xl border border-ink-100">
-                <div className="text-5xl mb-4">🏠</div>
-                <h3 className="text-xl font-bold text-ink-900 mb-2">No properties found</h3>
-                <p className="text-ink-500">Try adjusting your filters</p>
+                  <div className="absolute top-4 left-4">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-sm ${
+                      item.level === 'High' ? 'bg-brand-blue-bright/90 text-white' : 'bg-brand-green-mid/90 text-black'
+                    }`}>
+                      {item.level} Level
+                    </span>
+                  </div>
+                  
+                  <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-2xl border border-slate-100 shadow-xl">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-brand-green-mid animate-pulse" />
+                        <span className="text-[11px] font-black text-slate-900">{item.trustScore}% Trust</span>
+                      </div>
+                  </div>
+                </div>
+                
+                <div className="p-6 pt-2 flex-grow flex flex-col">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-bold text-slate-900 group-hover:text-brand-blue-bright transition-colors">{item.title}</h3>
+                    <HiShieldCheck className="text-brand-blue-bright text-2xl shrink-0" />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-500 font-medium mb-6">
+                    <HiOutlineLocationMarker className="text-brand-blue-bright" />
+                    <span className="text-sm">{item.cell}, {item.sector}</span>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-none mb-1">Monthly</p>
+                      <p className="text-xl font-extrabold text-slate-900">RWF {item.price.toLocaleString()}</p>
+                    </div>
+                    <button className="bg-[#0F172A] p-4 text-white rounded-2xl hover:bg-brand-blue-bright transition-all">
+                      <HiCheck className="text-brand-green-mid text-xl" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {filtered.map(p => (
-                  <div key={p.id}
-                    className="bg-white rounded-2xl border border-ink-100 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-200 overflow-hidden group">
-                    
-                    {/* Image placeholder */}
-                    <div className="h-44 bg-gradient-to-br from-ink-100 to-ink-200 flex items-center justify-center text-6xl relative">
-                      {p.image}
-                      {p.verified && (
-                        <div className="absolute top-3 right-3 bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                          ✓ Verified
-                        </div>
-                      )}
-                    </div>
+            );
+          })}
+        </div>
+      </section>
 
-                    <div className="p-5">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-bold text-ink-900 group-hover:text-brand-600 transition-colors">{p.title}</h3>
-                        <span className="text-xs bg-ink-100 text-ink-600 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">{p.type}</span>
-                      </div>
-
-                      <p className="text-sm text-ink-500 mb-3 flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        </svg>
-                        {p.location}
-                      </p>
-
-                      <div className="flex items-center gap-4 text-xs text-ink-500 mb-4">
-                        {p.bedrooms > 0 && <span>🛏 {p.bedrooms} bed</span>}
-                        <span>🚿 {p.bathrooms} bath</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-xl font-bold text-brand-600" style={{fontFamily:'Sora,sans-serif'}}>
-                            {p.price.toLocaleString()}
-                          </span>
-                          <span className="text-xs text-ink-400 ml-1">RWF/mo</span>
-                        </div>
-                        <Link to={`/properties/${p.id}`}
-                          className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors">
-                          View Details
-                        </Link>
+      {/* 4. Comparison Drawer */}
+      {comparisonList.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-4xl">
+          <div className="bg-[#0F172A] rounded-[32px] p-6 shadow-2xl shadow-black/40 border border-white/10 animate-in slide-in-from-bottom-10 duration-500">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-grow flex gap-4 overflow-x-auto no-scrollbar py-1">
+                {comparisonList.map(prop => (
+                  <div key={prop.id} className="flex items-center gap-3 bg-white/10 p-2 pr-4 rounded-2xl border border-white/5 min-w-[240px]">
+                    <img src={prop.img} className="w-12 h-12 rounded-xl object-cover border border-white/20" alt="" />
+                    <div className="overflow-hidden">
+                      <p className="text-white font-bold text-sm truncate">{prop.title}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-brand-green-mid text-[10px] font-black uppercase">{prop.trustScore}% Trust</span>
+                        <span className="text-slate-400 text-[10px] truncate">RWF {prop.price.toLocaleString()}</span>
                       </div>
                     </div>
+                    <button onClick={() => toggleComparison(prop)} className="text-white/40 hover:text-white ml-auto">
+                      <HiX />
+                    </button>
                   </div>
                 ))}
+                {comparisonList.length < 3 && (
+                  <div className="flex items-center justify-center gap-2 px-6 border-2 border-dashed border-white/10 rounded-2xl text-white/20 italic text-sm min-w-[200px]">
+                    Add one more...
+                  </div>
+                )}
               </div>
-            )}
-          </main>
+              
+              <div className="flex gap-3 shrink-0">
+                <button 
+                  disabled={comparisonList.length < 2}
+                  className="bg-brand-blue-bright disabled:bg-slate-700 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all hover:scale-105"
+                >
+                  <HiDuplicate className="text-xl" /> Compare Match
+                </button>
+                <button onClick={() => setComparisonList([])} className="p-4 rounded-2xl bg-white/5 text-white/60 hover:text-white border border-white/5">
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
     </div>
-  )
-}
+  );
+};
+
+export default Properties;

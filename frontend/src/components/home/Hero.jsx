@@ -12,16 +12,8 @@ const Hero = ({ images }) => {
   return (
     <section className="relative w-full pt-12 pb-20 overflow-hidden bg-white">
       <div className="w-full px-6 md:px-12 grid md:grid-cols-2 items-center gap-10">
-        
-        {/* Text Side - Left Aligned */}
         <div className="z-10 text-left flex flex-col items-start">
-          
-          {/* Location Pill */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-6">
-            <span className="w-2 h-2 rounded-full bg-brand-blue-bright animate-pulse" />
-            <span className="text-xs font-bold text-brand-blue-bright tracking-wide">Now Live in Kigali</span>
-          </div>
-
+      
           <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-slate-900 text-left">
             Digitally Manage <br /> Rentals with <br />
             <span className={`inline-block min-h-[1.2em] transition-colors duration-300 ${isWordComplete ? 'text-brand-green-mid' : 'text-brand-blue-bright'}`}>
@@ -93,7 +85,7 @@ const Hero = ({ images }) => {
                 <HiShieldCheck className="text-brand-blue-bright text-2xl" />
               </div>
               <div className="flex flex-col items-start">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter leading-none mb-1">Trust Score</p>
+                <p className="text-[10px] font-bold text-slate-400 tracking-tighter leading-none mb-1">Trust Score</p>
                 <p className="text-sm font-black text-slate-900 leading-none">Excellent (87%)</p>
               </div>
             </div>
@@ -112,7 +104,7 @@ const Hero = ({ images }) => {
                 <HiCheckCircle className="text-brand-green-mid text-2xl" />
               </div>
               <div className="flex flex-col items-start">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter leading-none mb-1">Status</p>
+                <p className="text-[10px] font-bold text-slate-400 tracking-tighter leading-none mb-1">Status</p>
                 <p className="text-sm font-black text-slate-900 leading-none">Payment Verified</p>
               </div>
             </div>
