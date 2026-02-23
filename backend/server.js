@@ -15,6 +15,11 @@ const propertyRoutes = require("./router/propertyRoutes");
 // Cloudinary (health check)
 const cloudinary = require("./config/cloudinary");
 
+// Verify email transporter (non-blocking, logs warning on failure)
+verifyTransport().catch((err) => {
+  console.warn("Email transporter verification failed at startup:", err && err.message ? err.message : err);
+});
+
 const app = express();
 
 /**

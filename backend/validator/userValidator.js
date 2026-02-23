@@ -51,6 +51,13 @@ const loginValidation = [
     .normalizeEmail(),
 
   body("password").notEmpty().withMessage("Password is required"),
+  body("otp")
+    .optional()
+    .trim()
+    .isLength({ min: 6, max: 6 })
+    .withMessage("OTP must be 6 digits")
+    .isNumeric()
+    .withMessage("OTP must contain only digits"),
 ];
 
 const otpValidation = [
