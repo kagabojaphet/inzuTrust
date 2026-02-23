@@ -18,6 +18,11 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
+// Verify email transporter (non-blocking, logs warning on failure)
+verifyTransport().catch((err) => {
+  console.warn("Email transporter verification failed at startup:", err && err.message ? err.message : err);
+});
+
 const app = express();
 
 // Middlewares
