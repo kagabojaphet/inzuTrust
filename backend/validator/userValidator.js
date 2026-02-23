@@ -60,4 +60,23 @@ const loginValidation = [
     .withMessage("OTP must contain only digits"),
 ];
 
-module.exports = { registerValidation, loginValidation };
+const otpValidation = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email")
+    .normalizeEmail(),
+
+  body("otp")
+    .trim()
+    .notEmpty()
+    .withMessage("OTP is required")
+    .isLength({ min: 6, max: 6 })
+    .withMessage("OTP must be 6 digits")
+    .isNumeric()
+    .withMessage("OTP must contain only numbers"),
+];
+
+module.exports = { registerValidation, loginValidation, otpValidation };

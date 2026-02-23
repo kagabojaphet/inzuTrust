@@ -1,22 +1,23 @@
-const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-const { DB_NAME, DB_USER, DB_PASSWORD, DB_HOST } = process.env;
+const { Sequelize } = require("sequelize");
 
-if (!DB_NAME || !DB_USER) {
-  console.error(
-    "Missing database environment variables. Please set DB_NAME and DB_USER in .env"
-  );
-  console.error(
-    `Current values -> DB_NAME: ${DB_NAME || "<empty>"}, DB_USER: ${DB_USER || "<empty>"}`
-  );
-  process.exit(1);
-}
 
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-  host: DB_HOST || "localhost",
-  dialect: "mysql",
-  logging: false,
-});
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: "mysql",
+    logging: false,
+  }
+);
+console.log("DB_NAME:", process.env.DB_NAME);
+console.log("DB_USER:", process.env.DB_USER);
+console.log("DB_PASSWORD:", process.env.DB_PASSWORD);
+console.log("DB_HOST:", process.env.DB_HOST);
+
+
 
 module.exports = sequelize;
