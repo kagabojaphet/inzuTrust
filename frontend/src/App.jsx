@@ -18,7 +18,8 @@ import AboutUs from './pages/AboutUs';
 import Services from './pages/Services';
 import Board from './pages/Board';
 import Careers from './pages/Careers';
-import Pricing from './pages/Pricing'
+import Pricing from './pages/Pricing';
+import Register from './pages/Register'
 
 import './App.css'
 
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/board" element={<Layout><Board /></Layout>} />
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
           <Route path="/prices" element={<Layout><Pricing /></Layout>} />
+           <Route path="/register" element={<Layout><Register /></Layout>} />
 
 
           {/* Protected Routes */}
