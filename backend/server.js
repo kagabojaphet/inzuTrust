@@ -3,6 +3,10 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const verifyTransport = require("./services/emailService").verifyTransport;
+dotenv.config();
+
+const sequelize = require("./config/database");
 const bcrypt = require("bcryptjs");
 
 const { sequelize, connectDB } = require("./config/database");
@@ -38,8 +42,8 @@ if (!process.env.JWT_SECRET) {
  * Middlewares
  */
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // ✅ only once
+app.use(express.urlencoded({ extended: false }));
 
 /**
  * Static folder for uploads
