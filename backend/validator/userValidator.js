@@ -1,5 +1,6 @@
 const { body } = require("express-validator");
 
+// ─── Register Validation ─────────────────────────────────────
 const registerValidation = [
   body("firstName")
     .trim()
@@ -37,10 +38,11 @@ const registerValidation = [
 
   body("role")
     .optional()
-    .isIn(["tenant", "landlord"])
-    .withMessage("Role must be either tenant or landlord"),
+    .isIn(["tenant", "landlord", "admin"])
+    .withMessage("Role must be tenant, landlord, or admin"),
 ];
 
+// ─── Login Validation ─────────────────────────────────────
 const loginValidation = [
   body("email")
     .trim()
@@ -50,7 +52,10 @@ const loginValidation = [
     .withMessage("Please provide a valid email")
     .normalizeEmail(),
 
-  body("password").notEmpty().withMessage("Password is required"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required"),
+
   body("otp")
     .optional()
     .trim()
@@ -60,6 +65,7 @@ const loginValidation = [
     .withMessage("OTP must contain only digits"),
 ];
 
+// ─── OTP Validation ─────────────────────────────────────
 const otpValidation = [
   body("email")
     .trim()
@@ -79,4 +85,8 @@ const otpValidation = [
     .withMessage("OTP must contain only numbers"),
 ];
 
-module.exports = { registerValidation, loginValidation, otpValidation };
+module.exports = {
+  registerValidation,
+  loginValidation,
+  otpValidation,
+};

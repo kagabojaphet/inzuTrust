@@ -3,151 +3,53 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const verifyTransport = require("./services/emailService").verifyTransport;
+const db = require("./model/index");
+
 dotenv.config();
-
-const sequelize = require("./config/database");
-const bcrypt = require("bcryptjs");
-
-const { sequelize, connectDB } = require("./config/database");
-const User = require("./model/userModel");
-
-// Routes
-const userRoutes = require("./router/userRoutes");
-const propertyRoutes = require("./router/propertyRoutes");
-const contactRoutes = require("./router/contactRoutes");
-const newsRoutes = require("./router/newsRoutes"); // news routes
-const bookingRoutes = require("./router/bookingRoutes");
-const notificationRoutes = require("./router/notificationRoutes");
-
-// Cloudinary (health check)
-const cloudinary = require("./config/cloudinary");
-
-// Verify email transporter (non-blocking, logs warning on failure)
-verifyTransport().catch((err) => {
-  console.warn("Email transporter verification failed at startup:", err && err.message ? err.message : err);
-});
 
 const app = express();
 
-/**
- * Validate critical env vars early
- */
-if (!process.env.JWT_SECRET) {
-  console.error("❌ JWT_SECRET is not set in .env");
-  process.exit(1);
-}
-
-/**
- * Middlewares
- */
+// Middleware
 app.use(cors());
-app.use(express.json()); // ✅ only once
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-/**
- * Static folder for uploads
- */
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+// Routes
+app.use("/api/users", require("./router/userRoutes"));
+app.use("/api/properties", require("./router/propertyRoutes"));
 
-/**
- * Routes
- */
-app.use("/api/users", userRoutes);
-app.use("/api/properties", propertyRoutes);
-app.use("/api/contact", contactRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/news", newsRoutes); 
-app.use("/api/notifications", notificationRoutes);
-
-app.get("/", (_req, res) => {
-  res.send("API is running...");
+app.get("/", (req, res) => {
+  res.json({ message: "InzuTrust API Running" });
 });
 
-/**
- * Cloudinary test route
- */
-app.get("/cloudinary-test", async (_req, res) => {
+// Initialization Logic
+const startServer = async () => {
   try {
-    const result = await cloudinary.api.ping();
-    return res.json({ success: true, result });
-  } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
-  }
-});
+    // 1. Authenticate
+    await db.sequelize.authenticate();
+    console.log("✔ MySQL Connected...");
 
-/**
- * Ensure default admin exists
- */
-async function ensureDefaultAdmin() {
-  const defaultAdmin = {
-    firstName: "mudage",
-    lastName: "bruno",
-    email: "mudagebruno76@gmail.com",
-    password: "mudagel4@1",
-    phone: "07323435781",
-    role: "admin",
-    nationalId: "120677078890",
-  };
+    // 2. Sync Parent Table first (Solves the 'users table doesn't exist' error)
+    await db.User.sync({ force: true }); 
+    console.log("✔ User table initialized.");
 
-  const existing = await User.findOne({ where: { email: defaultAdmin.email } });
-  if (existing) {
-    console.log("✅ Default admin already exists");
-    return;
-  }
+    // 3. Sync Child Tables
+    await db.Property.sync({ force: true });
+    console.log("✔ Property table initialized.");
 
-  const hashedPassword = await bcrypt.hash(defaultAdmin.password, 10);
+    // 4. Final Sync for Associations
+    await db.sequelize.sync();
+    console.log("✔ All associations ready.");
 
-  await User.create({
-    ...defaultAdmin,
-    password: hashedPassword,
-    isVerified: true,
-  });
-
-  console.log("✅ Default admin created");
-}
-
-/**
- * 404 Handler
- */
-app.use((req, res) => {
-  return res.status(404).json({
-    success: false,
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
-  });
-});
-
-/**
- * Global error handler
- */
-app.use((err, _req, res, _next) => {
-  console.error("❌ Unhandled error:", err);
-  return res.status(err.statusCode || 500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
-});
-
-/**
- * Start server
- */
-async function start() {
-  try {
-    await connectDB();
-    await sequelize.sync({ alter: true });
-
-    console.log("✅ Database synced");
-
-    await ensureDefaultAdmin();
-
-    const PORT = Number(process.env.PORT) || 5000;
-    app.listen(PORT, () =>
-      console.log(`🚀 Server running on port ${PORT}`)
-    );
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server flying on port ${PORT}`);
+    });
   } catch (err) {
-    console.error("❌ Failed to start server:", err);
+    console.error("✘ Server failed to start:", err.message);
     process.exit(1);
   }
-}
+};
 
-start();
+startServer();
