@@ -28,7 +28,7 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json()); // ✅ only once
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 // Static folder for uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
