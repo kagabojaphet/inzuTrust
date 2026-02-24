@@ -3,7 +3,7 @@ const otpGenerator = require("otp-generator");
 const User = require("../model/userModel");
 const generateToken = require("../utils/generateToken");
 const { sendOtpEmail } = require("../config/emailConfig");
-const otpGenerator = require("otp-generator");
+
 
 // Generate 6-digit OTP
 const generateOTP = () => {
