@@ -12,7 +12,9 @@ const User = require("./model/userModel");
 const userRoutes = require("./router/userRoutes");
 const propertyRoutes = require("./router/propertyRoutes");
 const contactRoutes = require("./router/contactRoutes");
-const newsRoutes = require("./router/newsRoutes"); // ✅ added
+const newsRoutes = require("./router/newsRoutes"); // news routes
+const bookingRoutes = require("./router/bookingRoutes");
+const notificationRoutes = require("./router/notificationRoutes");
 
 // Cloudinary (health check)
 const cloudinary = require("./config/cloudinary");
@@ -45,7 +47,9 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/contact", contactRoutes);
-app.use("/api/news", newsRoutes); // ✅ added here
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/news", newsRoutes); 
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (_req, res) => {
   res.send("API is running...");
