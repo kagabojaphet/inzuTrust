@@ -20,7 +20,7 @@ import Board from './pages/Board';
 import Careers from './pages/Careers';
 import Pricing from './pages/Pricing';
 import Register from './pages/Register'
-
+import ContactUs from './pages/ContactUs'
 import './App.css'
 
 function Layout({ children, showFooter = true }) {
@@ -54,7 +54,7 @@ export default function App() {
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
           <Route path="/prices" element={<Layout><Pricing /></Layout>} />
            <Route path="/register" element={<Layout><Register /></Layout>} />
-
+          <Route path="/contact" element={<Layout><ContactUs /></Layout>} />
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={
