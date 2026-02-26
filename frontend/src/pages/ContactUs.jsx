@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import three from "../assets/image/three.jpg";
+import one from "../assets/image/one.jpg";
+import two from "../assets/image/two.jpg";
 
-const COUNTRY_CODES = [
+const FALLBACK_COUNTRIES = [
   { code: "+1", flag: "🇺🇸", name: "US" },
   { code: "+44", flag: "🇬🇧", name: "GB" },
   { code: "+250", flag: "🇷🇼", name: "RW" },
@@ -13,11 +16,7 @@ const COUNTRY_CODES = [
   { code: "+81", flag: "🇯🇵", name: "JP" },
 ];
 
-const PORTRAIT_IMAGES = [
-  "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=380&h=580&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=380&h=580&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=380&h=580&fit=crop&crop=face",
-];
+const PORTRAIT_IMAGES = [one, three, two];
 
 /* ── Icons ── */
 const PhoneIcon = ({ size = 18 }) => (
@@ -80,10 +79,12 @@ const FieldWrap = ({ icon, children, focused }) => (
 
 export default function ContactUs() {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", message: "", terms: false });
-  const [countryCode, setCountryCode] = useState(COUNTRY_CODES[2]);
+  const [countryCode, setCountryCode] = useState(FALLBACK_COUNTRIES[2]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [status, setStatus] = useState("idle");
-  const [focused, setFocused] = useState("");
+  const [COUNTRY_CODES, setCountryCodes] = useState(FALLBACK_COUNTRIES);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+  const [focused, setFocused] = useState("");     // ← Fixed
+  const [status, setStatus] = useState("idle");   // ← Fixed
 
   const wordCount = form.message.trim().split(/\s+/).filter(Boolean).length;
 
@@ -99,10 +100,45 @@ export default function ContactUs() {
     setTimeout(() => {
       setStatus("success");
       setForm({ firstName: "", lastName: "", email: "", phone: "", message: "", terms: false });
-      setCountryCode(COUNTRY_CODES[2]);
+      setCountryCode(FALLBACK_COUNTRIES[2]);
       setTimeout(() => setStatus("idle"), 2800);
     }, 1500);
   };
+
+  // Fetch countries from REST Countries API
+  useEffect(() => {
+    fetch("https://restcountries.com/v3.1/all?fields=cca2,flag,idd,name")
+      .then(res => res.json())
+      .then(data => {
+        const processed = data
+          .filter(c => c.idd?.root)
+          .map(c => ({
+            code: c.idd.root,
+            flag: c.flag,
+            name: c.cca2,
+          }))
+          .reduce((acc, curr) => {
+            if (!acc.some(item => item.code === curr.code)) acc.push(curr);
+            return acc;
+          }, [])
+          .sort((a, b) => {
+            const numA = parseInt(a.code.replace(/\D/g, "")) || 0;
+            const numB = parseInt(b.code.replace(/\D/g, "")) || 0;
+            return numA - numB;
+          });
+
+        setCountryCodes(processed);
+
+        const rwanda = processed.find(c => c.code === "+250");
+        if (rwanda) setCountryCode(rwanda);
+
+        setLoadingCountries(false);
+      })
+      .catch(err => {
+        console.error("Failed to load countries from API:", err);
+        setLoadingCountries(false);
+      });
+  }, []);
 
   const allImages = [...PORTRAIT_IMAGES, ...PORTRAIT_IMAGES];
 
@@ -127,11 +163,9 @@ export default function ContactUs() {
       `}</style>
 
       <div className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow-2xl bg-white">
-
         {/* Upper section */}
         <div className="flex flex-col md:flex-row">
-
-          {/* Sliding image strip with top padding */}
+          {/* Sliding image strip */}
           <div className="w-full md:w-[320px] h-[220px] md:h-[420px] flex-shrink-0 overflow-hidden bg-[#e6ecf7]">
             <div className="slide-track pt-8 md:pt-12">
               {allImages.map((src, i) => (
@@ -151,7 +185,6 @@ export default function ContactUs() {
             <h2 className="text-4xl font-bold text-gray-900 mb-8 tracking-tight">Contact Us</h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-
               {/* Name fields */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
@@ -215,6 +248,7 @@ export default function ContactUs() {
                           <span className="text-gray-400 text-xs ml-auto">{cc.name}</span>
                         </div>
                       ))}
+                      {loadingCountries && <div className="px-4 py-3 text-gray-400 text-sm">Loading countries...</div>}
                     </div>
                   )}
                 </div>
@@ -232,7 +266,7 @@ export default function ContactUs() {
                 </div>
               </div>
 
-              {/* Message + word count */}
+              {/* Message */}
               <div>
                 <FieldWrap icon={<MessageIcon />} focused={focused === "message"}>
                   <textarea
@@ -261,14 +295,12 @@ export default function ContactUs() {
                 </span>
               </div>
 
-              {/* Submit button */}
+              {/* Submit */}
               <button
                 type="submit"
                 disabled={status !== "idle"}
                 className={`w-full py-4 rounded-2xl text-white text-base font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-3 active:scale-[0.985] shadow-lg ${
-                  status === "success"
-                    ? "bg-emerald-600"
-                    : "bg-[#1863c2] hover:bg-[#0f4a9c]"
+                  status === "success" ? "bg-emerald-600" : "bg-[#1863c2] hover:bg-[#0f4a9c]"
                 } ${status !== "idle" ? "cursor-not-allowed opacity-90" : ""}`}
               >
                 {status === "loading" && <Loader />}
