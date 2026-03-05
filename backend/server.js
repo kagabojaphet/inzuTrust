@@ -17,7 +17,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
 app.use("/api/users", require("./router/userRoutes"));
 app.use("/api/properties", require("./router/propertyRoutes"));
-
+app.use("/api/contact", require("./router/contactRoutes"));
 app.get("/", (req, res) => {
   res.json({ message: "InzuTrust API Running" });
 });
@@ -29,13 +29,13 @@ const startServer = async () => {
     await db.sequelize.authenticate();
     console.log("✔ MySQL Connected...");
 
-    // 2. Sync Parent Table first (Solves the 'users table doesn't exist' error)
-    await db.User.sync({ force: true }); 
-    console.log("✔ User table initialized.");
+    // i removed the forcre: true option to prevent data loss during development.
+   await db.sequelize.sync();
+console.log("✔ Database synced.");
 
-    // 3. Sync Child Tables
-    await db.Property.sync({ force: true });
-    console.log("✔ Property table initialized.");
+  
+    await db.sequelize.sync();
+console.log("✔ Database synced.");
 
     // 4. Final Sync for Associations
     await db.sequelize.sync();
