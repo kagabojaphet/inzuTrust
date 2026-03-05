@@ -1,10 +1,24 @@
+// services/propertyService.js
 const Property = require("../model/propertyModel");
 
 const createProperty = async (landlordId, payload) => {
-  const created = await Property.create({
+  // cast numeric fields that can arrive as strings from form-data
+  const data = {
     ...payload,
     landlordId,
-  });
+  };
+
+  if (data.rentAmount !== undefined && data.rentAmount !== null) {
+    data.rentAmount = Number(data.rentAmount);
+  }
+  if (data.bedrooms !== undefined && data.bedrooms !== null) {
+    data.bedrooms = Number(data.bedrooms);
+  }
+  if (data.bathrooms !== undefined && data.bathrooms !== null) {
+    data.bathrooms = Number(data.bathrooms);
+  }
+
+  const created = await Property.create(data);
   return created;
 };
 
@@ -29,12 +43,23 @@ const updateProperty = async (id, landlordId, updates) => {
   const property = await Property.findByPk(id);
   if (!property) throw new Error("Property not found");
 
-  // Only owner landlord (or admin if you add that logic later)
   if (property.landlordId !== landlordId) {
     throw new Error("Not authorized to update this property");
   }
 
-  await property.update(updates);
+  // cast when updating too
+  const data = { ...updates };
+  if (data.rentAmount !== undefined && data.rentAmount !== null) {
+    data.rentAmount = Number(data.rentAmount);
+  }
+  if (data.bedrooms !== undefined && data.bedrooms !== null) {
+    data.bedrooms = Number(data.bedrooms);
+  }
+  if (data.bathrooms !== undefined && data.bathrooms !== null) {
+    data.bathrooms = Number(data.bathrooms);
+  }
+
+  await property.update(data);
   return property;
 };
 
@@ -47,6 +72,7 @@ const deleteProperty = async (id, landlordId) => {
   }
 
   await property.destroy();
+  return true;
 };
 
 module.exports = {

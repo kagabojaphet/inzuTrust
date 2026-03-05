@@ -1,5 +1,8 @@
+// router/propertyRoutes.js
 const express = require("express");
 const router = express.Router();
+
+const upload = require("../middleware/uploadMiddleware");
 
 const {
   createProperty,
@@ -16,14 +19,24 @@ const {
   updatePropertyValidation,
 } = require("../validator/propertyValidator");
 
-// Public (or keep it protected if you want)
+// Public
 router.get("/", getAllProperties);
+
+// ✅ IMPORTANT: put this BEFORE "/:id"
+router.get("/my/list", protect, landlordOnly, getMyProperties);
+
 router.get("/:id", getPropertyById);
 
-// Landlord-only
-router.post("/", protect, landlordOnly, createPropertyValidation, createProperty);
+// Landlord-only + images upload (up to 6 files)
+router.post(
+  "/",
+  protect,
+  landlordOnly,
+  upload.array("images", 6),
+  createPropertyValidation,
+  createProperty
+);
 
-router.get("/my/list", protect, landlordOnly, getMyProperties);
 router.put("/:id", protect, landlordOnly, updatePropertyValidation, updateProperty);
 router.delete("/:id", protect, landlordOnly, deleteProperty);
 
