@@ -1,7 +1,6 @@
+// model/propertyModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-sequelize.sync({ alter: true });
-
 
 const Property = sequelize.define(
   "Property",
@@ -70,14 +69,14 @@ const Property = sequelize.define(
       defaultValue: "available",
     },
 
-    // 🔥 IMAGE FIELDS
+    // Images (Cloudinary URLs)
     mainImage: {
       type: DataTypes.STRING,
       allowNull: true,
     },
 
     images: {
-      type: DataTypes.JSON,  // array of image URLs
+      type: DataTypes.JSON, // array of urls
       allowNull: true,
     },
   },
