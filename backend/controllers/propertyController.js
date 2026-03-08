@@ -80,10 +80,21 @@ const createProperty = async (req, res) => {
 // GET /api/properties (public)
 const getAllProperties = async (req, res) => {
   try {
-    const properties = await propertyService.getAllProperties();
-    return res.json({ success: true, data: properties });
+    const result = await propertyService.getAllProperties(req.query);
+
+    return res.json({
+      success: true,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+      data: result.properties,
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 

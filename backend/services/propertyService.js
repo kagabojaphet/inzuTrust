@@ -1,8 +1,8 @@
-// services/propertyService.js
+
+const { Op } = require("sequelize");
 const Property = require("../model/propertyModel");
 
 const createProperty = async (landlordId, payload) => {
-  // cast numeric fields that can arrive as strings from form-data
   const data = {
     ...payload,
     landlordId,
@@ -22,8 +22,77 @@ const createProperty = async (landlordId, payload) => {
   return created;
 };
 
-const getAllProperties = async () => {
-  return Property.findAll({ order: [["createdAt", "DESC"]] });
+const getAllProperties = async (query) => {
+  const {
+    district,
+    type,
+    minRent,
+    maxRent,
+    bedrooms,
+    bathrooms,
+    status,
+    page = 1,
+    limit = 10,
+    sort = "createdAt",
+    order = "DESC",
+  } = query;
+
+  const where = {};
+
+  if (district) {
+    where.district = district;
+  }
+
+  if (type) {
+    where.type = type;
+  }
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (bedrooms) {
+    where.bedrooms = Number(bedrooms);
+  }
+
+  if (bathrooms) {
+    where.bathrooms = Number(bathrooms);
+  }
+
+  if (minRent || maxRent) {
+    where.rentAmount = {};
+
+    if (minRent) {
+      where.rentAmount[Op.gte] = Number(minRent);
+    }
+
+    if (maxRent) {
+      where.rentAmount[Op.lte] = Number(maxRent);
+    }
+  }
+
+  const allowedSortFields = ["createdAt", "rentAmount", "bedrooms", "bathrooms", "district"];
+  const sortField = allowedSortFields.includes(sort) ? sort : "createdAt";
+  const sortOrder = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+  const currentPage = Number(page) || 1;
+  const perPage = Number(limit) || 10;
+  const offset = (currentPage - 1) * perPage;
+
+  const { count, rows } = await Property.findAndCountAll({
+    where,
+    order: [[sortField, sortOrder]],
+    limit: perPage,
+    offset,
+  });
+
+  return {
+    total: count,
+    page: currentPage,
+    limit: perPage,
+    totalPages: Math.ceil(count / perPage),
+    properties: rows,
+  };
 };
 
 const getPropertyById = async (id) => {
@@ -47,8 +116,8 @@ const updateProperty = async (id, landlordId, updates) => {
     throw new Error("Not authorized to update this property");
   }
 
-  // cast when updating too
   const data = { ...updates };
+
   if (data.rentAmount !== undefined && data.rentAmount !== null) {
     data.rentAmount = Number(data.rentAmount);
   }
