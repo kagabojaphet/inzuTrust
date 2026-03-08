@@ -19,6 +19,8 @@ app.use("/api/users", require("./router/userRoutes"));
 app.use("/api/properties", require("./router/propertyRoutes"));
 app.use("/api/contact", require("./router/contactRoutes"));
 app.use("/api/news", require("./router/newsRoutes"));
+app.use("/api/favorites", require("./router/favoriteRoutes"));
+app.use("/api/viewing-requests", require("./router/viewingRequestRoutes"));
 
 
 app.get("/", (req, res) => {
