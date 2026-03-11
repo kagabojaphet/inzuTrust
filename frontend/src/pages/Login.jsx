@@ -1,130 +1,178 @@
-import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useNavigate, Link } from 'react-router-dom';
+import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
 
-export default function Login() {
-  const { login } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const from = location.state?.from || '/dashboard'
+// 1. Import the useAuth hook instead of manual axios or setAuthData helpers
+import { useAuth } from '../context/AuthContext'; 
 
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [showPass, setShowPass] = useState(false)
+const schema = yup.object({
+  email: yup.string().required('Email is required').email('Invalid email format'),
+  password: yup.string().required('Password is required'),
+}).required();
 
-  function handleChange(e) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-    setError('')
-  }
+const Login = () => {
+  const navigate = useNavigate();
+  // 2. Initialize the login function from context
+  const { login } = useAuth(); 
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ show: false, type: '', message: '' });
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    if (!form.email || !form.password) return setError('Please fill in all fields.')
-    setLoading(true)
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = async (formData) => {
+    setLoading(true);
+    setAlert({ show: false, type: '', message: '' });
+
     try {
-      await login(form.email, form.password)
-      navigate(from, { replace: true })
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password.')
+      // 3. Call the login method from AuthContext. 
+      // This handles axios, localStorage, and state management internally.
+      const userData = await login(formData.email, formData.password);
+
+      setAlert({
+        show: true,
+        type: 'success',
+        message: `Welcome back, ${userData.firstName}! Redirecting...`,
+      });
+
+      // 4. Role-Based Redirection
+      // Using 'replace: true' prevents the user from going back to the login page via the back button.
+      if (userData.role === 'landlord') {
+        navigate('/landlord/dashboard', { replace: true });
+      } else if (userData.role === 'tenant') {
+        navigate('/tenant/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+
+    } catch (error) {
+      setAlert({
+        show: true,
+        type: 'error',
+        message: error.response?.data?.message || 'Invalid credentials. Please try again.',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-ink-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex bg-white font-sans">
+      {/* Visual Side */}
+      <div className="hidden lg:flex lg:w-1/2 bg-blue-600 items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
+          </svg>
+        </div>
+        
+        <div className="relative z-10 text-white max-w-md">
+          <h1 className="text-5xl font-black mb-6 leading-tight">One platform for all your rental needs.</h1>
+          <p className="text-blue-100 text-lg mb-8">Whether you're looking for a home or managing properties, InzuTrust has you covered.</p>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl backdrop-blur-sm">
+              <div className="bg-white/20 p-2 rounded-lg"><HiCheckCircle className="text-xl"/></div>
+              <p className="font-bold text-sm text-blue-50">Verified Listings for Tenants</p>
+            </div>
+            <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl backdrop-blur-sm">
+              <div className="bg-white/20 p-2 rounded-lg"><HiCheckCircle className="text-xl"/></div>
+              <p className="font-bold text-sm text-blue-50">Powerful Tools for Landlords</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-3xl shadow-xl shadow-ink-900/5 border border-ink-100 p-8 sm:p-10 fade-up">
-
-          {/* Header */}
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl" style={{fontFamily:'Sora,sans-serif'}}>I</span>
-              </div>
-              <span className="font-bold text-2xl text-ink-900" style={{fontFamily:'Sora,sans-serif'}}>
-                Inzu<span className="text-brand-600">Trust</span>
-              </span>
-            </Link>
-            <h1 className="text-2xl font-bold text-ink-900 mb-1">Welcome back</h1>
-            <p className="text-ink-500 text-sm">Sign in to your account</p>
+      {/* Form Side */}
+      <div className="flex-1 flex flex-col justify-center p-8 md:p-12 lg:p-20">
+        <div className="w-full max-w-md mx-auto">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-200">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span className="text-2xl font-black text-gray-900 tracking-tight">Inzu<span className="text-blue-600">Trust</span></span>
           </div>
 
-          {/* Error */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm flex items-center gap-2">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              {error}
+          <h2 className="text-4xl font-black text-gray-900 mb-2">Sign In</h2>
+          <p className="text-gray-500 mb-10 font-medium">Access your account securely.</p>
+
+          {alert.show && (
+            <div className={`mb-8 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+              alert.type === 'success' ? 'bg-green-50 text-green-800 border border-green-100' : 'bg-red-50 text-red-800 border border-red-100'
+            }`}>
+              {alert.type === 'success' ? <HiCheckCircle className="text-2xl shrink-0" /> : <HiExclamationCircle className="text-2xl shrink-0" />}
+              <p className="text-xs font-bold">{alert.message}</p>
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-ink-700 mb-2">Email address</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl border border-ink-200 bg-ink-50 text-ink-900 text-sm placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
-              />
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Email Address</label>
+              <div className="relative">
+                <HiMail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 text-xl" />
+                <input
+                  {...register('email')}
+                  type="email"
+                  placeholder="name@example.com"
+                  className="w-full pl-14 pr-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-blue-600 focus:bg-white outline-none transition-all font-medium"
+                />
+              </div>
+              {errors.email && <p className="text-red-500 text-xs mt-2 font-bold ml-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-semibold text-ink-700">Password</label>
-                <button type="button" className="text-xs text-brand-600 hover:text-brand-700 font-medium">
-                  Forgot password?
-                </button>
+              <div className="flex justify-between items-center mb-2 ml-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Password</label>
+                <Link to="/forgot-password" size="sm" className="text-xs font-bold text-blue-600 hover:underline">Forgot?</Link>
               </div>
               <div className="relative">
+                <HiLockClosed className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 text-xl" />
                 <input
-                  type={showPass ? 'text' : 'password'}
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
+                  {...register('password')}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 rounded-xl border border-ink-200 bg-ink-50 text-ink-900 text-sm placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                  className="w-full pl-14 pr-14 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-blue-600 focus:bg-white outline-none transition-all font-medium"
                 />
-                <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 p-1">
-                  {showPass
-                    ? <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
-                    : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                  }
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600"
+                >
+                  {showPassword ? <HiEyeOff className="text-xl" /> : <HiEye className="text-xl" />}
                 </button>
               </div>
+              {errors.password && <p className="text-red-500 text-xs mt-2 font-bold ml-1">{errors.password.message}</p>}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-brand-300 text-white font-semibold py-3.5 rounded-xl transition-colors duration-200 text-sm flex items-center justify-center gap-2 mt-2">
-              {loading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              {loading ? 'Signing in...' : 'Sign In'}
+              className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-blue-100 transition-all ${
+                loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]'
+              }`}
+            >
+              {loading ? 'Authenticating...' : 'Sign In to InzuTrust'}
             </button>
           </form>
 
-          {/* Footer */}
-          <p className="text-center text-sm text-ink-500 mt-8">
-            Don't have an account?{' '}
-            <Link to="/register/tenant" className="text-brand-600 font-semibold hover:text-brand-700">
-              Register as Tenant
-            </Link>
-            {' · '}
-            <Link to="/register/landlord" className="text-brand-600 font-semibold hover:text-brand-700">
-              Landlord
-            </Link>
-          </p>
+          <div className="mt-10 pt-10 border-t border-gray-50 text-center">
+            <p className="text-sm text-gray-500 font-medium">
+              Don't have an account yet? <br/>
+              <Link to="/register/tenant" className="text-blue-600 font-black hover:underline inline-block mt-2">Create an account</Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default Login;
