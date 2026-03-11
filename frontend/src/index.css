@@ -17,3 +17,20 @@
   --color-brand-green-dark: #296d18;
   --color-brand-green-mid: #219967;
 }
+.react-international-phone-input-container {
+  --react-international-phone-border-radius: 0.75rem;
+  --react-international-phone-height: 56px;
+  --react-international-phone-background-color: #f9fafb; /* gray-50 */
+  --react-international-phone-text-color: #111827; /* gray-900 */
+  --react-international-phone-border-color: #e5e7eb; /* gray-200 */
+  --react-international-phone-focus-border-color: #2563eb; /* blue-600 */
+}
+
+.react-international-phone-country-selector {
+  border-right: 1px solid #e5e7eb !important;
+  background-color: #f9fafb !important;
+}
+
+.react-international-phone-input {
+  border-radius: 0.75rem !important;
+}

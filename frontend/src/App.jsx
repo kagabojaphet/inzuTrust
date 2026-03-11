@@ -6,8 +6,8 @@ import Footer from './components/Footer'
 
 import Home from './pages/Home'
 import Login from './pages/Login'
-import RegisterTenant from './pages/RegisterTenant'
-import RegisterLandlord from './pages/RegisterLandlord'
+import RegisterTenant from './pages/TenantRegister'
+import RegisterLandlord from './pages/LandlordRegister'
 import Dashboard from './pages/Dashboard'
 import Properties from './pages/Properties'
 import Profile from './pages/Profile'
@@ -53,7 +53,9 @@ export default function App() {
           <Route path="/board" element={<Layout><Board /></Layout>} />
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
           <Route path="/prices" element={<Layout><Pricing /></Layout>} />
-           <Route path="/register" element={<Layout><Register /></Layout>} />
+          <Route path="/register" element={<Layout><Register /></Layout>} />
+          <Route path="/login" element={<Layout><Login /></Layout>} />
+
 
 
           {/* Protected Routes */}

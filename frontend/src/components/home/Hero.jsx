@@ -10,7 +10,7 @@ const Hero = ({ images }) => {
   const [isWordComplete, setIsWordComplete] = useState(false);
 
   return (
-    <section className="relative w-full pt-12 pb-20 overflow-hidden bg-white">
+    <section className="relative w-full pt-12 pb-20 overflow-hidden bg-[#F8FAFC]">
       <div className="w-full px-6 md:px-12 grid md:grid-cols-2 items-center gap-10">
         <div className="z-10 text-left flex flex-col items-start">
       
