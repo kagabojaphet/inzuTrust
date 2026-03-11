@@ -21,7 +21,7 @@ export default function Navbar() {
 
       {/* Center Links */}
       <div className="hidden md:flex items-center gap-8 text-black font-semibold">
-        <a href="/" className="text-brand-blue-bright border-b-2 border-brand-blue-bright pb-1 transition-all">
+        <a href="/" className=" pb-1 transition-all">
           Home
         </a>
 
@@ -80,9 +80,9 @@ export default function Navbar() {
           </div>
         </div>
 
-        <button className="text-black font-bold hover:text-brand-blue-dark transition-colors">Log In</button>
-        <button className="bg-brand-green-mid hover:bg-brand-green-dark text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95">
-          Get Started
+        <button className="text-black font-bold hover:text-brand-blue-dark transition-colors"><a href="/login">Log In</a></button>
+        <button className="bg-brand-green-mid hover:bg-brand-green-dark text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95"> <a href="/register">
+          Get Started </a>
         </button>
       </div>
     </nav>
