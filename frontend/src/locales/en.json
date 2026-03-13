@@ -1,0 +1,198 @@
+{
+  "navbar": {
+    "home": "Home",
+    "properties": "Properties",
+    "news": "News",
+    "contact": "Contact Us",
+    "login": "Login",
+    "register": "Register",
+    "favorites": "Favorites",
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
+  "home": {
+    "title": "Find Your Dream Home",
+    "subtitle": "Browse the best rental properties with ease",
+    "search": "Search Properties",
+    "featured": "Featured Properties",
+    "viewMore": "View More"
+  },
+  "property": {
+    "title": "Property",
+    "district": "District",
+    "sector": "Sector",
+    "address": "Address",
+    "type": "Type",
+    "rent": "Rent Amount",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "description": "Description",
+    "status": "Status",
+    "available": "Available",
+    "occupied": "Occupied",
+    "requestViewing": "Request Viewing",
+    "addToFavorites": "Add to Favorites"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "password": "Password",
+    "phone": "Phone Number",
+    "nationalId": "National ID",
+    "role": "Role",
+    "tenant": "Tenant",
+    "landlord": "Landlord",
+    "admin": "Admin"
+  },
+  "news": {
+    "title": "News",
+    "like": "Like",
+    "dislike": "Dislike",
+    "comment": "Comment",
+    "share": "Share",
+    "comments": "Comments"
+  },
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "search": "Search",
+    "noData": "No data found",
+    "explore": "Explore",
+    "learnMore": "Learn More"
+  },
+  "hero": {
+    "titleLine1": "Digitally Manage",
+    "titleLine2": "Rentals with",
+    "confidence": "Confidence",
+    "security": "Security",
+    "ease": "Ease",
+    "trust": "Trust",
+    "subtitle": "The all-in-one platform for secure payments, digital leases, and tenant trust scores. Building a transparent rental ecosystem for Rwanda.",
+    "getStarted": "Get Started",
+    "browseRentals": "Browse Rentals",
+    "joinUsers": "Join 2,000+ happy tenants & landlords",
+    "trustScore": "Trust Score",
+    "excellent": "Excellent",
+    "status": "Status",
+    "paymentVerified": "Payment Verified"
+  },
+  "featuresSection": {
+    "verifiedTitle": "Verified Listings",
+    "verifiedDesc": "Every property is physically verified by our team to ensure your safety and quality.",
+    "trustScore": "Trust Score",
+    "trustTitle": "Build Rental Trust",
+    "trustDesc": "Earn a high reputation based on timely payments and digital lease history to unlock better homes.",
+    "payTitle": "Pay Easily",
+    "payDesc": "Seamlessly pay your rent using MTN Mobile Money, Airtel Money, or your preferred local bank."
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Follow these simple steps to secure your next home in Rwanda.",
+    "step1Title": "Register & Login",
+    "step1Desc": "Create your secure account and log in to access the full rental marketplace and management tools.",
+    "step2Title": "Browse Dream Houses",
+    "step2Desc": "Explore our verified listings to find your dream home. Choose the property that perfectly fits your lifestyle.",
+    "step3Title": "Secure Payment",
+    "step3Desc": "Complete your rental payment seamlessly through our integrated MTN, Airtel, or Bank payment gateways.",
+    "step4Title": "Sign Agreements",
+    "step4Desc": "Finalize your move by signing digital lease agreements with your landlord directly on the platform."
+  },
+  "partners": {
+    "title": "Regulated & Trusted BY"
+  },
+  "adminFeatures": {
+    "title": "Manage your rentals like a pro",
+    "subtitle": "Our dashboard provides all the professional tools you need to communicate, verify, and support your rental business in one place.",
+    "button": "Explore",
+    "messagingTitle": "Real-time Messaging",
+    "messagingDesc": "Instant chat between landlords and tenants with file sharing and history tracking for secure communication.",
+    "videoTitle": "Virtual Video Calls",
+    "videoDesc": "Conduct property tours and tenant interviews remotely with high-definition, integrated video conferencing.",
+    "scheduleTitle": "Smart Scheduling",
+    "scheduleDesc": "Automated booking system for property visits and meetings, synced directly with your digital calendar.",
+    "supportTitle": "24/7 Premium Support",
+    "supportDesc": "Round-the-clock technical assistance and dispute mediation to ensure a smooth rental experience."
+  },
+  "adminAnalytics": {
+    "title": "Your Dashboard, Your Data, Your Growth",
+    "subtitle": "Track property performance, tenant behavior, and financial trends with our integrated analytical engine.",
+    "overview": "Overview",
+    "monthly": "Monthly",
+    "ratings": "Ratings",
+    "newVotes": "New votes",
+    "scoreHistory": "Score History",
+    "verifiedStatus": "Level 4 Verified Status"
+  },
+  "ratings": {
+    "topRatedHouses": "Top Rated Houses",
+    "verifiedTenants": "Verified Tenants",
+    "trustedLandlords": "Trusted Landlords",
+    "verifiedQuality": "Verified Quality",
+    "highTrustScore": "High Trust Score",
+    "reliableService": "Reliable Service"
+  },
+  "newsSection": {
+    "title": "Latest News & Insights",
+    "readMore": "Learn More",
+    "marketTrends": "Market Trends",
+    "tenantTips": "Tenant Tips",
+    "updates": "Updates",
+    "legal": "Legal",
+    "community": "Community",
+    "finance": "Finance",
+    "article1Title": "The Rise of Digital Property Management",
+    "article1Desc": "Exploring how tech and digital verification are reshaping the rental landscape in Kigali.",
+    "article2Title": "Improve Your Tenant Trust Score",
+    "article2Desc": "A guide on how consistent digital payments help you unlock premium housing options.",
+    "article3Title": "New Banking Partnership for Payments",
+    "article3Desc": "Our latest integration makes rent collection seamless for professional landlords.",
+    "article4Title": "Understanding New Rental Laws",
+    "article4Desc": "Key takeaways from the ministerial order regarding selected housing services.",
+    "article5Title": "Safe Living Initiatives in Kigali",
+    "article5Desc": "How neighborhood watch integrations are improving tenant security scores.",
+    "article6Title": "Micro-loans for Security Deposits",
+    "article6Desc": "New financial products designed to help verified tenants move in faster."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about the most advanced rental ecosystem in Rwanda.",
+    "q1": "How exactly is my Rental Trust Score calculated?",
+    "a1": "Your Trust Score is a comprehensive metric calculated through our proprietary algorithm. It evaluates four key areas: 1) Identity verification through official government integration, 2) Your history of on-time rental payments via Mobile Money or Bank transfer, 3) Verified reviews from previous landlords on our platform, and 4) Digital lease compliance.",
+    "q2": "Are my financial transactions and personal data secure?",
+    "a2": "Security is our highest priority. All payments are processed through bank-grade encrypted gateways in direct partnership with MTN Rwanda, Airtel Money, and local commercial banks. We never store your full card details or mobile money PINs.",
+    "q3": "What is the physical verification process for house listings?",
+    "a3": "Unlike other marketplaces, we don't just allow anyone to upload photos. Our field verification team physically visits every property listed as 'Verified'. We check the actual condition of the house, confirm the landlord's ownership documents, and ensure amenities match the description.",
+    "q4": "How do digital lease agreements work on the platform?",
+    "a4": "Once you and the landlord agree on terms, we generate a legally binding digital lease agreement. Both parties can review, suggest edits, and sign electronically. These documents are securely stored in your dashboard and serve as official proof of residence.",
+    "q5": "What happens if there is a dispute between me and my landlord?",
+    "a5": "Our platform includes a dedicated dispute mediation module. If an issue arises regarding maintenance or deposits, you can raise a ticket through your dashboard. Our legal and support team will review the digital communication history and lease terms to provide an objective mediation.",
+    "stillQuestions": "Still have questions?",
+    "supportText": "We're here to help you 24/7. Reach out to our team for any assistance.",
+    "contactSupport": "Contact Support"
+  },
+  "cta": {
+    "title": "Ready to upgrade your rental experience?",
+    "subtitle": "Join thousands of tenants and landlords in Rwanda who are enjoying a safer, faster, and more transparent rental process.",
+    "startFree": "Get Started for Free",
+    "contactSales": "Contact Sales"
+  },
+  "navExtra": {
+  "about": "About",
+  "aboutUs": "About Us",
+  "services": "Services",
+  "board": "Board",
+  "prices": "Prices",
+  "careers": "Careers"
+}
+}

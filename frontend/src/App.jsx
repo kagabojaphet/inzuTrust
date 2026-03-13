@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { LanguageProvider } from './context/LanguageContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -21,6 +22,7 @@ import Careers from './pages/Careers';
 import Pricing from './pages/Pricing';
 import Register from './pages/Register'
 
+
 import './App.css'
 
 function Layout({ children, showFooter = true }) {
@@ -37,40 +39,45 @@ function Layout({ children, showFooter = true }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AIChatbot /> 
-        <BackToTop />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Layout><Home /></Layout>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register/tenant" element={<RegisterTenant />} />
-          <Route path="/register/landlord" element={<RegisterLandlord />} />
-          <Route path="/properties" element={<Layout><Properties /></Layout>} />
-          <Route path="/about" element={<Layout><AboutUs /></Layout>} />
-          <Route path="/services" element={<Layout><Services /></Layout>} />
-          <Route path="/board" element={<Layout><Board /></Layout>} />
-          <Route path="/careers" element={<Layout><Careers /></Layout>} />
-          <Route path="/prices" element={<Layout><Pricing /></Layout>} />
-           <Route path="/register" element={<Layout><Register /></Layout>} />
+    <LanguageProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AIChatbot /> 
+          <BackToTop />
+          <Routes>
+            <Route path="/" element={<Layout><Home /></Layout>} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register/tenant" element={<RegisterTenant />} />
+            <Route path="/register/landlord" element={<RegisterLandlord />} />
+            <Route path="/properties" element={<Layout><Properties /></Layout>} />
+            <Route path="/about" element={<Layout><AboutUs /></Layout>} />
+            <Route path="/services" element={<Layout><Services /></Layout>} />
+            <Route path="/board" element={<Layout><Board /></Layout>} />
+            <Route path="/careers" element={<Layout><Careers /></Layout>} />
+            <Route path="/prices" element={<Layout><Pricing /></Layout>} />
+            <Route path="/register" element={<Layout><Register /></Layout>} />
 
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout><Dashboard /></Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Layout><Profile /></Layout>
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Layout><Dashboard /></Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Layout><Profile /></Layout>
-            </ProtectedRoute>
-          } />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </LanguageProvider>
   )
 }

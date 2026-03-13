@@ -1,114 +1,352 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { HiOutlineChatAlt2, HiX, HiPaperAirplane } from "react-icons/hi";
+import { useEffect, useRef, useState } from "react";
+import "./AiChatbox.css";
+import iraLogo from "../assets/ira-logo.png";
 
-const AIChatbot = () => {
+const knowledgeBase = [
+  {
+    keywords: ["hello", "hi", "hey"],
+    response:
+      "Hello! I'm IRA, your Inzu Rental Assistant. I can help you understand the platform, find properties, save favorites, request viewings, and more.",
+  },
+  {
+    keywords: ["mission", "purpose"],
+    response:
+      "InzuTrust's mission is to simplify the rental experience by connecting tenants and landlords in a secure and reliable digital platform.",
+  },
+  {
+    keywords: ["vision", "future"],
+    response:
+      "InzuTrust aims to become the most trusted rental platform in Rwanda, helping people find homes faster and more securely.",
+  },
+  {
+    keywords: ["service", "services", "offer", "offers"],
+    response:
+      "InzuTrust offers property listings, property search, landlord property management, favorites, viewing requests, news updates, and contact support.",
+  },
+  {
+    keywords: ["what is inzutrust", "about inzutrust", "inzutrust"],
+    response:
+      "InzuTrust is a rental platform that connects tenants and landlords. It helps users search for homes, save favorites, request viewings, manage listings, and stay updated through news and support features.",
+  },
+  {
+    keywords: ["tenant", "renter"],
+    response:
+      "A tenant can browse properties, search with filters, save favorites, request viewings, read news updates, and contact support.",
+  },
+  {
+    keywords: ["landlord", "owner"],
+    response:
+      "A landlord can create property listings, upload images, manage listings, and respond to viewing requests from tenants.",
+  },
+  {
+    keywords: ["admin", "administrator"],
+    response:
+      "An admin manages special platform features such as publishing news updates and controlling administrative parts of the system.",
+  },
+  {
+    keywords: ["property", "properties", "house", "apartment", "room", "rent", "rental"],
+    response:
+      "You can browse rental properties such as houses, apartments, rooms, land, and commercial spaces. Each listing includes location, rent amount, property details, and images.",
+  },
+  {
+    keywords: ["property type", "types of properties", "types"],
+    response:
+      "InzuTrust supports different property types such as houses, apartments, rooms, land, and commercial spaces.",
+  },
+  {
+    keywords: ["district", "sector", "address", "location"],
+    response:
+      "Each property includes location details such as district, sector, and address to help users know where it is located.",
+  },
+  {
+    keywords: ["price", "rent amount", "cost", "budget"],
+    response:
+      "Each property includes its rent amount so tenants can compare options and choose a property that fits their budget.",
+  },
+  {
+    keywords: ["bedroom", "bedrooms", "bathroom", "bathrooms"],
+    response:
+      "Property listings include bedroom and bathroom information to help tenants choose what best matches their needs.",
+  },
+  {
+    keywords: ["image", "images", "photo", "photos", "upload"],
+    response:
+      "Landlords can upload property images to make listings more attractive and help tenants understand the property before visiting it.",
+  },
+  {
+    keywords: ["search", "find", "filter", "filters"],
+    response:
+      "You can search for properties using filters like district, property type, price range, bedrooms, bathrooms, and availability status.",
+  },
+  {
+    keywords: ["sort", "sorting"],
+    response:
+      "Properties can be sorted using fields like rent amount or newest listings to help users find the most relevant options faster.",
+  },
+  {
+    keywords: ["favorite", "favorites", "save property", "saved properties", "save"],
+    response:
+      "You can save properties as favorites so you can easily return to them later. You can also remove a property from favorites when you no longer need it.",
+  },
+  {
+    keywords: ["view favorites", "my favorites"],
+    response:
+      "The favorites feature allows users to see a list of saved properties in one place, making it easier to compare and revisit them.",
+  },
+  {
+    keywords: ["viewing", "viewing request", "visit", "appointment", "schedule", "request viewing"],
+    response:
+      "Tenants can request a property viewing by selecting a preferred date and time. The landlord can then accept or reject the request.",
+  },
+  {
+    keywords: ["accept viewing", "reject viewing", "landlord response"],
+    response:
+      "Landlords can review viewing requests for their properties and respond by accepting or rejecting them.",
+  },
+  {
+    keywords: ["preferred date", "preferred time", "date and time"],
+    response:
+      "When requesting a viewing, tenants can choose a preferred date and time so the landlord can respond based on availability.",
+  },
+  {
+    keywords: ["news", "updates", "announcement", "announcements"],
+    response:
+      "The news section allows administrators to publish platform updates and announcements. Users can read, like, dislike, comment on, and share news posts.",
+  },
+  {
+    keywords: ["like", "dislike", "comment", "share"],
+    response:
+      "Users can interact with news posts by liking, disliking, commenting, and sharing them.",
+  },
+  {
+    keywords: ["contact", "contact us", "support", "help", "message"],
+    response:
+      "If you need help, you can use the Contact Us section to send a message to the InzuTrust team. The system can also send an automatic reply to confirm your message was received.",
+  },
+  {
+    keywords: ["register", "sign up", "signup", "create account"],
+    response:
+      "You can register an account as a tenant or landlord. After registering, you may need to verify your email before logging in.",
+  },
+  {
+    keywords: ["login", "log in", "sign in"],
+    response:
+      "If you already have an account, use the login page to sign in with your email and password so you can access your dashboard and protected features.",
+  },
+  {
+    keywords: ["otp", "verification", "verify email", "email verification"],
+    response:
+      "After registration, the platform may send an OTP to your email so you can verify your account before logging in.",
+  },
+  {
+    keywords: ["dashboard", "profile", "account"],
+    response:
+      "The dashboard helps users manage their activities. Depending on your role, it may include saved properties, viewing requests, or property management tools.",
+  },
+  {
+    keywords: ["create property", "add property", "post property", "upload property"],
+    response:
+      "Landlords can create new property listings by filling in property details such as title, location, rent amount, bedrooms, bathrooms, description, and property images.",
+  },
+  {
+    keywords: ["update property", "edit property"],
+    response:
+      "Landlords can update the details of properties they own, including price, description, status, and other important information.",
+  },
+  {
+    keywords: ["delete property", "remove property"],
+    response:
+      "Landlords can delete their property listings when they are no longer needed or available.",
+  },
+  {
+    keywords: ["available", "occupied", "status"],
+    response:
+      "Property listings can show whether a property is available or occupied, helping tenants know which homes can still be rented.",
+  },
+  {
+    keywords: ["safe", "security", "secure", "trust"],
+    response:
+      "InzuTrust is designed to provide a more trustworthy rental experience by organizing listings, user roles, support features, and property information in one platform.",
+  },
+  {
+    keywords: ["where can i find properties", "open properties", "go to properties"],
+    response:
+      "You can go to the Properties page to browse available listings and use filters to narrow down your search.",
+  },
+  {
+    keywords: ["go to favorites", "open favorites"],
+    response:
+      "You can open the Favorites section to view the properties you have saved for later.",
+  },
+  {
+    keywords: ["go to contact", "open contact", "contact page"],
+    response:
+      "You can go to the Contact Us page if you want to send a message to the support team.",
+  },
+  {
+    keywords: ["go to login", "open login"],
+    response:
+      "You can use the Login page to sign in and access your account features.",
+  },
+  {
+    keywords: ["go to register", "open register"],
+    response:
+      "You can use the Register page to create a new tenant or landlord account.",
+  },
+];
+
+const quickSuggestions = [
+  "How do I search for properties?",
+  "How do favorites work?",
+  "How do I request a viewing?",
+  "How can landlords upload properties?",
+];
+
+const initialMessages = [
+  {
+    sender: "bot",
+    text: "Hi 👋 I'm IRA (Inzu Rental Assistant).Ask me about properties, viewing requests, landlords, tenants, or how to use the platform.",
+  },
+];
+
+const getBotResponse = (message) => {
+  const lower = message.toLowerCase();
+
+  const match = knowledgeBase.find((item) =>
+    item.keywords.some((keyword) => lower.includes(keyword))
+  );
+
+  return (
+    match?.response ||
+    "I’m here to help with InzuTrust. You can ask about properties, favorites, viewing requests, landlords, tenants, or platform features."
+  );
+};
+
+export default function AiChatbox() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false); // New state for delayed entry
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("inzutrust_chat_history");
+    return saved ? JSON.parse(saved) : initialMessages;
+  });
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hello! I am the InzuTrust Assistant. Ask me about our Mission, Vision, or Services." }
-  ]);
-  
-  const scrollRef = useRef(null);
+  const [typing, setTyping] = useState(false);
 
-  // Phase 1: Delayed Entry - Icon appears after 3 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 3000); // 3-second delay
-    return () => clearTimeout(timer);
-  }, []);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    localStorage.setItem("inzutrust_chat_history", JSON.stringify(messages));
   }, [messages]);
 
-  const KNOWLEDGE_BASE = {
-    mission: "Our mission is to make renting secure, transparent, and easy for everyone in East Africa.",
-    vision: "Our vision is to be the leading digital trust platform, empowering landlords and tenants with verified data.",
-    services: "We provide real-time messaging, virtual tours, smart scheduling, and premium support.",
-    fallback: "I am only trained to answer questions about InzuTrust's Mission, Vision, and Services. Please ask me about those topics!"
-  };
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, typing]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const userMessage = { role: 'user', text: input };
-    setMessages(prev => [...prev, userMessage]);
+  const sendMessage = (text) => {
+    if (!text.trim()) return;
 
-    const query = input.toLowerCase();
-    let botReply = KNOWLEDGE_BASE.fallback;
+    const userMessage = {
+      sender: "user",
+      text,
+    };
 
-    if (query.includes("mission") || query.includes("goal")) botReply = KNOWLEDGE_BASE.mission;
-    if (query.includes("vision") || query.includes("future")) botReply = KNOWLEDGE_BASE.vision;
-    if (query.includes("service") || query.includes("offer")) botReply = KNOWLEDGE_BASE.services;
+    setMessages((prev) => [...prev, userMessage]);
+    setTyping(true);
 
     setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'bot', text: botReply }]);
-    }, 500);
+      const botReply = {
+        sender: "bot",
+        text: getBotResponse(text),
+      };
+
+      setMessages((prev) => [...prev, botReply]);
+      setTyping(false);
+    }, 900);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    sendMessage(input);
     setInput("");
   };
 
-  // If the timer hasn't finished, show nothing
-  if (!isVisible) return null;
+  const clearChat = () => {
+    setMessages(initialMessages);
+    localStorage.removeItem("inzutrust_chat_history");
+  };
 
   return (
-    /* Fix: Lowered Z-index of the outer container so it doesn't block the Navbar */
-    <div className="fixed bottom-8 right-8 z-[50] font-sans text-left">
-      
+    <>
+      <button className="chat-toggle-btn" onClick={() => setIsOpen(!isOpen)}>
+  {isOpen ? (
+    "×"
+  ) : (
+    <img src={iraLogo} alt="IRA Assistant" className="chat-logo" />
+  )}
+</button>
       {isOpen && (
-        /* Chat window adjusted to ensure it stays below fixed navigation bars if necessary */
-        <div className="absolute bottom-20 right-0 w-[350px] h-[500px] bg-white rounded-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 z-[60]">
-          
-          {/* Header using Brand Blue */}
-          <div className="bg-blue-600 p-6 text-white flex justify-between items-center shadow-md">
-            <h4 className="font-black text-lg tracking-tight">InzuTrust AI</h4>
-            <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform">
-              <HiX className="text-xl" />
+        <div className="chatbox-wrapper">
+          <div className="chatbox-header">
+            <div>
+              <h3>IRA</h3>
+              <p>Your Inzu Rental Assistant</p>
+            </div>
+            <button className="clear-btn" onClick={clearChat}>
+              Clear
             </button>
           </div>
 
-          <div ref={scrollRef} className="flex-1 p-4 bg-slate-50 overflow-y-auto space-y-4">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'bot' ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-semibold leading-relaxed shadow-sm ${
-                  msg.role === 'bot' ? 'bg-white text-slate-700 rounded-tl-none border border-slate-100' : 'bg-blue-600 text-white rounded-tr-none'
-                }`}>
+          <div className="chatbox-body">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`chat-message-row ${
+                  msg.sender === "user" ? "user-row" : "bot-row"
+                }`}
+              >
+                <div className={`chat-message ${msg.sender}`}>
                   {msg.text}
                 </div>
               </div>
             ))}
+
+            {typing && (
+              <div className="chat-message-row bot-row">
+                <div className="chat-message bot typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 bg-white border-t border-slate-100 flex gap-2">
-            <input 
+          <div className="chat-suggestions">
+            {quickSuggestions.map((suggestion, index) => (
+              <button
+                key={index}
+                className="suggestion-btn"
+                onClick={() => sendMessage(suggestion)}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
+          <form className="chatbox-input-area" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Ask something..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about our Vision..." 
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20"
             />
-            <button onClick={handleSend} className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors">
-              <HiPaperAirplane />
-            </button>
-          </div>
+            <button type="submit">Send</button>
+          </form>
         </div>
       )}
-
-      {/* Blue Trigger Button with Icons */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 bg-brand-blue-bright rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all text-white active:scale-95 animate-in zoom-in-0 duration-500"
-      >
-        {isOpen ? (
-          <HiX className="text-3xl" />
-        ) : (
-          <HiOutlineChatAlt2 className="text-3xl" />
-        )}
-      </button>
-    </div>
+    </>
   );
-};
-
-export default AIChatbot;
+}
