@@ -1,60 +1,67 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { HiUser, HiHome, HiArrowRight } from "react-icons/hi";
 import TenantRegister from './TenantRegister';
 import LandlordRegister from './LandlordRegister';
 
 const Register = () => {
-  const [role, setRole] = useState(null);
+  const navigate = useNavigate();
 
-  const resetSelection = () => setRole(null);
-
-  if (!role) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center px-6 py-12 font-sans">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#203482] mb-3 tracking-tight">
-            Join InzuTrust
-          </h1>
-          <p className="text-slate-500 text-lg font-medium">
-            Select your account type to continue
-          </p>
-        </div>
-
-        <div className="max-w-4xl w-full grid md:grid-cols-2 gap-8">
-          <RoleCard 
-            title="I am a Tenant" 
-            desc="I'm looking for a verified home and want to build my rental trust score."
-            icon={<HiUser className="text-2xl text-[#2563eb]" />}
-            iconBg="bg-[#eff6ff]"
-            btnColor="bg-[#2563eb]"
-            onClick={() => setRole('tenant')}
-          />
-          <RoleCard 
-            title="I am a Landlord" 
-            desc="I want to list my properties and manage tenants with verified digital history."
-            icon={<HiHome className="text-2xl text-[#27a376]" />}
-            iconBg="bg-[#ecfdf5]"
-            btnColor="bg-[#27a376]"
-            onClick={() => setRole('landlord')}
-          />
-        </div>
+  // This is your selection screen
+  const SelectionScreen = () => (
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center px-6 py-12 font-sans">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-[#203482] mb-3 tracking-tight">
+          Join InzuTrust
+        </h1>
+        <p className="text-slate-500 text-lg font-medium">
+          Select your account type to continue
+        </p>
       </div>
-    );
-  }
+
+      <div className="max-w-4xl w-full grid md:grid-cols-2 gap-8">
+        <RoleCard 
+          title="I am a Tenant" 
+          desc="I'm looking for a verified home and want to build my rental trust score."
+          icon={<HiUser className="text-2xl text-[#2563eb]" />}
+          iconBg="bg-[#eff6ff]"
+          btnColor="bg-[#2563eb]"
+          onClick={() => navigate('tenant')} // Updates URL to /register/tenant
+        />
+        <RoleCard 
+          title="I am a Landlord" 
+          desc="I want to list my properties and manage tenants with verified digital history."
+          icon={<HiHome className="text-2xl text-[#27a376]" />}
+          iconBg="bg-[#ecfdf5]"
+          btnColor="bg-[#27a376]"
+          onClick={() => navigate('landlord')} // Updates URL to /register/landlord
+        />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      {role === 'tenant' ? (
-        <TenantRegister onBack={resetSelection} />
-      ) : (
-        <LandlordRegister onBack={resetSelection} />
-      )}
-    </div>
+    <Routes>
+      {/* Renders at /register */}
+      <Route index element={<SelectionScreen />} />
+      
+      {/* Renders at /register/tenant */}
+      <Route 
+        path="tenant" 
+        element={<TenantRegister onBack={() => navigate('/register')} />} 
+      />
+      
+      {/* Renders at /register/landlord */}
+      <Route 
+        path="landlord" 
+        element={<LandlordRegister onBack={() => navigate('/register')} />} 
+      />
+    </Routes>
   );
 };
 
+// ... RoleCard component remains the same ...
 const RoleCard = ({ title, desc, icon, iconBg, btnColor, onClick }) => (
-  /* Applied your exact styling string here */
   <div 
     onClick={onClick}
     className="bg-white p-8 rounded-lg border border-slate-200 shadow-xl shadow-slate-200/40 flex flex-col items-start text-left group transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl cursor-pointer"

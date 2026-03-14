@@ -1,6 +1,5 @@
-// /model/userModel.js
-const { DataTypes } = require("sequelize"); // This tells Node what DataTypes are
-const sequelize = require("../config/database"); // This connects this file to your DB config
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
 
 const User = sequelize.define(
   "User",
@@ -10,14 +9,8 @@ const User = sequelize.define(
       defaultValue: DataTypes.UUIDV4, 
       primaryKey: true 
     },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    firstName: { type: DataTypes.STRING, allowNull: false },
+    lastName: { type: DataTypes.STRING, allowNull: false },
     email: { 
       type: DataTypes.STRING, 
       allowNull: false, 
@@ -26,33 +19,22 @@ const User = sequelize.define(
     },
     password: { 
       type: DataTypes.STRING, 
-      allowNull: false 
+      allowNull: true // Changed to allow null for Google users
     },
-    phone: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    phone: { type: DataTypes.STRING, allowNull: true },
+   authType: {
+  type: DataTypes.STRING,
+  defaultValue: 'email', // Options: 'email' or 'google'
+},
     role: { 
       type: DataTypes.ENUM("tenant", "landlord", "admin"), 
       defaultValue: "tenant" 
     },
-    isVerified: { 
-      type: DataTypes.BOOLEAN, 
-      defaultValue: false 
-    },
-    otp: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    otpExpiry: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
+    isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+    otp: { type: DataTypes.STRING, allowNull: true },
+    otpExpiry: { type: DataTypes.DATE, allowNull: true },
   },
-  { 
-    tableName: "users", 
-    timestamps: true 
-  }
+  { tableName: "users", timestamps: true }
 );
 
 module.exports = User;

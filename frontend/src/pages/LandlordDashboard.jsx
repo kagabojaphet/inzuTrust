@@ -1,170 +1,163 @@
-import React from 'react';
-import { 
-  HiOutlineHome, HiOutlineUserGroup, HiOutlineDocumentText, 
-  HiOutlineCash, HiOutlineCog, HiOutlinePlus, HiOutlineBell, HiOutlineSearch 
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  HiHome, HiOfficeBuilding, HiUsers, HiDocumentText,
+  HiCreditCard, HiCog, HiBell, HiSearch, HiPlus, HiMenu, HiChevronLeft
 } from "react-icons/hi";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
-// Mock data for the chart
-const data = [
-  { name: 'Feb', revenue: 1.2 },
-  { name: 'Mar', revenue: 2.1 },
-  { name: 'Apr', revenue: 3.8 },
-  { name: 'May', revenue: 3.2 },
-  { name: 'Jun', revenue: 4.5 },
+// Sub-component Imports
+import LDOverview from "../components/landlord/Ldoverview";
+import LDProperties from "../components/landlord/Ldproperties";
+import LDTenants from "../components/landlord/Ldtenants";
+import LDAgreements from "../components/landlord/Ldagreements";
+import LDPayments from "../components/landlord/Ldpayments";
+import LDSettings from "../components/landlord/Ldsettings";
+import LDAddProperty from "../components/landlord/LDAddProperty";
+
+export const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const NAV = [
+  { id: "dashboard",   label: "Dashboard",   icon: HiHome           },
+  { id: "properties",  label: "Properties",  icon: HiOfficeBuilding },
+  { id: "tenants",     label: "Tenants",     icon: HiUsers          },
+  { id: "agreements",  label: "Agreements",  icon: HiDocumentText   },
+  { id: "payments",    label: "Payments",    icon: HiCreditCard     },
+  { id: "settings",    label: "Settings",    icon: HiCog            },
 ];
 
-const LandlordDashboard = () => {
+export default function LandlordDashboard() {
+  const navigate = useNavigate();
+  const [active, setActive] = useState("dashboard");
+  const [search, setSearch] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const token = localStorage.getItem("token") || "";
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  const renderPage = () => {
+    switch (active) {
+      case "dashboard":    return <LDOverview token={token} setActive={setActive} />;
+      case "properties":   return <LDProperties token={token} setActive={setActive} />;
+      case "tenants":      return <LDTenants token={token} />;
+      case "agreements":   return <LDAgreements token={token} />;
+      case "payments":     return <LDPayments token={token} />;
+      case "settings":     return <LDSettings token={token} user={user} />;
+      case "add-property": return <LDAddProperty onCancel={() => setActive("properties")} token={token} />;
+      default:             return <LDOverview token={token} setActive={setActive} />;
+    }
+  };
+
+  // Consistent widths for alignment
+  const sideWidth = isCollapsed ? "w-20" : "w-64";
+  const contentMargin = isCollapsed ? "pl-20" : "pl-64";
+
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full">
-        <div className="p-6 flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
+    <div className="min-h-screen bg-[#f8f9fc] flex font-sans">
+      {/* Sidebar Section - Fixed and Full Height */}
+      <aside 
+        className={`${sideWidth} bg-white border-r border-gray-200 flex flex-col fixed top-0 left-0 h-full z-30 transition-all duration-300`}
+      >
+        <div className="flex items-center justify-between px-5 py-5 border-b border-gray-100 relative">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
+              <HiHome className="text-white text-lg" />
+            </div>
+            {!isCollapsed && (
+              <div className="whitespace-nowrap">
+                <p className="text-sm font-black text-black leading-none uppercase tracking-tight">InzuTrust</p>
+                <p className="text-[10px] text-gray-400 font-bold mt-1">Landlord Admin</p>
+              </div>
+            )}
           </div>
-          <span className="text-xl font-black text-slate-900">Inzu<span className="text-blue-600">Trust</span></span>
+          
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="absolute -right-3 top-7 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-600 shadow-sm z-40 transition-transform"
+          >
+            {isCollapsed ? <HiMenu size={12}/> : <HiChevronLeft size={12}/>}
+          </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          <NavItem icon={<HiOutlineHome />} label="Dashboard" active />
-          <NavItem icon={<HiOutlineHome />} label="Properties" />
-          <NavItem icon={<HiOutlineUserGroup />} label="Tenants" />
-          <NavItem icon={<HiOutlineDocumentText />} label="Agreements" />
-          <NavItem icon={<HiOutlineCash />} label="Payments" />
+        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+          {NAV.map(item => {
+            const Icon = item.icon;
+            const isActive = active === item.id || (active === "add-property" && item.id === "properties");
+            return (
+              <button 
+                key={item.id} 
+                onClick={() => setActive(item.id)}
+                className={`w-full flex items-center ${isCollapsed ? "justify-center" : "gap-3"} px-4 py-3 rounded-xl text-xs font-black transition-all ${
+                  isActive ? "bg-blue-50 text-blue-700" : "text-gray-500 hover:bg-gray-50 hover:text-black"
+                }`}
+              >
+                <Icon className={`text-xl shrink-0 ${isActive ? "text-blue-600" : "text-gray-400"}`} />
+                {!isCollapsed && <span className="truncate">{item.label}</span>}
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="p-4 border-t border-slate-100">
-          <NavItem icon={<HiOutlineCog />} label="Settings" />
-          <div className="mt-4 flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">JP</div>
-            <div className="overflow-hidden">
-              <p className="text-sm font-bold text-slate-900 truncate">Jean-Paul M.</p>
-              <p className="text-xs text-slate-500 truncate">jean@inzutrust.rw</p>
-            </div>
+        <div className="px-4 py-5 border-t border-gray-100">
+          <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}>
+            <img 
+              src={`https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=dbeafe&color=2563eb&bold=true`}
+              alt="avatar" 
+              className="w-8 h-8 rounded-full shrink-0 border border-gray-100" 
+            />
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-black text-black truncate">{user.firstName} {user.lastName}</p>
+                <button onClick={handleLogout} className="text-[10px] text-red-500 font-bold hover:underline uppercase tracking-tighter">Logout</button>
+              </div>
+            )}
           </div>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 ml-64 p-8">
-        {/* HEADER */}
-        <header className="flex justify-between items-center mb-10">
-          <div className="relative w-96">
-            <HiOutlineSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg" />
+      {/* Main Content Area */}
+      <div className={`flex-1 ${contentMargin} flex flex-col min-h-screen transition-all duration-300`}>
+        
+        {/* Sticky Top Navbar */}
+        <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20 w-full">
+          <div className="relative w-72">
+            <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
-              type="text" 
-              placeholder="Search properties, tenants..." 
-              className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+              value={search} 
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search properties..." 
+              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-xl bg-gray-50 outline-none focus:bg-white focus:border-blue-300 transition-all placeholder:text-gray-400" 
             />
           </div>
+
           <div className="flex items-center gap-4">
-            <button className="p-2.5 text-slate-500 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">
-              <HiOutlineBell className="text-xl" />
+            <button className="relative w-9 h-9 flex items-center justify-center text-gray-500 hover:bg-gray-50 border border-transparent hover:border-gray-100 rounded-xl transition">
+              <HiBell className="text-xl" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
             </button>
-            <button className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
-              <HiOutlinePlus /> Add Property
+            
+            <div className="h-6 w-[1px] bg-gray-200 mx-1"></div>
+
+            <button
+              onClick={() => setActive("add-property")}
+              className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-black hover:bg-blue-700 transition shadow-lg shadow-blue-100"
+            >
+              <HiPlus /> 
+              {!isCollapsed && <span>Add Property</span>}
             </button>
           </div>
         </header>
 
-        {/* STATS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard label="Active Agreements" value="10" change="+10%" color="blue" />
-          <StatCard label="Rent Collected" value="4.5M RWF" change="+15%" color="green" />
-          <StatCard label="Pending Payments" value="350k RWF" change="Action needed" color="orange" isWarning />
-        </div>
-
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          {/* REVENUE VIEW */}
-          <div className="col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="font-black text-slate-900">Revenue View</h3>
-              <select className="bg-slate-50 border-none text-xs font-bold rounded-lg px-3 py-1 text-slate-500">
-                <option>This Year</option>
-              </select>
-            </div>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
-                  <YAxis hide />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* QUICK ACTIONS & STATUS */}
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-              <h3 className="font-black text-slate-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <QuickAction icon={<HiOutlineHome />} label="New Listing" />
-                <QuickAction icon={<HiOutlineDocumentText />} label="Create Lease" />
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-              <h3 className="font-black text-slate-900 mb-4">Portfolio Status</h3>
-              <div className="flex items-center justify-between">
-                <div className="relative w-24 h-24">
-                  <svg className="w-full h-full" viewBox="0 0 36 36">
-                    <path className="text-slate-100" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="text-blue-600" strokeWidth="3" strokeDasharray="83, 100" strokeLinecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-xl font-black text-slate-900">83%</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-blue-600"></span> Occupied (10)
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-slate-200"></span> Vacant (2)
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+        {/* Scrollable Content */}
+        <main className="flex-1 px-8 py-8">
+          {renderPage()}
+        </main>
+      </div>
     </div>
   );
-};
-
-// Helper Components
-const NavItem = ({ icon, label, active = false }) => (
-  <div className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all ${active ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50'}`}>
-    <span className="text-xl">{icon}</span>
-    <span className="font-bold text-sm">{label}</span>
-  </div>
-);
-
-const StatCard = ({ label, value, change, color, isWarning }) => (
-  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-    <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">{label}</p>
-    <h2 className={`text-2xl font-black mb-1 ${isWarning ? 'text-orange-600' : 'text-slate-900'}`}>{value}</h2>
-    <p className={`text-xs font-bold ${isWarning ? 'text-orange-400' : 'text-green-500'}`}>{change}</p>
-  </div>
-);
-
-const QuickAction = ({ icon, label }) => (
-  <button className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50 transition-all gap-2 group">
-    <span className="text-xl text-slate-400 group-hover:text-blue-600">{icon}</span>
-    <span className="text-[10px] font-black text-slate-500 group-hover:text-blue-600 uppercase tracking-tighter">{label}</span>
-  </button>
-);
-
-export default LandlordDashboard;
+}

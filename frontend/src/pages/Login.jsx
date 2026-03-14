@@ -92,14 +92,14 @@ const Login = () => {
       {/* Form Side */}
       <div className="flex-1 flex flex-col justify-center p-8 md:p-12 lg:p-20">
         <div className="w-full max-w-md mx-auto">
-          <div className="flex items-center gap-3 mb-12">
+          {/* <div className="flex items-center gap-3 mb-12">
             <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-200">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
             </div>
             <span className="text-2xl font-black text-gray-900 tracking-tight">Inzu<span className="text-blue-600">Trust</span></span>
-          </div>
+          </div> */}
 
           <h2 className="text-4xl font-black text-gray-900 mb-2">Sign In</h2>
           <p className="text-gray-500 mb-10 font-medium">Access your account securely.</p>
@@ -166,7 +166,7 @@ const Login = () => {
           <div className="mt-10 pt-10 border-t border-gray-50 text-center">
             <p className="text-sm text-gray-500 font-medium">
               Don't have an account yet? <br/>
-              <Link to="/register/tenant" className="text-blue-600 font-black hover:underline inline-block mt-2">Create an account</Link>
+              <Link to="/register" className="text-blue-600 font-black hover:underline inline-block mt-2">Create an account</Link>
             </p>
           </div>
         </div>
