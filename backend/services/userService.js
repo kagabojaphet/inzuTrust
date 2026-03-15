@@ -4,6 +4,46 @@ const otpGenerator = require("otp-generator");
 const { User, TenantProfile, LandlordProfile, sequelize } = require("../model"); 
 const generateToken = require("../utils/generateToken");
 const { sendOtpEmail } = require("../config/emailConfig");
+const googleAuth = async (userData) => {
+  const { firstName, lastName, email, role } = userData;
+
+  const transaction = await sequelize.transaction();
+  try {
+    let user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // Create User
+      user = await User.create({
+        firstName,
+        lastName,
+        email,
+        role: role || "tenant",
+        authType: "google",
+        isVerified: true,
+      }, { transaction });
+
+      // Create Tenant Profile automatically
+      if (user.role === "tenant") {
+        await TenantProfile.create({
+          userId: user.id,
+        }, { transaction });
+      }
+    }
+
+    await transaction.commit();
+    
+    // Return the user data (add your token generation here)
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw new Error(error.message);
+  }
+};
 
 /**
  * Helper: Generate 6-digit numeric OTP
@@ -233,5 +273,6 @@ module.exports = {
   verifyOTP,
   resendOTP,
   getAllUsers,
+  googleAuth,
   deleteUser
 };

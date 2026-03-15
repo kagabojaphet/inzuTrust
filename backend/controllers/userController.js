@@ -1,6 +1,8 @@
 // /controllers/userController.js
 const userService = require("../services/userService");
 const { validationResult } = require("express-validator");
+const User = require("../model/userModel");
+const generateToken = require('../utils/generateToken');
 
 /**
  * @desc    Register new user
@@ -167,6 +169,54 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// controllers/userController.js (Google Auth snippet)
+// controllers/authController.js
+
+// FIX 1: Ensure User is imported at the top!
+
+// /controllers/userController.js
+
+// /controllers/userController.js
+
+const googleAuth = async (req, res) => {
+  try {
+    const { email, firstName, lastName, role } = req.body;
+
+    let user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      user = await User.create({
+        firstName,
+        lastName,
+        email,
+        role: role || 'tenant',
+        authType: 'google',
+        isVerified: true 
+      });
+    }
+
+    // Check if verified - THIS IS WHERE generateToken IS NEEDED
+    if (user.isVerified) {
+      const token = generateToken(user.id); // Fixed: Now imported and defined
+      return res.status(200).json({ 
+        success: true, 
+        message: "Login successful", 
+        isVerified: true,
+        data: {
+          token,
+          user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName }
+        }
+      });
+    }
+
+    // Logic for unverified users...
+    // ... resendOTP logic ...
+
+  } catch (error) {
+    console.error("Google Auth Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 const logoutUser = async (req, res) => {
   return res.status(200).json({
     success: true,
@@ -176,6 +226,7 @@ const logoutUser = async (req, res) => {
 
 module.exports = {
   registerUser,
+  googleAuth,
   loginUser,
   logoutUser,
   getUserProfile,

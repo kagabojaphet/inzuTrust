@@ -7,10 +7,11 @@ import Footer from './components/Footer'
 // Pages
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import RegisterTenant from './pages/TenantRegister'
 import RegisterLandlord from './pages/LandlordRegister'
 import TenantDashboard from './pages/TenantDashboard'
-import LandlordDashboard from './pages/LandlordDashboard' // Updated import name
+import LandlordDashboard from './pages/LandlordDashboard' 
 import Properties from './pages/Properties'
 import Profile from './pages/Profile'
 import AIChatbot from './components/AIChatbot';
@@ -25,8 +26,8 @@ import VerifyOTP from './components/VerifyOTP';
 
 import './App.css'
 
-// Layout helper to keep the UI consistent
-function Layout({ children, showFooter = true }) {
+// Layout for Public Pages (Includes the visitor Navbar and Footer)
+function PublicLayout({ children, showFooter = true }) {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -45,43 +46,45 @@ export default function App() {
         <AIChatbot /> 
         <BackToTop />
         <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Layout><Home /></Layout>} />
+          {/* Public Pages: Use PublicLayout */}
+          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/register/tenant" element={<RegisterTenant />} />
           <Route path="/register/landlord" element={<RegisterLandlord />} />
-          <Route path="/properties" element={<Layout><Properties /></Layout>} />
-          <Route path="/about" element={<Layout><AboutUs /></Layout>} />
-          <Route path="/services" element={<Layout><Services /></Layout>} />
-          <Route path="/board" element={<Layout><Board /></Layout>} />
-          <Route path="/careers" element={<Layout><Careers /></Layout>} />
-          <Route path="/prices" element={<Layout><Pricing /></Layout>} />
+          <Route path="/properties" element={<PublicLayout><Properties /></PublicLayout>} />
+          <Route path="/about" element={<PublicLayout><AboutUs /></PublicLayout>} />
+          <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
+          <Route path="/board" element={<PublicLayout><Board /></PublicLayout>} />
+          <Route path="/careers" element={<PublicLayout><Careers /></PublicLayout>} />
+          <Route path="/prices" element={<PublicLayout><Pricing /></PublicLayout>} />
           <Route path="/verify-otp" element={<VerifyOTP />} />
-          <Route path="/login" element={<Layout><Login /></Layout>} />
+          <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+          <Route path="/register/*" element={<Register />} />
 
           {/* General Protected Routes */}
           <Route path="/profile" element={
             <ProtectedRoute>
-              <Layout><Profile /></Layout>
+              <PublicLayout><Profile /></PublicLayout>
             </ProtectedRoute>
           } />
 
-          {/* Role-Specific Protected Routes */}
-          {/* Tenant specific dashboard */}
+          {/* Role-Specific Dashboard Routes: 
+              DO NOT use PublicLayout here. 
+              These components provide their own Sidebar/Header.
+          */}
           <Route 
             path="/tenant/dashboard" 
             element={
               <ProtectedRoute allowedRoles={['tenant']}>
-                <Layout><TenantDashboard /></Layout> 
+                <TenantDashboard /> 
               </ProtectedRoute>
             } 
           />
 
-          {/* Landlord specific dashboard */}
           <Route 
             path="/landlord/dashboard" 
             element={
               <ProtectedRoute allowedRoles={['landlord']}>
-                <Layout><LandlordDashboard /></Layout>
+                <LandlordDashboard />
               </ProtectedRoute>
             } 
           />

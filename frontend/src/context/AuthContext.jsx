@@ -26,6 +26,7 @@ export function AuthProvider({ children }) {
   async function fetchProfile() {
     try {
       const res = await axios.get(`${API_URL}/users/profile`);
+      // Assuming backend returns { data: { id, firstName, role, ... } }
       setUser(res.data.data);
     } catch (err) {
       logout();
@@ -35,17 +36,34 @@ export function AuthProvider({ children }) {
   }
 
   async function login(email, password) {
-    const res = await axios.post(`${API_URL}/users/login`, { email, password });
-    const authData = res.data.data; 
-    setToken(authData.token);
-    setUser(authData);
-    return authData; // This allows Login.jsx to see userData.role
+    try {
+      const res = await axios.post(`${API_URL}/users/login`, { email, password });
+      const authData = res.data.data; // Should contain { token, user: { role, firstName, ... } }
+
+      const receivedToken = authData.token;
+      const receivedUser = authData.user || authData; // Fallback if user is flat in data
+
+      // 1. Set global axios header immediately
+      axios.defaults.headers.common['Authorization'] = `Bearer ${receivedToken}`;
+      
+      // 2. Update LocalStorage immediately
+      localStorage.setItem('inzu_token', receivedToken);
+      
+      // 3. Update States
+      setToken(receivedToken);
+      setUser(receivedUser);
+      
+      return receivedUser; 
+    } catch (error) {
+      throw error;
+    }
   }
 
   function logout() {
     setToken(null);
     setUser(null);
     localStorage.removeItem('inzu_token');
+    delete axios.defaults.headers.common['Authorization'];
   }
 
   return (
