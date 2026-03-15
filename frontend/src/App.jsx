@@ -25,7 +25,7 @@ import Board from './pages/Board';
 import Careers from './pages/Careers';
 import Pricing from './pages/Pricing';
 import VerifyOTP from './components/VerifyOTP';
-
+import HelpCenter from './pages/HelpCenter'
 import './App.css'
 
 function PublicLayout({ children, showFooter = true }) {
@@ -100,6 +100,8 @@ export default function App() {
 
           {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path='/helpcenter' element={<HelpCenter />} />
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>
