@@ -11,7 +11,8 @@ import Register from './pages/Register'
 import RegisterTenant from './pages/TenantRegister'
 import RegisterLandlord from './pages/LandlordRegister'
 import TenantDashboard from './pages/TenantDashboard'
-import LandlordDashboard from './pages/LandlordDashboard' 
+import LandlordDashboard from './pages/LandlordDashboard'
+import AdminDashboard from './pages/AdminDashboard' 
 import Properties from './pages/Properties'
 import Profile from './pages/Profile'
 import AIChatbot from './components/AIChatbot';
@@ -26,7 +27,6 @@ import VerifyOTP from './components/VerifyOTP';
 
 import './App.css'
 
-// Layout for Public Pages (Includes the visitor Navbar and Footer)
 function PublicLayout({ children, showFooter = true }) {
   return (
     <div className="flex flex-col min-h-screen">
@@ -46,7 +46,7 @@ export default function App() {
         <AIChatbot /> 
         <BackToTop />
         <Routes>
-          {/* Public Pages: Use PublicLayout */}
+          {/* Public Pages */}
           <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/register/tenant" element={<RegisterTenant />} />
           <Route path="/register/landlord" element={<RegisterLandlord />} />
@@ -60,6 +60,16 @@ export default function App() {
           <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
           <Route path="/register/*" element={<Register />} />
 
+          {/* Admin Protected Route */}
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+
           {/* General Protected Routes */}
           <Route path="/profile" element={
             <ProtectedRoute>
@@ -67,10 +77,7 @@ export default function App() {
             </ProtectedRoute>
           } />
 
-          {/* Role-Specific Dashboard Routes: 
-              DO NOT use PublicLayout here. 
-              These components provide their own Sidebar/Header.
-          */}
+          {/* Role-Specific Dashboard Routes */}
           <Route 
             path="/tenant/dashboard" 
             element={

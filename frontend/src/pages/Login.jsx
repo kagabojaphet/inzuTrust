@@ -26,13 +26,13 @@ const Login = () => {
     resolver: yupResolver(schema),
   });
 
+ // ... inside the Login component, update the onSubmit function:
+
   const onSubmit = async (formData) => {
     setLoading(true);
     setAlert({ show: false, type: '', message: '' });
 
     try {
-      // 3. Call the login method from AuthContext. 
-      // This handles axios, localStorage, and state management internally.
       const userData = await login(formData.email, formData.password);
 
       setAlert({
@@ -41,14 +41,18 @@ const Login = () => {
         message: `Welcome back, ${userData.firstName}! Redirecting...`,
       });
 
-      // 4. Role-Based Redirection
-      // Using 'replace: true' prevents the user from going back to the login page via the back button.
-      if (userData.role === 'landlord') {
+      // Role-Based Redirection Logic
+      const role = userData.role?.toLowerCase();
+
+      if (role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (role === 'landlord') {
         navigate('/landlord/dashboard', { replace: true });
-      } else if (userData.role === 'tenant') {
+      } else if (role === 'tenant') {
         navigate('/tenant/dashboard', { replace: true });
       } else {
-        navigate('/dashboard', { replace: true });
+        // Fallback for general users
+        navigate('/', { replace: true });
       }
 
     } catch (error) {
