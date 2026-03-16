@@ -1,4 +1,3 @@
-// model/contactModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
@@ -6,8 +5,8 @@ const Contact = sequelize.define(
   "Contact",
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
 
