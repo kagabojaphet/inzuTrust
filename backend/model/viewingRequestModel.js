@@ -1,4 +1,3 @@
-// model/viewingRequestModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
@@ -6,24 +5,36 @@ const ViewingRequest = sequelize.define(
   "ViewingRequest",
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
 
     tenantId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
 
     landlordId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
 
     propertyId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'properties',
+        key: 'id',
+      },
     },
 
     preferredDateTime: {

@@ -1,9 +1,8 @@
-// model/index.js
 const sequelize = require("../config/database");
 
 const User = require("./userModel");
-const TenantProfile = require("./tenantProfile"); // New
-const LandlordProfile = require("./landlordProfile"); // New
+const TenantProfile = require("./tenantProfile");
+const LandlordProfile = require("./landlordProfile");
 const Property = require("./propertyModel");
 const Contact = require("./contactModel");
 const NewsPost = require("./newsPostModel");
@@ -58,7 +57,6 @@ db.LandlordProfile.belongsTo(db.User, {
     Property Relationships
 =========================== */
 
-// Changed to LandlordProfile if properties belong to the Business profile
 db.User.hasMany(db.Property, {
   foreignKey: "landlordId",
   as: "ownedProperties",
@@ -186,7 +184,6 @@ db.User.hasMany(db.ViewingRequest, {
   as: "landlordViewingRequests",
   onDelete: "CASCADE",
 });
-//For landloard
 
 db.ViewingRequest.belongsTo(db.User, {
   foreignKey: "landlordId",
