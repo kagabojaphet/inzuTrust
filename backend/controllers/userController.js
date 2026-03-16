@@ -1,14 +1,18 @@
 // /controllers/userController.js
-
 const userService = require("../services/userService");
 const { validationResult } = require("express-validator");
+const User = require("../model/userModel");
+const generateToken = require('../utils/generateToken');
 
-// @desc    Register new user
-// @route   POST /api/users/register
-// @access  Public
+/**
+ * @desc    Register new user
+ * @route   POST /api/users/register
+ * @access  Public klnksngkljjljwfgrfvs
+ * sfgsgdsdkhbkj ksjd
+ * sfgkbjsfg
+ */
 const registerUser = async (req, res) => {
   try {
-    // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -18,22 +22,11 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const { firstName, lastName, email, password, phone, role, nationalId } =
-      req.body;
-
-    const result = await userService.registerUser({
-      firstName,
-      lastName,
-      email,
-      password,
-      phone,
-      role,
-      nationalId,
-    });
+    const result = await userService.registerUser(req.body);
 
     return res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: "User registered successfully. Please verify your email.",
       data: result,
     });
   } catch (error) {
@@ -44,23 +37,15 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/users/login
-// @access  Public
+/**
+ * @desc    Login user
+ * @route   POST /api/users/login
+ * @access  Public
+ */
 const loginUser = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
-    }
-
-    const { email, password, otp } = req.body;
-
-    const result = await userService.loginUser({ email, password, otp });
+    const { email, password } = req.body;
+    const result = await userService.loginUser({ email, password });
 
     return res.status(200).json({
       success: true,
@@ -75,23 +60,56 @@ const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Verify OTP
-// @route   POST /api/users/verify-otp
-// @access  Public
-const verifyOtp = async (req, res) => {
+/**
+ * @desc    Get user profile (Includes role-specific profile data)
+ * @route   GET /api/users/profile
+ * @access  Private
+ */
+const getUserProfile = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
-    }
+    const user = await userService.getUserById(req.user.id);
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: error.message || "User not found",
+    });
+  }
+};
 
+/**
+ * @desc    Update user profile (Updates both User and Profile tables)
+ * @route   PUT /api/users/profile
+ * @access  Private
+ */
+const updateUserProfile = async (req, res) => {
+  try {
+    const updated = await userService.updateUserProfile(req.user.id, req.body);
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updated,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Update failed",
+    });
+  }
+};
+
+/**
+ * @desc    Verify OTP
+ * @route   POST /api/users/verify-otp
+ * @access  Public
+ */
+const verifyOTP = async (req, res) => {
+  try {
     const { email, otp } = req.body;
-
-    const result = await userService.verifyOtp({ email, otp });
+    const result = await userService.verifyOTP(email, otp);
 
     return res.status(200).json({
       success: true,
@@ -106,169 +124,111 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
-// @access  Private
-const getUserProfile = async (req, res) => {
+/**
+ * @desc    Resend OTP
+ * @route   POST /api/users/resend-otp
+ * @access  Public
+ */
+const resendOTP = async (req, res) => {
   try {
-    const user = await userService.getUserById(req.user.id);
-
+    const { email } = req.body;
+    await userService.resendOTP(email);
     return res.status(200).json({
       success: true,
-      data: user,
-    });
-  } catch (error) {
-    return res.status(404).json({
-      success: false,
-      message: error.message || "User not found",
-    });
-  }
-};
-
-// @desc    Update user profile
-// @route   PUT /api/users/profile
-// @access  Private
-const updateUserProfile = async (req, res) => {
-  try {
-    const updated = await userService.updateUser(req.user.id, req.body);
-
-    return res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      data: updated,
+      message: "A new OTP has been sent to your email.",
     });
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: error.message || "Update failed",
+      message: error.message || "Failed to resend OTP",
     });
   }
 };
 
-// @desc    Get all users (Admin only)
-// @route   GET /api/users
-// @access  Private/Admin
+/**
+ * @desc    Get all users (Admin only)
+ */
 const getAllUsers = async (req, res) => {
   try {
     const users = await userService.getAllUsers();
-
-    return res.status(200).json({
-      success: true,
-      count: users.length,
-      data: users,
-    });
+    return res.status(200).json({ success: true, count: users.length, data: users });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch users",
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Delete user (Admin only)
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
+/**
+ * @desc    Delete user (Admin only)
+ */
 const deleteUser = async (req, res) => {
   try {
     await userService.deleteUser(req.params.id);
-
-    return res.status(200).json({
-      success: true,
-      message: "User deleted successfully",
-    });
+    return res.status(200).json({ success: true, message: "User deleted successfully" });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message || "Delete failed",
-    });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Verify OTP
-// @route   POST /api/users/verify-otp
-// @access  Public
-const verifyOTP = async (req, res) => {
+// controllers/userController.js (Google Auth snippet)
+// controllers/authController.js
+
+// FIX 1: Ensure User is imported at the top!
+
+// /controllers/userController.js
+
+// /controllers/userController.js
+
+const googleAuth = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
+    const { email, firstName, lastName, role } = req.body;
+
+    let user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      user = await User.create({
+        firstName,
+        lastName,
+        email,
+        role: role || 'tenant',
+        authType: 'google',
+        isVerified: true 
       });
     }
 
-    const { email, otp } = req.body;
-
-    const result = await userService.verifyOTP(email, otp);
-
-    return res.status(200).json({
-      success: true,
-      message: result.message,
-      data: result,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message || "OTP verification failed",
-    });
-  }
-};
-
-// @desc    Resend OTP
-// @route   POST /api/users/resend-otp
-// @access  Public
-const resendOTP = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
+    // Check if verified - THIS IS WHERE generateToken IS NEEDED
+    if (user.isVerified) {
+      const token = generateToken(user.id); // Fixed: Now imported and defined
+      return res.status(200).json({ 
+        success: true, 
+        message: "Login successful", 
+        isVerified: true,
+        data: {
+          token,
+          user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName }
+        }
       });
     }
 
-    const { email } = req.body;
+    // Logic for unverified users...
+    // ... resendOTP logic ...
 
-    const result = await userService.resendOTP(email);
-
-    return res.status(200).json({
-      success: true,
-      message: result.message,
-    });
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message || "Resend OTP failed",
-    });
+    console.error("Google Auth Error:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// @desc    Logout user
-// @route   POST /api/users/logout
-// @access  Private (requires valid token)
 const logoutUser = async (req, res) => {
-  try {
-    // JWT is stateless; logout is handled client-side by discarding token
-    // This endpoint confirms logout on the server and can be extended with token blacklisting later
-    return res.status(200).json({
-      success: true,
-      message: "Logged out successfully. Please discard your token.",
-    });
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message || "Logout failed",
-    });
-  }
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully. Please discard your token.",
+  });
 };
 
 module.exports = {
   registerUser,
+  googleAuth,
   loginUser,
   logoutUser,
-  verifyOtp,
   getUserProfile,
   updateUserProfile,
   getAllUsers,

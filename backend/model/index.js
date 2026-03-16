@@ -2,6 +2,8 @@
 const sequelize = require("../config/database");
 
 const User = require("./userModel");
+const TenantProfile = require("./tenantProfile"); // New
+const LandlordProfile = require("./landlordProfile"); // New
 const Property = require("./propertyModel");
 const Contact = require("./contactModel");
 const NewsPost = require("./newsPostModel");
@@ -16,6 +18,8 @@ db.sequelize = sequelize;
 
 // Models
 db.User = User;
+db.TenantProfile = TenantProfile;
+db.LandlordProfile = LandlordProfile;
 db.Property = Property;
 db.Contact = Contact;
 db.NewsPost = NewsPost;
@@ -25,9 +29,36 @@ db.Favorite = Favorite;
 db.ViewingRequest = ViewingRequest;
 
 /* ===========================
-   Property Relationships
+    Profile Relationships
 =========================== */
 
+// One-to-One: User <-> TenantProfile
+db.User.hasOne(db.TenantProfile, {
+  foreignKey: "userId",
+  as: "tenantProfile",
+  onDelete: "CASCADE",
+});
+db.TenantProfile.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+// One-to-One: User <-> LandlordProfile
+db.User.hasOne(db.LandlordProfile, {
+  foreignKey: "userId",
+  as: "landlordProfile",
+  onDelete: "CASCADE",
+});
+db.LandlordProfile.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+/* ===========================
+    Property Relationships
+=========================== */
+
+// Changed to LandlordProfile if properties belong to the Business profile
 db.User.hasMany(db.Property, {
   foreignKey: "landlordId",
   as: "ownedProperties",
@@ -40,7 +71,7 @@ db.Property.belongsTo(db.User, {
 });
 
 /* ===========================
-   News Relationships
+    News Relationships
 =========================== */
 
 db.User.hasMany(db.NewsPost, {
@@ -99,7 +130,7 @@ db.NewsComment.belongsTo(db.User, {
 });
 
 /* ===========================
-   Favorite Relationships
+    Favorite Relationships
 =========================== */
 
 db.User.hasMany(db.Favorite, {
@@ -123,11 +154,11 @@ db.Favorite.belongsTo(db.Property, {
   foreignKey: "propertyId",
   as: "property",
 });
+
 /* ===========================
-   Viewing Request Relationships
+    Viewing Request Relationships
 =========================== */
 
-// Property -> Viewing Requests
 db.Property.hasMany(db.ViewingRequest, {
   foreignKey: "propertyId",
   as: "viewingRequests",
@@ -139,7 +170,6 @@ db.ViewingRequest.belongsTo(db.Property, {
   as: "property",
 });
 
-// User (tenant) -> Viewing Requests
 db.User.hasMany(db.ViewingRequest, {
   foreignKey: "tenantId",
   as: "tenantViewingRequests",
@@ -151,12 +181,12 @@ db.ViewingRequest.belongsTo(db.User, {
   as: "tenant",
 });
 
-// User (landlord) -> Viewing Requests received
 db.User.hasMany(db.ViewingRequest, {
   foreignKey: "landlordId",
   as: "landlordViewingRequests",
   onDelete: "CASCADE",
 });
+//For landloard
 
 db.ViewingRequest.belongsTo(db.User, {
   foreignKey: "landlordId",

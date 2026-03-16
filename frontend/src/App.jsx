@@ -5,11 +5,15 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 
+// Pages
 import Home from './pages/Home'
 import Login from './pages/Login'
-import RegisterTenant from './pages/RegisterTenant'
-import RegisterLandlord from './pages/RegisterLandlord'
-import Dashboard from './pages/Dashboard'
+import Register from './pages/Register'
+import RegisterTenant from './pages/TenantRegister'
+import RegisterLandlord from './pages/LandlordRegister'
+import TenantDashboard from './pages/TenantDashboard'
+import LandlordDashboard from './pages/LandlordDashboard'
+import AdminDashboard from './pages/AdminDashboard' 
 import Properties from './pages/Properties'
 import Profile from './pages/Profile'
 import AIChatbot from './components/AIChatbot';
@@ -20,12 +24,12 @@ import Services from './pages/Services';
 import Board from './pages/Board';
 import Careers from './pages/Careers';
 import Pricing from './pages/Pricing';
-import Register from './pages/Register'
+import VerifyOTP from './components/VerifyOTP';
 
 
 import './App.css'
 
-function Layout({ children, showFooter = true }) {
+function PublicLayout({ children, showFooter = true }) {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -39,45 +43,65 @@ function Layout({ children, showFooter = true }) {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <AIChatbot /> 
-          <BackToTop />
-          <Routes>
-            <Route path="/" element={<Layout><Home /></Layout>} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register/tenant" element={<RegisterTenant />} />
-            <Route path="/register/landlord" element={<RegisterLandlord />} />
-            <Route path="/properties" element={<Layout><Properties /></Layout>} />
-            <Route path="/about" element={<Layout><AboutUs /></Layout>} />
-            <Route path="/services" element={<Layout><Services /></Layout>} />
-            <Route path="/board" element={<Layout><Board /></Layout>} />
-            <Route path="/careers" element={<Layout><Careers /></Layout>} />
-            <Route path="/prices" element={<Layout><Pricing /></Layout>} />
-            <Route path="/register" element={<Layout><Register /></Layout>} />
+    <BrowserRouter>
+      <AuthProvider>
+        <AIChatbot /> 
+        <BackToTop />
+        <Routes>
+          {/* Public Pages */}
+          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+          <Route path="/register/tenant" element={<RegisterTenant />} />
+          <Route path="/register/landlord" element={<RegisterLandlord />} />
+          <Route path="/properties" element={<PublicLayout><Properties /></PublicLayout>} />
+          <Route path="/about" element={<PublicLayout><AboutUs /></PublicLayout>} />
+          <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
+          <Route path="/board" element={<PublicLayout><Board /></PublicLayout>} />
+          <Route path="/careers" element={<PublicLayout><Careers /></PublicLayout>} />
+          <Route path="/prices" element={<PublicLayout><Pricing /></PublicLayout>} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+          <Route path="/register/*" element={<Register />} />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Layout><Dashboard /></Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Layout><Profile /></Layout>
-                </ProtectedRoute>
-              }
-            />
+          {/* Admin Protected Route */}
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </LanguageProvider>
+          {/* General Protected Routes */}
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <PublicLayout><Profile /></PublicLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Role-Specific Dashboard Routes */}
+          <Route 
+            path="/tenant/dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['tenant']}>
+                <TenantDashboard /> 
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/landlord/dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['landlord']}>
+                <LandlordDashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
