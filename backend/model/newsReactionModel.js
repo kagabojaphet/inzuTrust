@@ -1,16 +1,30 @@
-// model/newsReactionModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
 const NewsReaction = sequelize.define(
   "NewsReaction",
   {
-    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-
-    userId: { type: DataTypes.INTEGER, allowNull: false },
-
-    newsPostId: { type: DataTypes.INTEGER, allowNull: false },
-
+    id: { 
+      type: DataTypes.UUID, 
+      defaultValue: DataTypes.UUIDV4, 
+      primaryKey: true 
+    },
+    userId: { 
+      type: DataTypes.UUID, 
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id'
+      }
+    },
+    newsPostId: { 
+      type: DataTypes.UUID, 
+      allowNull: false,
+      references: {
+        model: 'news_posts',
+        key: 'id'
+      }
+    },
     type: {
       type: DataTypes.ENUM("like", "dislike"),
       allowNull: false,
@@ -22,7 +36,7 @@ const NewsReaction = sequelize.define(
     indexes: [
       {
         unique: true,
-        fields: ["userId", "newsPostId"], // ✅ 1 reaction per user per post
+        fields: ["userId", "newsPostId"],
       },
     ],
   }
