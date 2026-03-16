@@ -109,6 +109,11 @@ const knowledgeBase = [
       "When requesting a viewing, tenants can choose a preferred date and time so the landlord can respond based on availability.",
   },
   {
+    keywords: ["cancel viewing", "cancel appointment", "cancel request"],
+    response:
+      "If you need to cancel a viewing request, you can do so through your dashboard before the landlord has responded, or by contacting the InzuTrust support team.",
+  },
+  {
     keywords: ["news", "updates", "announcement", "announcements"],
     response:
       "The news section allows administrators to publish platform updates and announcements. Users can read, like, dislike, comment on, and share news posts.",
@@ -139,9 +144,29 @@ const knowledgeBase = [
       "After registration, the platform may send an OTP to your email so you can verify your account before logging in.",
   },
   {
+    keywords: ["forgot password", "reset password", "password reset", "lost password"],
+    response:
+      "If you forgot your password, use the Forgot Password option on the login page. You will receive an email with instructions to reset your password securely.",
+  },
+  {
+    keywords: ["change password", "update password"],
+    response:
+      "You can update your password through your account settings once you are logged in. Make sure to choose a strong and secure password.",
+  },
+  {
     keywords: ["dashboard", "profile", "account"],
     response:
       "The dashboard helps users manage their activities. Depending on your role, it may include saved properties, viewing requests, or property management tools.",
+  },
+  {
+    keywords: ["edit profile", "update profile", "change name", "update account", "profile settings"],
+    response:
+      "You can update your profile details such as your name and contact information through your account settings after logging in.",
+  },
+  {
+    keywords: ["deactivate account", "delete account", "close account"],
+    response:
+      "If you wish to deactivate or delete your account, please contact the InzuTrust support team through the Contact Us page and they will assist you.",
   },
   {
     keywords: ["create property", "add property", "post property", "upload property"],
@@ -167,6 +192,61 @@ const knowledgeBase = [
     keywords: ["safe", "security", "secure", "trust"],
     response:
       "InzuTrust is designed to provide a more trustworthy rental experience by organizing listings, user roles, support features, and property information in one platform.",
+  },
+  {
+    keywords: ["privacy", "data", "personal information", "data protection"],
+    response:
+      "InzuTrust takes user privacy seriously. Your personal information is used only to operate the platform and is not shared with unauthorized third parties.",
+  },
+  {
+    keywords: ["notification", "notifications", "alert", "alerts", "email alert"],
+    response:
+      "InzuTrust may send you notifications or email alerts for important events such as viewing request updates, account verification, and contact form confirmations.",
+  },
+  {
+    keywords: ["free", "pricing", "subscription", "paid", "cost to use", "fee"],
+    response:
+      "InzuTrust is designed to make the rental process accessible. For the most up-to-date information on any fees or subscription plans, please visit the platform or contact support.",
+  },
+  {
+    keywords: ["mobile", "app", "phone", "android", "ios", "smartphone"],
+    response:
+      "InzuTrust is accessible via web browser on both desktop and mobile devices. Check the platform for the latest information on any dedicated mobile app availability.",
+  },
+  {
+    keywords: ["language", "kinyarwanda", "english", "french"],
+    response:
+      "InzuTrust primarily operates in English. If you need support in another language such as Kinyarwanda or French, please reach out through the Contact Us page.",
+  },
+  {
+    keywords: ["landlord verification", "verified landlord", "trusted landlord"],
+    response:
+      "InzuTrust works to ensure landlords on the platform are genuine. If you have concerns about a listing or a landlord, please report it through the Contact Us page.",
+  },
+  {
+    keywords: ["report listing", "report property", "fake listing", "suspicious"],
+    response:
+      "If you come across a suspicious or inaccurate property listing, you can report it by contacting the InzuTrust support team through the Contact Us section.",
+  },
+  {
+    keywords: ["response time", "how long", "wait", "reply time"],
+    response:
+      "Response times depend on the landlord or support team. After submitting a viewing request or support message, you should receive a response within a reasonable timeframe.",
+  },
+  {
+    keywords: ["lease", "contract", "agreement", "rental agreement"],
+    response:
+      "InzuTrust helps connect tenants and landlords, but any lease or rental agreement is arranged directly between both parties. Always review your contract carefully before signing.",
+  },
+  {
+    keywords: ["review", "reviews", "rating", "ratings", "feedback"],
+    response:
+      "InzuTrust may include features for users to leave feedback on their rental experience. Check the platform for the latest information on ratings and reviews.",
+  },
+  {
+    keywords: ["get started", "how to start", "new user", "first time", "begin", "onboarding"],
+    response:
+      "To get started on InzuTrust: register an account as a tenant or landlord, verify your email, then log in to explore properties, save favorites, request viewings, or manage your listings.",
   },
   {
     keywords: ["where can i find properties", "open properties", "go to properties"],
