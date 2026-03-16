@@ -63,10 +63,10 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
 
         const response = await axios.post('http://localhost:5000/api/users/google-auth', payload);
         
-        if (response.data.isVerified) {
-          localStorage.setItem('token', response.data.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.data.user));
-          setAlert({ show: true, type: 'success', message: 'Welcome back! Redirecting...' });
+        if (response.data.success) {
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          setAlert({ show: true, type: 'success', message: 'Welcome! Redirecting...' });
           setTimeout(() => navigate('/dashboard'), 1500);
         } else {
           setAlert({ show: true, type: 'success', message: 'Account linked! Please verify your email.' });
@@ -102,38 +102,46 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
     else setPasswordStrength({ score: 5, label: 'Strong', color: 'bg-green-500', textColor: 'text-green-600' });
   }, [password]);
 
-  const onSubmit = async (data) => {
-    setLoading(true);
-    setAlert({ show: false, type: '', message: '' });
-    try {
-      const nameParts = data.fullName.trim().split(' ');
-      const payload = {
-        firstName: nameParts[0],
-        lastName: nameParts.slice(1).join(' ') || 'Tenant', 
-        email: data.email,
-        phone: data.phone,
-        password: data.password,
-        role: 'tenant', 
-        authType: 'email',
-      };
-      
-      await axios.post('http://localhost:5000/api/users/register', payload);
+  // React: TenantRegister.jsx (Updated onSubmit)
+const onSubmit = async (data) => {
+  setLoading(true);
+  setAlert({ show: false, type: '', message: '' });
+  try {
+    const nameParts = data.fullName.trim().split(/\s+/);
+    const payload = {
+      firstName: nameParts[0],
+      // Ensure lastName is never an empty string if the DB requires it
+      lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'N/A', 
+      email: data.email,
+      phone: data.phone,
+      password: data.password,
+      role: 'tenant', 
+      authType: 'email',
+    };
+    
+    const response = await axios.post('http://localhost:5000/api/users/register', payload);
+    
+    // Check for success based on your backend response structure
+    if (response.status === 201 || response.data.success) {
       setAlert({ show: true, type: 'success', message: 'Registration successful! Verifying OTP...' });
       setTimeout(() => navigate('/verify-otp', { state: { email: data.email } }), 2000);
-    } catch (error) {
-      setAlert({
-        show: true,
-        type: 'error',
-        message: error.response?.data?.message || 'Validation error. Please check your details.',
-      });
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    // Log the actual error to see exactly what the backend is complaining about
+    console.error("Registration Error Details:", error.response?.data);
+    
+    setAlert({
+      show: true,
+      type: 'error',
+      message: error.response?.data?.message || 'Registration failed. Please try again.',
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex bg-white font-sans">
-      {/* Left side branding section */}
       <div className="hidden lg:flex lg:w-[45%] relative bg-gray-900 overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2070"
@@ -141,10 +149,8 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
           className="absolute inset-0 w-full h-full object-cover opacity-35"
         />
         <div className="absolute inset-0 bg-black/65"></div>
-        
         <div className="relative z-10 flex flex-col justify-end h-full pb-20 pl-10 pr-10 text-left max-w-xl">
           <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight mb-8">Building Trust in <br/> Rwandan Rentals</h1>
-          
           <div className="bg-black/70 backdrop-blur-lg p-6 rounded-2xl border border-gray-700/30 shadow-xl max-w-md">
             <div className="flex text-yellow-400 mb-4 text-2xl">★★★★★</div>
             <p className="text-white text-base lg:text-lg font-medium leading-relaxed mb-5">"InzuTrust made renting my first apartment in Kigali safe and paperless."</p>
@@ -159,7 +165,6 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
         </div>
       </div>
 
-      {/* Right side form section */}
       <div className="flex-1 flex flex-col p-8 md:p-12 lg:p-16 bg-white overflow-y-auto">
         <div className="self-end mb-10">
           <p className="text-sm font-semibold text-gray-600">Are you a landlord?{' '}
@@ -200,7 +205,7 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
               <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-2 text-left">Full Name</label>
               <div className="relative">
                 <HiUser className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl z-10" />
-                <input {...register('fullName')} placeholder="Iradukunda Japhet" className={`w-full pl-14 pr-5 py-4 bg-gray-50 border rounded-xl outline-none transition-all ${errors.fullName ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-200 focus:border-blue-600'}`} />
+                <input {...register('fullName')} placeholder="e.g. Iradukunda Japhet" className={`w-full pl-14 pr-5 py-4 bg-gray-50 border rounded-xl outline-none transition-all ${errors.fullName ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-200 focus:border-blue-600'}`} />
               </div>
               {errors.fullName && <p className="text-red-500 text-xs mt-1.5 text-left">{errors.fullName.message}</p>}
             </div>
@@ -209,7 +214,7 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
               <label className="block text-xs font-black text-gray-700 uppercase tracking-wider mb-2 text-left">Email Address</label>
               <div className="relative">
                 <HiMail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl z-10" />
-                <input {...register('email')} placeholder="japhet@gmail.com" className={`w-full pl-14 pr-5 py-4 bg-gray-50 border rounded-xl outline-none transition-all ${errors.email ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-200 focus:border-blue-600'}`} />
+                <input {...register('email')} placeholder="email@example.com" className={`w-full pl-14 pr-5 py-4 bg-gray-50 border rounded-xl outline-none transition-all ${errors.email ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-200 focus:border-blue-600'}`} />
               </div>
               {errors.email && <p className="text-red-500 text-xs mt-1.5 text-left">{errors.email.message}</p>}
             </div>
