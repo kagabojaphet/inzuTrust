@@ -34,17 +34,11 @@ const startServer = async () => {
     await db.sequelize.authenticate();
     console.log("✔ MySQL Connected...");
 
-    // i removed the forcre: true option to prevent data loss during development.
-   await db.sequelize.sync();
-console.log("✔ Database synced.");
-
-  
-    await db.sequelize.sync();
-console.log("✔ Database synced.");
-
-    // 4. Final Sync for Associations
-    await db.sequelize.sync();
-    console.log("✔ All associations ready.");
+    // 2. FORCE SYNC (Change this part)
+    // Using { alter: true } will attempt to update the column type automatically.
+    // If it fails due to existing data, use { force: true } ONCE to reset the table.
+    await db.sequelize.sync({ alter: true }); 
+    console.log("✔ Database synced and schema updated to UUID.");
 
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {

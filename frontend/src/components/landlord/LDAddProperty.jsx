@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from "react";
+// src/components/landlord/LDAddProperty.jsx
+import React, { useState } from "react";
+import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 import { 
   HiCheck, HiCloudUpload, HiArrowRight, HiArrowLeft, 
   HiLightningBolt, HiWifi, HiHome, HiX
 } from "react-icons/hi";
-import { MdWaterDrop, MdCleaningServices, MdLocalParking, MdOutlineBed, MdOutlineBathtub } from "react-icons/md";
+import { 
+  MdWaterDrop, MdCleaningServices, MdLocalParking, 
+  MdOutlineBed, MdOutlineBathtub 
+} from "react-icons/md";
 import { API_BASE } from "../../config";
 
 const STEPS = ["Basic Info", "Location", "Media", "Review"];
 
-export default function LDAddProperty({ token }) {
+export default function LDAddProperty() {
+  const { token } = useAuth(); 
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -24,13 +31,6 @@ export default function LDAddProperty({ token }) {
     address: "",
     photos: [] 
   });
-
-  // Debugging: Check if token exists on mount
-  useEffect(() => {
-    if (!token) {
-      console.error("401 Warning: No token provided to LDAddProperty component.");
-    }
-  }, [token]);
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -61,45 +61,40 @@ export default function LDAddProperty({ token }) {
     try {
       const formData = new FormData();
       
-      // text fields
+      // 1. Map frontend state to Backend expected keys
       formData.append("title", form.name);
       formData.append("type", form.type.toLowerCase());
-      formData.append("rentAmount", form.rent);
+      formData.append("rentAmount", Number(form.rent)); // Ensure Number type
       formData.append("description", form.description);
-      formData.append("bedrooms", form.bedrooms);
-      formData.append("bathrooms", form.bathrooms);
+      formData.append("bedrooms", Number(form.bedrooms)); // Ensure Number type
+      formData.append("bathrooms", Number(form.bathrooms)); // Ensure Number type
       formData.append("district", form.district);
       formData.append("sector", form.sector);
       formData.append("address", form.address);
+      
+      // 2. Stringify complex objects for Multer/Body-parser
       formData.append("utilities", JSON.stringify(form.utilities));
 
-      // files - key MUST be 'images' to match your router/uploadMiddleware
+      // 3. IMPORTANT: The key "images" must match the backend upload.array('images')
       form.photos.forEach((file) => {
-        formData.append("images", file);
+        formData.append("images", file); 
       });
 
-      const response = await fetch(`${API_BASE}/properties`, {
-        method: "POST",
+      const response = await axios.post(`${API_BASE}/properties`, formData, {
         headers: {
-          // IMPORTANT: Do NOT set 'Content-Type': 'multipart/form-data'
-          "Authorization": `Bearer ${token}`, 
+          "Authorization": `Bearer ${token}`,
+          // Note: Do NOT set Content-Type; Axios does it automatically for FormData
         },
-        body: formData,
       });
 
-      const result = await response.json();
-
-      if (response.status === 401) {
-        alert("Authorization failed. Your session might have expired.");
-      } else if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         alert("Property published successfully!");
-        // Optional: window.location.href = "/dashboard";
-      } else {
-        alert(`Error: ${result.message || "Something went wrong"}`);
+        // Reset or navigate away
       }
     } catch (error) {
-      console.error("Submission Error:", error);
-      alert("Could not connect to the server.");
+      console.error("Submission Error Details:", error.response?.data);
+      const msg = error.response?.data?.message || "Check console for validation errors.";
+      alert(`Error: ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -154,7 +149,7 @@ export default function LDAddProperty({ token }) {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-[11px] font-black text-black uppercase mb-2">Property Name</label>
-                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:border-blue-400 outline-none"
+                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm outline-none"
                       value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} />
                   </div>
                   <div className="grid grid-cols-2 gap-6">
@@ -173,17 +168,10 @@ export default function LDAddProperty({ token }) {
                         value={form.rent} onChange={(e) => setForm({...form, rent: e.target.value})} />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="flex items-center gap-2 text-[11px] font-black text-black uppercase mb-2"><MdOutlineBed /> Bedrooms</label>
-                      <input type="number" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm outline-none"
-                        value={form.bedrooms} onChange={(e) => setForm({...form, bedrooms: e.target.value})} />
-                    </div>
-                    <div>
-                      <label className="flex items-center gap-2 text-[11px] font-black text-black uppercase mb-2"><MdOutlineBathtub /> Bathrooms</label>
-                      <input type="number" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm outline-none"
-                        value={form.bathrooms} onChange={(e) => setForm({...form, bathrooms: e.target.value})} />
-                    </div>
+                  <div>
+                    <label className="block text-[11px] font-black text-black uppercase mb-2">Description</label>
+                    <textarea className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm outline-none min-h-[100px]"
+                      value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} />
                   </div>
                 </div>
               </div>
@@ -204,12 +192,8 @@ export default function LDAddProperty({ token }) {
                   </div>
                   <div>
                     <label className="block text-[11px] font-black text-black uppercase mb-2">Sector</label>
-                    <select className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm outline-none"
-                      value={form.sector} onChange={(e) => setForm({...form, sector: e.target.value})}>
-                      <option>Kacyiru</option>
-                      <option>Remera</option>
-                      <option>Kimironko</option>
-                    </select>
+                    <input type="text" className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-sm outline-none"
+                      value={form.sector} onChange={(e) => setForm({...form, sector: e.target.value})} />
                   </div>
                 </div>
                 <div>
@@ -249,7 +233,8 @@ export default function LDAddProperty({ token }) {
                   <div className="bg-gray-50 rounded-2xl p-6 space-y-2">
                     <p className="text-sm font-bold text-gray-700">Title: <span className="font-medium">{form.name}</span></p>
                     <p className="text-sm font-bold text-gray-700">Rent: <span className="font-medium">{form.rent} RWF</span></p>
-                    <p className="text-sm font-bold text-gray-700">Specs: <span className="font-medium">{form.bedrooms} Bed / {form.bathrooms} Bath</span></p>
+                    <p className="text-sm font-bold text-gray-700">Type: <span className="font-medium capitalize">{form.type}</span></p>
+                    <p className="text-sm font-bold text-gray-700">Location: <span className="font-medium">{form.district}, {form.sector}</span></p>
                     <p className="text-sm font-bold text-gray-700">Photos: <span className="font-medium">{form.photos.length} uploaded</span></p>
                   </div>
                </div>
