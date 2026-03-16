@@ -1,3 +1,4 @@
+// Backend: models/User.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
@@ -6,11 +7,17 @@ const User = sequelize.define(
   {
     id: { 
       type: DataTypes.UUID, 
-      defaultValue: DataTypes.UUIDV4, 
+      defaultValue: DataTypes.UUIDV4, // Automatically generates a UUID on creation
       primaryKey: true 
     },
-    firstName: { type: DataTypes.STRING, allowNull: false },
-    lastName: { type: DataTypes.STRING, allowNull: false },
+    firstName: { 
+      type: DataTypes.STRING, 
+      allowNull: false 
+    },
+    lastName: { 
+      type: DataTypes.STRING, 
+      allowNull: false 
+    },
     email: { 
       type: DataTypes.STRING, 
       allowNull: false, 
@@ -19,22 +26,37 @@ const User = sequelize.define(
     },
     password: { 
       type: DataTypes.STRING, 
-      allowNull: true // Changed to allow null for Google users
+      allowNull: true // Null allowed for Google Auth users
     },
-    phone: { type: DataTypes.STRING, allowNull: true },
-   authType: {
-  type: DataTypes.STRING,
-  defaultValue: 'email', // Options: 'email' or 'google'
-},
+    phone: { 
+      type: DataTypes.STRING, 
+      allowNull: true 
+    },
+    authType: {
+      type: DataTypes.STRING,
+      defaultValue: 'email', // 'email' or 'google'
+    },
     role: { 
       type: DataTypes.ENUM("tenant", "landlord", "admin"), 
       defaultValue: "tenant" 
     },
-    isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
-    otp: { type: DataTypes.STRING, allowNull: true },
-    otpExpiry: { type: DataTypes.DATE, allowNull: true },
+    isVerified: { 
+      type: DataTypes.BOOLEAN, 
+      defaultValue: false 
+    },
+    otp: { 
+      type: DataTypes.STRING, 
+      allowNull: true 
+    },
+    otpExpiry: { 
+      type: DataTypes.DATE, 
+      allowNull: true 
+    },
   },
-  { tableName: "users", timestamps: true }
+  { 
+    tableName: "users", 
+    timestamps: true 
+  }
 );
 
 module.exports = User;

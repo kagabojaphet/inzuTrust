@@ -10,18 +10,19 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('inzu_token'));
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      localStorage.setItem('inzu_token', token);
-      fetchProfile();
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-      localStorage.removeItem('inzu_token');
-      setUser(null);
-      setLoading(false);
-    }
-  }, [token]);
+ useEffect(() => {
+  if (token) {
+    // Set header for all future requests
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    localStorage.setItem('inzu_token', token);
+    fetchProfile();
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem('inzu_token');
+    setUser(null);
+    setLoading(false);
+  }
+}, [token]);
 
   async function fetchProfile() {
     try {
