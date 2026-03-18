@@ -1,0 +1,10 @@
+// routes/notificationRoutes.js
+const router = require("express").Router();
+const ctrl   = require("../controllers/notificationController");
+const { protect } = require("../middleware/authMiddleware");
+
+router.get("/",                protect, ctrl.getAll);
+router.put("/read-all",        protect, ctrl.markAllRead);
+router.put("/:id/read",        protect, ctrl.markRead);
+
+module.exports = router;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { HiSearch, HiEye, HiBan, HiCheckCircle, HiChevronDown, HiX } from "react-icons/hi";
+import { HiSearch, HiEye, HiBan, HiCheckCircle, HiX, HiFilter, HiUserGroup, HiShieldCheck, HiClock } from "react-icons/hi";
 import { API_BASE } from "../../config";
 
 const MOCK = [
@@ -12,20 +12,20 @@ const MOCK = [
 ];
 
 const roleBadge = {
-  Tenant:   "bg-blue-50 text-blue-700 border border-blue-200",
-  Landlord: "bg-purple-50 text-purple-700 border border-purple-200",
-  Admin:    "bg-gray-100 text-gray-700",
+  Tenant:   "bg-blue-50 text-blue-700",
+  Landlord: "bg-indigo-50 text-indigo-700",
+  Admin:    "bg-slate-100 text-slate-700",
 };
 const statusBadge = {
-  Active:    "bg-green-50 text-green-700 border border-green-200",
-  Pending:   "bg-yellow-50 text-yellow-700 border border-yellow-200",
-  Suspended: "bg-red-50 text-red-600 border border-red-200",
+  Active:    "bg-emerald-50 text-emerald-700",
+  Pending:   "bg-amber-50 text-amber-700",
+  Suspended: "bg-rose-50 text-rose-600",
 };
 const kycBadge = {
-  Verified:      "bg-green-50 text-green-700",
-  Pending:       "bg-yellow-50 text-yellow-700",
-  "Under Review":"bg-blue-50 text-blue-700",
-  Rejected:      "bg-red-50 text-red-600",
+  Verified:       "bg-emerald-100 text-emerald-800",
+  Pending:        "bg-amber-100 text-amber-800",
+  "Under Review": "bg-blue-100 text-blue-800",
+  Rejected:       "bg-rose-100 text-rose-800",
 };
 
 export default function ADUsers({ token }) {
@@ -61,126 +61,222 @@ export default function ADUsers({ token }) {
   });
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-gray-900">User Management</h2>
-          <p className="text-sm text-gray-400 mt-0.5">{users.length} registered users</p>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">User Management</h2>
+          <p className="text-slate-500 mt-1 font-medium">Manage permissions, verify identities, and monitor trust scores.</p>
+        </div>
+        <div className="flex items-center gap-3">
+            <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-sm font-bold text-slate-700">{users.filter(u => u.status === 'Active').length} Online Now</span>
+            </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative w-64">
-          <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search users..."
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100" />
-        </div>
-        {["All", "Tenant", "Landlord"].map(r => (
-          <button key={r} onClick={() => setRoleFilter(r)}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${
-              roleFilter === r ? "bg-blue-600 text-white" : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
-            }`}>{r}</button>
+      {/* Metric Overview Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+            { label: 'Total Users', val: users.length, icon: HiUserGroup, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'KYC Verified', val: users.filter(u => u.kyc === 'Verified').length, icon: HiShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Pending Review', val: users.filter(u => u.kyc === 'Pending').length, icon: HiClock, color: 'text-amber-600', bg: 'bg-amber-50' },
+        ].map((stat, i) => (
+            <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className={`${stat.bg} ${stat.color} p-3 rounded-xl`}><stat.icon size={24}/></div>
+                <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-2xl font-black text-slate-900">{stat.val}</p>
+                </div>
+            </div>
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100
-          text-[9px] font-black uppercase tracking-wider text-gray-400">
-          <div className="col-span-3">USER</div>
-          <div className="col-span-2">ROLE</div>
-          <div className="col-span-2">KYC</div>
-          <div className="col-span-1">TRUST</div>
-          <div className="col-span-2">STATUS</div>
-          <div className="col-span-2 text-right">ACTIONS</div>
+      {/* Table Actions / Filters */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="relative w-full md:w-96">
+          <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg" />
+          <input 
+            value={search} 
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name, email..."
+            className="w-full pl-12 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all" 
+          />
         </div>
-        <div className="divide-y divide-gray-50">
-          {filtered.map(u => (
-            <div key={u.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-gray-50 transition">
-              <div className="col-span-3 flex items-center gap-2.5">
-                <img src={`https://ui-avatars.com/api/?name=${u.name}&background=dbeafe&color=1d4ed8&bold=true&size=30`}
-                  className="w-8 h-8 rounded-full shrink-0" alt={u.name} />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{u.name}</p>
-                  <p className="text-[10px] text-gray-400 truncate">{u.email}</p>
-                </div>
-              </div>
-              <div className="col-span-2">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleBadge[u.role]}`}>{u.role}</span>
-              </div>
-              <div className="col-span-2">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${kycBadge[u.kyc] || kycBadge.Pending}`}>{u.kyc}</span>
-              </div>
-              <div className="col-span-1 text-sm font-black text-blue-600">{u.trustScore ?? "—"}</div>
-              <div className="col-span-2">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge[u.status]}`}>{u.status}</span>
-              </div>
-              <div className="col-span-2 flex items-center justify-end gap-1.5">
-                <button onClick={() => setSelected(u)} title="View"
-                  className="w-7 h-7 flex items-center justify-center bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
-                  <HiEye className="text-sm" />
-                </button>
-                {u.kyc !== "Verified" && (
-                  <button onClick={() => handleVerifyKyc(u.id)} title="Approve KYC"
-                    className="w-7 h-7 flex items-center justify-center bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition">
-                    <HiCheckCircle className="text-sm" />
-                  </button>
-                )}
-                <button onClick={() => handleSuspend(u.id)} title={u.status === "Suspended" ? "Activate" : "Suspend"}
-                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition ${
-                    u.status === "Suspended" ? "bg-green-50 text-green-600 hover:bg-green-100" : "bg-red-50 text-red-500 hover:bg-red-100"
-                  }`}>
-                  {u.status === "Suspended" ? <HiCheckCircle className="text-sm" /> : <HiBan className="text-sm" />}
-                </button>
-              </div>
-            </div>
-          ))}
+        
+        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            {["All", "Tenant", "Landlord"].map(r => (
+              <button 
+                key={r} 
+                onClick={() => setRoleFilter(r)}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  roleFilter === r ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+          <button className="p-2.5 text-slate-500 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+             <HiFilter />
+          </button>
         </div>
       </div>
 
-      {/* User detail drawer */}
+      {/* Modern User Table */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                <th className="px-6 py-4">Full Name</th>
+                <th className="px-6 py-4">Account Role</th>
+                <th className="px-6 py-4">Identity (KYC)</th>
+                <th className="px-6 py-4 text-center">Trust</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filtered.map(u => (
+                <tr key={u.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={`https://ui-avatars.com/api/?name=${u.name}&background=eff6ff&color=2563eb&bold=true`}
+                        className="w-9 h-9 rounded-full border border-slate-100 shadow-sm" alt={u.name} 
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 truncate">{u.name}</p>
+                        <p className="text-[11px] text-slate-500 truncate">{u.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-tight ${roleBadge[u.role]}`}>
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${kycBadge[u.kyc] || kycBadge.Pending}`}>
+                      {u.kyc}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`text-sm font-black ${u.trustScore >= 80 ? 'text-emerald-600' : u.trustScore >= 50 ? 'text-blue-600' : 'text-rose-500'}`}>
+                        {u.trustScore ?? "—"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${statusBadge[u.status]}`}>
+                      {u.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => setSelected(u)}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      >
+                        <HiEye size={18} />
+                      </button>
+                      {u.kyc !== "Verified" && (
+                        <button 
+                          onClick={() => handleVerifyKyc(u.id)}
+                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                        >
+                          <HiCheckCircle size={18} />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => handleSuspend(u.id)}
+                        className={`p-2 rounded-lg transition-all ${
+                          u.status === "Suspended" 
+                            ? "text-emerald-500 hover:bg-emerald-50" 
+                            : "text-rose-400 hover:text-rose-600 hover:bg-rose-50"
+                        }`}
+                      >
+                        {u.status === "Suspended" ? <HiCheckCircle size={18} /> : <HiBan size={18} />}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* User Side-Panel Drawer */}
       {selected && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-end z-50">
-          <div className="bg-white w-80 h-full overflow-y-auto p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-gray-900">User Profile</h3>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-700"><HiX className="text-xl" /></button>
+        <div className="fixed inset-0 z-[100] flex justify-end">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setSelected(null)} />
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="text-lg font-bold text-slate-900">Account Details</h3>
+              <button onClick={() => setSelected(null)} className="p-2 hover:bg-white rounded-xl text-slate-400 transition">
+                <HiX size={20} />
+              </button>
             </div>
-            <div className="text-center mb-6">
-              <img src={`https://ui-avatars.com/api/?name=${selected.name}&background=dbeafe&color=1d4ed8&bold=true&size=64`}
-                className="w-16 h-16 rounded-full mx-auto mb-3" alt={selected.name} />
-              <h4 className="font-black text-gray-900">{selected.name}</h4>
-              <p className="text-xs text-gray-400">{selected.email}</p>
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleBadge[selected.role]}`}>{selected.role}</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge[selected.status]}`}>{selected.status}</span>
+            
+            <div className="flex-1 overflow-y-auto p-8">
+              <div className="text-center mb-10">
+                <div className="relative inline-block">
+                  <img 
+                    src={`https://ui-avatars.com/api/?name=${selected.name}&background=eff6ff&color=2563eb&bold=true&size=128`}
+                    className="w-24 h-24 rounded-3xl mx-auto shadow-xl border-4 border-white" alt={selected.name} 
+                  />
+                  <span className={`absolute -bottom-2 -right-2 px-3 py-1 rounded-full text-[10px] font-black border-2 border-white shadow-sm ${statusBadge[selected.status]}`}>
+                    {selected.status}
+                  </span>
+                </div>
+                <h4 className="mt-6 text-xl font-bold text-slate-900">{selected.name}</h4>
+                <p className="text-sm text-slate-500 font-medium">{selected.email}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">Trust Score</p>
+                    <p className="text-lg font-black text-blue-600">{selected.trustScore || 'N/A'}</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">KYC Status</p>
+                    <p className="text-sm font-bold text-slate-700">{selected.kyc}</p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                {[
+                  { label: "Account ID", value: `#USR-00${selected.id}` },
+                  { label: "Registration Date", value: selected.joined },
+                  { label: "User Role", value: selected.role },
+                ].map((r, i) => (
+                  <div key={i} className="flex justify-between py-4 border-b border-slate-50">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{r.label}</span>
+                    <span className="text-sm font-semibold text-slate-800">{r.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="space-y-3">
-              {[
-                { label: "Joined",      value: selected.joined       },
-                { label: "KYC Status",  value: selected.kyc          },
-                { label: "Trust Score", value: selected.trustScore ?? "N/A" },
-              ].map((r, i) => (
-                <div key={i} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{r.label}</span>
-                  <span className="text-sm font-semibold text-gray-800">{r.value}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => handleSuspend(selected.id)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition ${
-                  selected.status === "Suspended" ? "bg-green-600 text-white hover:bg-green-700" : "bg-red-500 text-white hover:bg-red-600"
-                }`}>
-                {selected.status === "Suspended" ? "Activate" : "Suspend"}
+
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex gap-3">
+              <button 
+                onClick={() => handleSuspend(selected.id)}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                  selected.status === "Suspended" 
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700" 
+                    : "bg-white text-rose-600 border border-rose-100 hover:bg-rose-50"
+                }`}
+              >
+                {selected.status === "Suspended" ? "Reactivate User" : "Suspend Account"}
               </button>
               {selected.kyc !== "Verified" && (
-                <button onClick={() => handleVerifyKyc(selected.id)}
-                  className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition">
+                <button 
+                  onClick={() => handleVerifyKyc(selected.id)}
+                  className="flex-1 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-100 transition-all"
+                >
                   Approve KYC
                 </button>
               )}
