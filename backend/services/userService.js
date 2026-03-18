@@ -1,9 +1,9 @@
 const bcrypt = require("bcryptjs");
 const otpGenerator = require("otp-generator");
-// Important: Importing from /model/index.js ensures associations are loaded
-const { User, TenantProfile, LandlordProfile, sequelize } = require("../model"); 
+const { User, TenantProfile, LandlordProfile, sequelize } = require("../model");
 const generateToken = require("../utils/generateToken");
 const { sendOtpEmail } = require("../config/emailConfig");
+
 const googleAuth = async (userData) => {
   const { firstName, lastName, email, role } = userData;
 
@@ -12,7 +12,6 @@ const googleAuth = async (userData) => {
     let user = await User.findOne({ where: { email } });
 
     if (!user) {
-      // Create User
       user = await User.create({
         firstName,
         lastName,
@@ -22,22 +21,23 @@ const googleAuth = async (userData) => {
         isVerified: true,
       }, { transaction });
 
-      // Create Tenant Profile automatically
       if (user.role === "tenant") {
-        await TenantProfile.create({
-          userId: user.id,
-        }, { transaction });
+        await TenantProfile.create({ userId: user.id }, { transaction });
       }
     }
 
     await transaction.commit();
-    
-    // Return the user data (add your token generation here)
+
+    const token = generateToken(user.id);
     return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      firstName: user.firstName
+      token,
+      user: {
+        id:        user.id,
+        email:     user.email,
+        role:      user.role,
+        firstName: user.firstName,
+        lastName:  user.lastName,
+      },
     };
   } catch (error) {
     await transaction.rollback();
@@ -106,9 +106,9 @@ const registerUser = async (userData) => {
     }
 
     return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
+      id:      user.id,
+      email:   user.email,
+      role:    user.role,
       message: "Registration successful. Please verify your email.",
     };
   } catch (error) {
@@ -118,15 +118,15 @@ const registerUser = async (userData) => {
 };
 
 /**
- * @desc Login user and return token + profile data
+ * @desc Login user and return token + user object
  */
 const loginUser = async ({ email, password }) => {
-  const user = await User.findOne({ 
+  const user = await User.findOne({
     where: { email },
     include: [
-      { model: LandlordProfile, as: 'landlordProfile' },
-      { model: TenantProfile, as: 'tenantProfile' }
-    ]
+      { model: LandlordProfile, as: "landlordProfile" },
+      { model: TenantProfile,   as: "tenantProfile"   },
+    ],
   });
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -138,12 +138,15 @@ const loginUser = async ({ email, password }) => {
   const token = generateToken(user.id);
 
   return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    role: user.role,
-    profile: user.role === 'landlord' ? user.landlordProfile : user.tenantProfile,
     token,
+    user: {
+      id:        user.id,
+      email:     user.email,
+      firstName: user.firstName,
+      lastName:  user.lastName,
+      role:      user.role,
+      profile:   user.role === "landlord" ? user.landlordProfile : user.tenantProfile,
+    },
   };
 };
 
@@ -154,19 +157,19 @@ const getUserById = async (id) => {
   const user = await User.findByPk(id, {
     attributes: { exclude: ["password", "otp", "otpExpiry"] },
     include: [
-      { model: LandlordProfile, as: 'landlordProfile', required: false },
-      { model: TenantProfile, as: 'tenantProfile', required: false }
-    ]
+      { model: LandlordProfile, as: "landlordProfile", required: false },
+      { model: TenantProfile,   as: "tenantProfile",   required: false },
+    ],
   });
 
   if (!user) throw new Error("User not found");
-  
+
   const userData = user.toJSON();
-  if (user.role === 'landlord') delete userData.tenantProfile;
-  if (user.role === 'tenant') delete userData.landlordProfile;
-  if (user.role === 'admin') {
-     delete userData.landlordProfile;
-     delete userData.tenantProfile;
+  if (user.role === "landlord") delete userData.tenantProfile;
+  if (user.role === "tenant")   delete userData.landlordProfile;
+  if (user.role === "admin") {
+    delete userData.landlordProfile;
+    delete userData.tenantProfile;
   }
 
   return userData;
@@ -182,34 +185,32 @@ const updateUserProfile = async (userId, updates) => {
   const transaction = await sequelize.transaction();
 
   try {
-    // 1. Update Core User table
     await user.update({
       firstName: updates.firstName || user.firstName,
-      lastName: updates.lastName || user.lastName,
-      phone: updates.phone || user.phone,
+      lastName:  updates.lastName  || user.lastName,
+      phone:     updates.phone     || user.phone,
     }, { transaction });
 
-    // 2. Update/Insert Role-Specific Profile data
-    if (user.role === 'landlord') {
+    if (user.role === "landlord") {
       await LandlordProfile.upsert({
-        userId: userId,
-        companyName: updates.companyName,
-        tinNumber: updates.tinNumber,
+        userId:          userId,
+        companyName:     updates.companyName,
+        tinNumber:       updates.tinNumber,
         businessAddress: updates.businessAddress,
-        website: updates.website,
-        bio: updates.bio
+        website:         updates.website,
+        bio:             updates.bio,
       }, { transaction });
-    } else if (user.role === 'tenant') {
+    } else if (user.role === "tenant") {
       await TenantProfile.upsert({
-        userId: userId,
-        nationalId: updates.nationalId,
-        momoNumber: updates.momoNumber,
-        currentAddress: updates.currentAddress
+        userId:         userId,
+        nationalId:     updates.nationalId,
+        momoNumber:     updates.momoNumber,
+        currentAddress: updates.currentAddress,
       }, { transaction });
     }
 
     await transaction.commit();
-    return await getUserById(userId); 
+    return await getUserById(userId);
   } catch (error) {
     await transaction.rollback();
     throw new Error("Update failed: " + error.message);
@@ -217,7 +218,7 @@ const updateUserProfile = async (userId, updates) => {
 };
 
 /**
- * @desc Verify OTP and activate user
+ * @desc Verify OTP, activate user, and return token + user immediately
  */
 const verifyOTP = async (email, otp) => {
   const user = await User.findOne({ where: { email } });
@@ -225,7 +226,17 @@ const verifyOTP = async (email, otp) => {
   if (user.otp !== otp || new Date() > user.otpExpiry) throw new Error("Invalid or expired OTP");
 
   await user.update({ isVerified: true, otp: null, otpExpiry: null });
-  return { token: generateToken(user.id), message: "Verified successfully" };
+
+  return {
+    token: generateToken(user.id),
+    user: {
+      id:        user.id,
+      email:     user.email,
+      role:      user.role,
+      firstName: user.firstName,
+      lastName:  user.lastName,
+    },
+  };
 };
 
 /**
@@ -235,7 +246,7 @@ const resendOTP = async (email) => {
   const user = await User.findOne({ where: { email } });
   if (!user) throw new Error("User not found");
   if (user.isVerified) throw new Error("User is already verified");
-  
+
   const otp = generateOTP();
   await user.update({ otp, otpExpiry: new Date(Date.now() + 10 * 60 * 1000) });
   await sendOtpEmail(email, otp);
@@ -249,9 +260,9 @@ const getAllUsers = async () => {
   return await User.findAll({
     attributes: { exclude: ["password", "otp", "otpExpiry"] },
     include: [
-      { model: LandlordProfile, as: 'landlordProfile' },
-      { model: TenantProfile, as: 'tenantProfile' }
-    ]
+      { model: LandlordProfile, as: "landlordProfile" },
+      { model: TenantProfile,   as: "tenantProfile"   },
+    ],
   });
 };
 
@@ -274,5 +285,5 @@ module.exports = {
   resendOTP,
   getAllUsers,
   googleAuth,
-  deleteUser
+  deleteUser,
 };

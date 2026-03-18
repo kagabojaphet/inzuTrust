@@ -17,6 +17,7 @@ import Properties from './pages/Properties'
 import Profile from './pages/Profile'
 import AIChatbot from './components/AIChatbot';
 import BackToTop from './components/BackToTop';
+import PropertyDetail from './pages/PropertyDetail';
 
 import AboutUs from './pages/AboutUs';
 import Services from './pages/Services';
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/prices" element={<PublicLayout><Pricing /></PublicLayout>} />
           <Route path="/verify-otp" element={<VerifyOTP />} />
           <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+          <Route path="/properties/:id" element={<PublicLayout><PropertyDetail /></PublicLayout>} />
           <Route path="/register/*" element={<Register />} />
 
           {/* Admin Protected Route */}
