@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   HiHome, HiOfficeBuilding, HiUsers, HiDocumentText,
   HiCreditCard, HiCog, HiBell, HiSearch, HiPlus,
-  HiMenu, HiChevronLeft, HiX, HiChat, HiExclamationCircle
+  HiMenu, HiChevronLeft, HiX, HiChat, HiExclamationCircle, HiClipboardList
 } from "react-icons/hi";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -16,7 +16,8 @@ import LDAgreements  from "../components/landlord/Ldagreements";
 import LDPayments    from "../components/landlord/Ldpayments";
 import LDSettings    from "../components/landlord/Ldsettings";
 import LDAddProperty from "../components/landlord/LDAddProperty";
-import Messages      from "../components/shared/Messages";
+import Messages        from "../components/shared/Messages";
+import LDApplications  from "../components/landlord/LDApplications";
 import DisputeCenter from "../components/shared/DisputeCenter";
 
 export const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -25,7 +26,8 @@ const NAV = [
   { id:"dashboard",  label:"Dashboard",  icon:HiHome              },
   { id:"properties", label:"Properties", icon:HiOfficeBuilding     },
   { id:"tenants",    label:"Tenants",    icon:HiUsers              },
-  { id:"agreements", label:"Agreements", icon:HiDocumentText       },
+  { id:"agreements",   label:"Agreements",   icon:HiDocumentText      },
+  { id:"applications", label:"Applications", icon:HiClipboardList     },
   { id:"payments",   label:"Payments",   icon:HiCreditCard         },
   { id:"messages",   label:"Messages",   icon:HiChat               },
   { id:"disputes",   label:"Disputes",   icon:HiExclamationCircle  },
@@ -50,7 +52,8 @@ export default function LandlordDashboard() {
       case "dashboard":    return <LDOverview    token={token} setActive={setActive}/>;
       case "properties":   return <LDProperties  token={token} setActive={setActive}/>;
       case "tenants":      return <LDTenants     token={token}/>;
-      case "agreements":   return <LDAgreements  token={token} user={user}/>;
+      case "agreements":   return <LDAgreements   token={token} user={user}/>;
+      case "applications": return <LDApplications token={token}/>;
       case "payments":     return <LDPayments    token={token}/>;
       case "messages":     return <Messages      token={token} user={user} userRole="landlord"/>;
       case "disputes":     return <DisputeCenter token={token} userRole="landlord"/>;
