@@ -5,8 +5,8 @@ import { HiShieldCheck } from "react-icons/hi";
 import { useAuth } from '../context/AuthContext';
 
 const VerifyOTP = () => {
-  const location  = useLocation();
-  const navigate  = useNavigate();
+  const location    = useLocation();
+  const navigate    = useNavigate();
   const { setAuth } = useAuth();
 
   const [otp,     setOtp]     = useState('');
@@ -40,29 +40,14 @@ const VerifyOTP = () => {
           if (setAuth) setAuth(token, user);
         }
 
-        // 3. If coming from Apply Lease flow — submit the application now
-        if (propertyId && token) {
-          try {
-            await axios.post(
-              'http://localhost:5000/api/lease-applications',
-              {
-                propertyId,
-                message:    `Hi, I just verified my InzuTrust account and I am interested in ${propertyTitle || 'this property'}. I would love to discuss the lease terms.`,
-                moveInDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                duration:   12,
-              },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-          } catch (appErr) {
-            // Application failed silently — tenant can apply again from dashboard
-            console.warn('Auto-apply after OTP failed:', appErr.response?.data?.message);
-          }
+        // 3. Redirect based on what triggered registration:
+        //    - apply-lease flow → back to property detail page, modal auto-opens
+        //    - normal signup    → tenant dashboard
+        if (propertyId) {
+          navigate(`/properties/${propertyId}?apply=true`);
+        } else {
+          navigate(redirectTo || '/tenant/dashboard');
         }
-
-        // 4. Redirect:
-        //    - apply-lease flow  → /tenant/dashboard?tab=applications
-        //    - normal signup     → /tenant/dashboard
-        navigate(redirectTo || '/tenant/dashboard');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP code');
