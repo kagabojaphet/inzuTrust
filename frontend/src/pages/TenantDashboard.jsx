@@ -3,6 +3,7 @@ import {
   HiBell, HiHome, HiCreditCard, HiShieldCheck,
   HiCog, HiChat, HiUser, HiMenu, HiX, HiViewGrid // Added HiViewGrid for the dashboard icon
 } from "react-icons/hi";
+import { useAuth } from "../context/AuthContext";
 
 import Overview      from "../components/tenant/Overview";
 import Payments      from "../components/tenant/Payments";
