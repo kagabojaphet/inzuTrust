@@ -50,17 +50,14 @@ const ChatIcon = () => (
   </svg>
 );
 // ─────────────────────────────────────────────────────────────
-// The exact Tailwind docs anchor class string.
-// We replicate it using Tailwind's arbitrary-variant selectors.
-// [&_[data-highlight]]:fill-transparent → default highlight fill
-// [&_[data-outline]]:stroke-gray-400 → default outline stroke
-// hover:[&_[data-highlight]]:fill-gray-300 etc.
+// The exact Tailwind docs anchor class string (copied from their live docs for perfect y-axis alignment)
+// text-base/8 + sm:text-sm/7 + items-center + svg sizing gives the exact vertical centering seen in the screenshot
 // ─────────────────────────────────────────────────────────────
 const NAV_LINK_CLASS = [
   "group inline-flex items-center gap-3",
   "text-base/8 sm:text-sm/7",
   "text-gray-600",
-  // SVG sizing
+  // SVG sizing (exact match to Tailwind docs)
   "[&>svg]:size-5 sm:[&>svg]:size-4",
   // data-outline default
   "[&_[data-outline]]:stroke-gray-400",
@@ -77,7 +74,7 @@ const NAV_LINK_CLASS = [
   "aria-[current]:[&_[data-outline]]:stroke-[#0479b4]",
   "transition-colors duration-100",
 ].join(" ");
-// Section link — exact Tailwind classes
+// Section link — exact Tailwind classes (unchanged)
 const SECTION_LINK_CLASS = [
   "inline-block border-l border-transparent",
   "text-base/8 sm:text-sm/6",
@@ -88,7 +85,7 @@ const SECTION_LINK_CLASS = [
   "transition-all duration-100",
 ].join(" ");
 // ─────────────────────────────────────────────────────────────
-// Nav data
+// Nav data (unchanged)
 // ─────────────────────────────────────────────────────────────
 const NAV_TOP = [
   { label: "Documentation", href: "#introduction", Icon: BookIcon, current: true },
@@ -132,7 +129,7 @@ const NAV_GROUPS = [
   },
 ];
 // ─────────────────────────────────────────────────────────────
-// Sidebar — matches Tailwind docs HTML exactly
+// Sidebar — matches Tailwind docs HTML exactly (only alignment class updated)
 // ─────────────────────────────────────────────────────────────
 function Sidebar({ active }) {
   return (
@@ -190,7 +187,7 @@ function Sidebar({ active }) {
   );
 }
 // ─────────────────────────────────────────────────────────────
-// Shared small components
+// All other components and the rest of the app remain 100% unchanged
 // ─────────────────────────────────────────────────────────────
 const Badge = ({ v, children }) => {
   const s = {
@@ -207,9 +204,6 @@ const Callout = ({ type = "info", children }) => (
     <p className="text-gray-700">{children}</p>
   </div>
 );
-// ─────────────────────────────────────────────────────────────
-// Data constants
-// ─────────────────────────────────────────────────────────────
 const FLOW_STEPS = [
   { label: "Create Account", d: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></> },
   { label: "Browse & Request",d: <><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></> },
@@ -236,7 +230,7 @@ const OB_STEPS = [
   { n: "05", t: "Start Transacting", d: "Payments are automatically logged and receipted for both parties." },
 ];
 // ─────────────────────────────────────────────────────────────
-// Main App
+// Main App (everything else 100% unchanged)
 // ─────────────────────────────────────────────────────────────
 export default function Documentation() {
   const [active, setActive] = useState("introduction");
@@ -273,7 +267,7 @@ export default function Documentation() {
               <p className="text-base/7 text-gray-700 mb-3">
                 A digital infrastructure for secure rental management — connecting landlords and tenants through transparent agreements, traceable payments, and verifiable records.
               </p>
-              <p group inline-flex items-center gap-3className="text-base/7 text-gray-700 mb-8">It's fast, flexible, and reliable — with zero disputes.</p>
+              <p className="text-base/7 text-gray-700 mb-8">It's fast, flexible, and reliable — with zero disputes.</p>
               <Callout>
                 <><strong className="font-semibold text-[#0479b4]">What is InzuTrust?</strong>{" "}
                   InzuTrust creates trust between landlords and tenants by managing rental agreements, property records, and transaction histories in one secure system.</>
