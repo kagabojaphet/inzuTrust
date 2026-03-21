@@ -94,27 +94,27 @@ ${agreement.additionalTerms ? `<div class="st">9. Additional Terms</div><p>${agr
   };
 
   return (
-    <div className="fixed inset-0 bg-[#0f172a]/95 z-50 flex flex-col">
+    <div className="flex flex-col rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
 
       {/* ── Top bar ── */}
-      <div className="bg-[#0f172a] border-b border-white/10 px-6 py-4 flex items-center justify-between shrink-0">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
             <HiShieldCheck className="text-white"/>
           </div>
           <div>
-            <p className="text-white font-black text-sm">Finalize Lease Agreement</p>
-            <p className="text-blue-300 text-[10px]">Document ID: #{docLabel}</p>
+            <p className="text-gray-900 font-black text-sm">Finalize Lease Agreement</p>
+            <p className="text-blue-500 text-[10px]">Document ID: #{docLabel}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={handleDownload}
-            className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs font-bold transition"
+            className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 text-xs font-bold transition"
           >
             <HiDownload/> Download Draft
           </button>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition">
             <HiX className="text-lg"/>
           </button>
         </div>
@@ -123,27 +123,33 @@ ${agreement.additionalTerms ? `<div class="st">9. Additional Terms</div><p>${agr
       <div className="flex flex-1 overflow-hidden">
 
         {/* ── Left progress sidebar ── */}
-        <div className="w-52 bg-[#0f172a] border-r border-white/10 p-5 shrink-0">
-          <p className="text-[9px] font-black uppercase tracking-widest text-white/30 mb-5">
+        <div className="w-64 bg-white border-r border-gray-200 p-6 shrink-0">
+          <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-5">
             AGREEMENT PROGRESS
           </p>
           {STEPS.map((s, i) => {
             const isDone   = i < 3;
             const isActive = i === 3;
             return (
-              <div key={i} className={`flex items-start gap-3 p-3 rounded-xl mb-1 ${isActive ? "bg-white/10" : ""}`}>
+              <div key={i} className={`flex items-start gap-3 px-3 py-3 rounded-xl mb-1 transition-all ${
+                isActive ? "bg-blue-50 border border-blue-100" : ""
+              }`}>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                  isDone ? "bg-green-500" : isActive ? "bg-blue-500" : "bg-white/10"
+                  isDone ? "bg-green-500" : isActive ? "bg-blue-500" : "bg-gray-200"
                 }`}>
                   {isDone   ? <HiCheck      className="text-white text-xs"/> :
                    isActive ? <HiPencilAlt  className="text-white text-xs"/> :
-                   <span className="text-white/30 text-[10px] font-bold">{i + 1}</span>}
+                   <span className="text-gray-400 text-[10px] font-bold">{i + 1}</span>}
                 </div>
                 <div>
-                  <p className={`text-xs font-bold ${isActive ? "text-white" : isDone ? "text-white/70" : "text-white/30"}`}>
+                  <p className={`text-xs font-black leading-tight ${
+                    isActive ? "text-blue-700" : isDone ? "text-gray-700" : "text-gray-400"
+                  }`}>
                     {s.label}
                   </p>
-                  <p className={`text-[10px] ${isActive ? "text-blue-300" : isDone ? "text-green-400" : "text-white/20"}`}>
+                  <p className={`text-[10px] mt-0.5 font-medium ${
+                    isActive ? "text-blue-500" : isDone ? "text-green-500" : "text-gray-300"
+                  }`}>
                     {isDone ? "Completed" : isActive ? "In Progress" : "Pending"}
                   </p>
                 </div>
@@ -153,7 +159,7 @@ ${agreement.additionalTerms ? `<div class="st">9. Additional Terms</div><p>${agr
         </div>
 
         {/* ── Main content ── */}
-        <div className="flex-1 bg-gray-50 overflow-y-auto p-6">
+        <div className="flex-1 bg-gray-50 overflow-y-auto p-8 max-h-[700px] border-l border-gray-200">
           <div className="max-w-2xl mx-auto space-y-5">
 
             <div className="flex items-start justify-between">

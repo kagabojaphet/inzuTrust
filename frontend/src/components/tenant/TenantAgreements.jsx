@@ -44,16 +44,6 @@ export default function TenantAgreements({ token, user }) {
 
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-      {signing && (
-        <SignModal
-          agreement={signing}
-          tenantName={tenantName}
-          token={token}
-          onClose={() => setSigning(null)}
-          onSigned={handleSigned}
-        />
-      )}
-
       <div className="space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -112,8 +102,19 @@ export default function TenantAgreements({ token, user }) {
           </div>
         )}
 
-        {/* Cards */}
-        {!loading && agreements.length > 0 && (
+        {/* Sign modal — shown inline when tenant clicks Sign Agreement */}
+        {signing && (
+          <SignModal
+            agreement={signing}
+            tenantName={tenantName}
+            token={token}
+            onClose={() => setSigning(null)}
+            onSigned={handleSigned}
+          />
+        )}
+
+        {/* Cards — hidden while signing so modal takes full content area */}
+        {!loading && !signing && agreements.length > 0 && (
           <div className="space-y-4">
             {agreements.map(a => (
               <AgreementCard key={a.id} agreement={a} onSign={setSigning}/>
