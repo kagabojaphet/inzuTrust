@@ -31,6 +31,7 @@ app.use("/api/messages",           require("./router/messageRoutes"));
 app.use("/api/notifications",      require("./router/notificationRoutes"));
 app.use("/api/trust-score",        require("./router/trustScoreRoutes"));
 app.use("/api/admin",              require("./router/adminRoutes"));
+app.use("/api/calls",              require("./router/callRoutes")); // ← Daily.co rooms
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
@@ -57,7 +58,6 @@ const startServer = async () => {
     await db.sequelize.authenticate();
     console.log("✔ MySQL Connected...");
 
-    // alter: true adds new tables/columns without dropping existing data
     await db.sequelize.sync({ alter: true });
     console.log("✔ Database synced — all new tables created.");
 
