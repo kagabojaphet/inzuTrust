@@ -291,7 +291,7 @@ export default function ChatArea({
         <CallModal
           contact={contact}
           callType={activeCall}
-          token={token}
+          currentUserId={currentUserId}
           onClose={() => setActiveCall(null)}
         />
       )}

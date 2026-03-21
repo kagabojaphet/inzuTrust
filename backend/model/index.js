@@ -1,6 +1,7 @@
 const sequelize = require("../config/database");
 
 // ── Existing models ───────────────────────────────────────────────────────────
+const Meeting         = require("./meetingModel");
 const User            = require("./userModel");
 const TenantProfile   = require("./tenantProfile");
 const LandlordProfile = require("./landlordProfile");
@@ -29,6 +30,7 @@ const db = {};
 db.sequelize = sequelize;
 
 // ── Attach all models ─────────────────────────────────────────────────────────
+db.Meeting         = Meeting;
 db.User            = User;
 db.TenantProfile   = TenantProfile;
 db.LandlordProfile = LandlordProfile;
@@ -49,6 +51,31 @@ db.DisputeEvidence  = DisputeEvidence;
 db.Message          = Message;
 db.TrustScoreLog    = TrustScoreLog;
 db.Notification     = Notification;
+
+
+/* ===========================
+    Meeting Relationships
+=========================== */
+db.User.hasMany(db.Meeting, {
+  foreignKey: "organizerId",
+  as:         "organizedMeetings",
+  onDelete:   "CASCADE",
+});
+db.Meeting.belongsTo(db.User, {
+  foreignKey: "organizerId",
+  as:         "organizer",
+});
+ 
+db.User.hasMany(db.Meeting, {
+  foreignKey: "participantId",
+  as:         "participatingMeetings",
+  onDelete:   "CASCADE",
+});
+db.Meeting.belongsTo(db.User, {
+  foreignKey: "participantId",
+  as:         "participant",
+});
+
 
 /* ===========================
     Profile Relationships

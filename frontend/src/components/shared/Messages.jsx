@@ -166,7 +166,9 @@ export default function Messages({ token: propToken, userRole = "tenant" }) {
 
       <RightPanel
         contact={activeContact}
-        onScheduleCall={handleScheduleCall}
+        token={token}
+        currentUserId={currentUserId}
+        onJoinCall={() => {}}
       />
     </div>
   );
