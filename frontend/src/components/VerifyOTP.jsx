@@ -1,25 +1,53 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { HiShieldCheck, HiArrowLeft } from "react-icons/hi";
+import { HiShieldCheck } from "react-icons/hi";
+import { useAuth } from '../context/AuthContext';
 
 const VerifyOTP = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [otp, setOtp] = useState('');
+  const location    = useLocation();
+  const navigate    = useNavigate();
+  const { setAuth } = useAuth();
+
+  const [otp,     setOtp]     = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const email = location.state?.email || '';
+  const [error,   setError]   = useState('');
+
+  const email         = location.state?.email         || '';
+  const redirectTo    = location.state?.redirectTo    || null;
+  const propertyId    = location.state?.propertyId    || null;
+  const propertyTitle = location.state?.propertyTitle || '';
 
   const handleVerify = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
-      const response = await axios.post('http://localhost:5000/api/users/verify-otp', { email, otp });
+      // 1. Verify OTP — response contains token + user
+      const response = await axios.post(
+        'http://localhost:5000/api/users/verify-otp',
+        { email, otp }
+      );
 
       if (response.data.success) {
-        // Redirect to LOGIN instead of Dashboard to ensure credentials work
-        navigate('/login', { state: { message: "Account verified! Please log in." } });
+        const token = response.data.data?.token;
+        const user  = response.data.data?.user;
+
+        // 2. Save token and update AuthContext so ProtectedRoute lets us through
+        if (token) {
+          localStorage.setItem('inzu_token', token);
+          localStorage.setItem('user', JSON.stringify(user || {}));
+          if (setAuth) setAuth(token, user);
+        }
+
+        // 3. Redirect based on what triggered registration:
+        //    - apply-lease flow → back to property detail page, modal auto-opens
+        //    - normal signup    → tenant dashboard
+        if (propertyId) {
+          navigate(`/properties/${propertyId}?apply=true`);
+        } else {
+          navigate(redirectTo || '/tenant/dashboard');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP code');
@@ -45,7 +73,10 @@ const VerifyOTP = () => {
             placeholder="000000"
           />
           {error && <p className="text-red-500 font-bold text-sm">{error}</p>}
-          <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase">
+          <button
+            type="submit"
+            className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase"
+          >
             {loading ? 'Verifying...' : 'Verify & Continue'}
           </button>
         </form>

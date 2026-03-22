@@ -3,8 +3,9 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../context/AuthContext';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 
@@ -21,6 +22,13 @@ const schema = yup.object({
 
 const TenantRegister = ({ onSwitchToLandlord }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // ── Read URL params set by Properties.jsx "Apply Lease" button ──────────────
+  const propertyId    = searchParams.get('propertyId') || '';
+  const propertyTitle = searchParams.get('propertyTitle') || '';
+  const isApplyFlow   = searchParams.get('action') === 'apply' && !!propertyId;
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
@@ -62,12 +70,20 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
         };
 
         const response = await axios.post('http://localhost:5000/api/users/google-auth', payload);
-        
+
         if (response.data.success) {
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('inzu_token', response.data.token);
           localStorage.setItem('user', JSON.stringify(response.data.user));
-          setAlert({ show: true, type: 'success', message: 'Welcome! Redirecting...' });
-          setTimeout(() => navigate('/dashboard'), 1500);
+          if (setAuth) setAuth(response.data.token, response.data.user);
+
+          // If coming from "Apply Lease", submit application then go to applications tab
+          if (isApplyFlow) {
+            await submitLeaseApplication(response.data.token);
+            navigate('/tenant/dashboard?tab=applications');
+          } else {
+            setAlert({ show: true, type: 'success', message: 'Welcome! Redirecting...' });
+            setTimeout(() => navigate('/tenant/dashboard'), 1500);
+          }
         } else {
           setAlert({ show: true, type: 'success', message: 'Account linked! Please verify your email.' });
           setTimeout(() => navigate('/verify-otp', { state: { email: userInfo.data.email } }), 1500);
@@ -102,43 +118,76 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
     else setPasswordStrength({ score: 5, label: 'Strong', color: 'bg-green-500', textColor: 'text-green-600' });
   }, [password]);
 
-  // React: TenantRegister.jsx (Updated onSubmit)
-const onSubmit = async (data) => {
-  setLoading(true);
-  setAlert({ show: false, type: '', message: '' });
-  try {
-    const nameParts = data.fullName.trim().split(/\s+/);
-    const payload = {
-      firstName: nameParts[0],
-      // Ensure lastName is never an empty string if the DB requires it
-      lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'N/A', 
-      email: data.email,
-      phone: data.phone,
-      password: data.password,
-      role: 'tenant', 
-      authType: 'email',
-    };
-    
-    const response = await axios.post('http://localhost:5000/api/users/register', payload);
-    
-    // Check for success based on your backend response structure
-    if (response.status === 201 || response.data.success) {
-      setAlert({ show: true, type: 'success', message: 'Registration successful! Verifying OTP...' });
-      setTimeout(() => navigate('/verify-otp', { state: { email: data.email } }), 2000);
+  // ── Helper: submit lease application after account is ready ─────────────────
+  const submitLeaseApplication = async (token) => {
+    if (!propertyId || !token) return;
+    try {
+      await axios.post(
+        'http://localhost:5000/api/lease-applications',
+        {
+          propertyId,
+          message: `Hi, I just created my InzuTrust account and I am interested in ${propertyTitle || 'this property'}. I would love to discuss the lease terms.`,
+          moveInDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          duration: 12,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (err) {
+      // Application failed silently — tenant can apply again from dashboard
+      console.warn('Auto-apply failed:', err.response?.data?.message || err.message);
     }
-  } catch (error) {
-    // Log the actual error to see exactly what the backend is complaining about
-    console.error("Registration Error Details:", error.response?.data);
-    
-    setAlert({
-      show: true,
-      type: 'error',
-      message: error.response?.data?.message || 'Registration failed. Please try again.',
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
+  // ── onSubmit: register → login → (auto-apply if needed) → redirect ──────────
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setAlert({ show: false, type: '', message: '' });
+    try {
+      const nameParts = data.fullName.trim().split(/\s+/);
+      const payload = {
+        firstName: nameParts[0],
+        lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'N/A',
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        role: 'tenant',
+        authType: 'email',
+      };
+
+      const response = await axios.post('http://localhost:5000/api/users/register', payload);
+
+      if (response.status === 201 || response.data.success) {
+
+        if (isApplyFlow) {
+          // Must verify email first — pass property details through OTP page
+          // so the application can be submitted right after verification
+          setAlert({ show: true, type: 'success', message: 'Account created! Please verify your email to continue.' });
+          setTimeout(() => navigate('/verify-otp', {
+            state: {
+              email:         data.email,
+              propertyId:    propertyId,
+              propertyTitle: propertyTitle,
+              redirectTo:    '/tenant/dashboard?tab=applications',
+            }
+          }), 1500);
+
+        } else {
+          // Normal registration → OTP → tenant dashboard
+          setAlert({ show: true, type: 'success', message: 'Registration successful! Please verify your email.' });
+          setTimeout(() => navigate('/verify-otp', { state: { email: data.email } }), 1500);
+        }
+      }
+    } catch (error) {
+      console.error("Registration Error Details:", error.response?.data);
+      setAlert({
+        show: true,
+        type: 'error',
+        message: error.response?.data?.message || 'Registration failed. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex bg-white font-sans">
@@ -185,9 +234,9 @@ const onSubmit = async (data) => {
             </div>
           )}
 
-          <button 
-            type="button" 
-            onClick={() => googleLogin()} 
+          <button
+            type="button"
+            onClick={() => googleLogin()}
             disabled={loading}
             className="w-full py-4 border border-gray-200 rounded-xl flex items-center justify-center gap-3 font-semibold text-gray-700 hover:bg-gray-50 transition mb-8 disabled:opacity-50"
           >

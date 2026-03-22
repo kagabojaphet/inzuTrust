@@ -1,26 +1,40 @@
+// models/tenantProfile.js  — add trustScore + new fields
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-const TenantProfile = sequelize.define(
-  "TenantProfile",
-  {
-    userId: {
-      type: DataTypes.UUID, // Must match User model id type
-      primaryKey: true,
-      references: {
-        model: 'users',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    nationalId: { type: DataTypes.STRING, allowNull: true, unique: true },
-    dateOfBirth: { type: DataTypes.DATEONLY, allowNull: true },
-    momoNumber: { type: DataTypes.STRING, allowNull: true },
-    emergencyContactName: { type: DataTypes.STRING, allowNull: true },
-    emergencyContactPhone: { type: DataTypes.STRING, allowNull: true },
-    currentAddress: { type: DataTypes.STRING, allowNull: true },
+const TenantProfile = sequelize.define("TenantProfile", {
+  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+
+  userId: {
+    type: DataTypes.UUID, allowNull: false, unique: true,
+    references: { model: "users", key: "id" },
   },
-  { tableName: "tenant_profiles", timestamps: true }
-);
+
+  // ── Trust Score (denormalized from TrustScoreLog for fast reads) ──
+  trustScore:    { type: DataTypes.INTEGER, defaultValue: 100 },
+
+  // ── Identity ──
+  idVerified:    { type: DataTypes.BOOLEAN, defaultValue: false },
+  idType:        { type: DataTypes.ENUM("national_id","passport","driving_license"), allowNull: true },
+  idNumber:      { type: DataTypes.STRING, allowNull: true },
+
+  // ── Rental stats (updated by payment/dispute hooks) ──
+  totalPayments: { type: DataTypes.INTEGER, defaultValue: 0 },
+  latePayments:  { type: DataTypes.INTEGER, defaultValue: 0 },
+  activeLeaseId: { type: DataTypes.UUID,    allowNull: true },
+
+  // ── Profile ──
+  bio:           { type: DataTypes.TEXT,    allowNull: true },
+  occupation:    { type: DataTypes.STRING,  allowNull: true },
+  monthlyIncome: { type: DataTypes.DECIMAL(12,2), allowNull: true },
+
+  // ── Notification preferences ──
+  notifyEmail:   { type: DataTypes.BOOLEAN, defaultValue: true },
+  notifySMS:     { type: DataTypes.BOOLEAN, defaultValue: true },
+  notifyApp:     { type: DataTypes.BOOLEAN, defaultValue: true },
+}, {
+  tableName: "tenant_profiles",
+  timestamps: true,
+});
 
 module.exports = TenantProfile;

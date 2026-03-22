@@ -1,48 +1,69 @@
 const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const path = require("path");
-const db = require("./model/index");
+const cors    = require("cors");
+const dotenv  = require("dotenv");
+const path    = require("path");
+const db      = require("./model/index");
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
+// ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // increased for base64 signatures
 app.use(express.urlencoded({ extended: false }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Routes
-app.use("/api/users", require("./router/userRoutes"));
-app.use("/api/properties", require("./router/propertyRoutes"));
-app.use("/api/contact", require("./router/contactRoutes"));
-app.use("/api/news", require("./router/newsRoutes"));
-app.use("/api/favorites", require("./router/favoriteRoutes"));
+// ── Existing routes ───────────────────────────────────────────────────────────
+app.use("/api/users",            require("./router/userRoutes"));
+app.use("/api/properties",       require("./router/propertyRoutes"));
+app.use("/api/contact",          require("./router/contactRoutes"));
+app.use("/api/news",             require("./router/newsRoutes"));
+app.use("/api/favorites",        require("./router/favoriteRoutes"));
 app.use("/api/viewing-requests", require("./router/viewingRequestRoutes"));
 
+// ── New routes ────────────────────────────────────────────────────────────────
+app.use("/api/lease-applications", require("./router/leaseApplicationRoutes"));
+app.use("/api/agreements",         require("./router/agreementRoutes"));
+app.use("/api/payments",           require("./router/paymentRoutes"));
+app.use("/api/disputes",           require("./router/disputeRoutes"));
+app.use("/api/messages",           require("./router/messageRoutes"));
+app.use("/api/notifications",      require("./router/notificationRoutes"));
+app.use("/api/trust-score",        require("./router/trustScoreRoutes"));
+app.use("/api/admin",              require("./router/adminRoutes"));
 
+// ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
   res.json({ message: "InzuTrust API Running" });
 });
 
-// Initialization Logic
+// ── 404 handler ───────────────────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+});
+
+// ── Global error handler ──────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal server error",
+  });
+});
+
+// ── Start server ──────────────────────────────────────────────────────────────
 const startServer = async () => {
   try {
-    // 1. Authenticate
     await db.sequelize.authenticate();
     console.log("✔ MySQL Connected...");
 
-    // 2. FORCE SYNC (Change this part)
-    // Using { alter: true } will attempt to update the column type automatically.
-    // If it fails due to existing data, use { force: true } ONCE to reset the table.
-    await db.sequelize.sync({ alter: true }); 
-    console.log("✔ Database synced and schema updated to UUID.");
+    // alter: true adds new tables/columns without dropping existing data
+    await db.sequelize.sync({ alter: true });
+    console.log("✔ Database synced — all new tables created.");
 
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-      console.log(`🚀 Server flying on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (err) {
     console.error("✘ Server failed to start:", err.message);
