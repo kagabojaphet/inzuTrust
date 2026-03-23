@@ -11,10 +11,10 @@ import AdminFeatures from '../components/home/AdminFeatures';
 import AdminAnalytics from '../components/home/AdminAnalytics';
 
 
-import oneHouse from '../assets/image/one.jpg';
-import oneTwo from '../assets/image/two.jpg';
-import oneThree from '../assets/image/three.jpg';
-import oneFour from '../assets/image/four.jpg';
+import oneHouse from '../assets/image/One.jpg';
+import oneTwo from '../assets/image/Two.jpg';
+import oneThree from '../assets/image/Three.jpg';
+import oneFour from '../assets/image/Four.jpg';
 
 const Home = () => {
   const heroImages = [oneHouse, oneTwo, oneThree, oneFour];

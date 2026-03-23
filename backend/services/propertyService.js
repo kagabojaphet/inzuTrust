@@ -1,8 +1,9 @@
-
-const { Op } = require("sequelize");
+// services/propertyService.js
 const Property = require("../model/propertyModel");
 
 const createProperty = async (landlordId, payload) => {
+  // cast numeric fields that can arrive as strings from form-data
+  
   const data = {
     ...payload,
     landlordId,
@@ -116,8 +117,8 @@ const updateProperty = async (id, landlordId, updates) => {
     throw new Error("Not authorized to update this property");
   }
 
+  // cast when updating too
   const data = { ...updates };
-
   if (data.rentAmount !== undefined && data.rentAmount !== null) {
     data.rentAmount = Number(data.rentAmount);
   }
