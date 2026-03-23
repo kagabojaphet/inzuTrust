@@ -1,35 +1,38 @@
 const sequelize = require("../config/database");
 
-const User = require("./userModel");
-const TenantProfile = require("./tenantProfile"); // New
-const LandlordProfile = require("./landlordProfile"); // New
-const Property = require("./propertyModel");
-const Contact = require("./contactModel");
+// ── Existing models ───────────────────────────────────────────────────────────
+const Meeting         = require("./meetingModel");
+const User            = require("./userModel");
+const TenantProfile   = require("./tenantProfile");
+const LandlordProfile = require("./landlordProfile");
+const Property        = require("./propertyModel");
+const Contact         = require("./contactModel");
+const NewsPost        = require("./newsPostModel");
+const NewsReaction    = require("./newsReactionModel");
+const NewsComment     = require("./newsCommentModel");
+const Favorite        = require("./favoriteModel");
+const ViewingRequest  = require("./viewingRequestModel");
 
-
-const NewsPost = require("./newsPostModel");
-const NewsReaction = require("./newsReactionModel");
-const NewsComment = require("./newsCommentModel");
+// ── New models (Corrected to match your actual filenames) ─────────────────────
+// NOTE: I changed these to match the 📜 icons in your folder tree exactly.
+const LeaseApplication = require("./leaseapplication"); // was leaseApplicationModel
+const Agreement        = require("./agreement");        // was agreementModel
+const Payment          = require("./payment");          // was paymentModel
+const Dispute          = require("./dispute");          // was disputeModel
+const DisputeMessage   = require("./disputeMessage");   // was disputeMessageModel
+const DisputeEvidence  = require("./disputeEvidence");  // was disputeEvidenceModel
+const Message          = require("./message");          // was messageModel
+const TrustScoreLog    = require("./trustScoreLog");    // was trustScoreLogModel
+const Notification     = require("./notification");     // was notificationModel
 
 const db = {};
 
 db.sequelize = sequelize;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
 
-// Models
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
-db.User = User;
-db.Property = Property;
-db.Contact = Contact;
->>>>>>> 4cf61aa (nongereyemo  Contact Us feature with auto reply using nodemailer)
-
-<<<<<<< HEAD
-// Models
-db.User = User;
-db.TenantProfile = TenantProfile;
+// ── Attach all models ─────────────────────────────────────────────────────────
+db.Meeting         = Meeting;
+db.User            = User;
+db.TenantProfile   = TenantProfile;
 db.LandlordProfile = LandlordProfile;
 db.Property        = Property;
 db.Contact         = Contact;
@@ -107,40 +110,15 @@ db.User.hasMany(db.Property, {
   as: "ownedProperties",
   onDelete: "CASCADE",
 });
-
-=======
-db.NewsPost = NewsPost;
-db.NewsReaction = NewsReaction;
-db.NewsComment = NewsComment;
-
-/* ===========================
-   Relationships
-=========================== */
-
-// User (Landlord) -> Properties
-db.User.hasMany(db.Property, {
-  foreignKey: "landlordId",
-  as: "ownedProperties",
-  onDelete: "CASCADE",
-});
-
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
 db.Property.belongsTo(db.User, {
   foreignKey: "landlordId",
   as: "landlord",
 });
 
 /* ===========================
-<<<<<<< HEAD
     News Relationships
 =========================== */
 
-=======
-   News Relationships
-=========================== */
-
-// A User creates many NewsPosts
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
 db.User.hasMany(db.NewsPost, {
   foreignKey: "authorId",
   as: "newsPosts",
@@ -151,10 +129,6 @@ db.NewsPost.belongsTo(db.User, {
   as: "author",
 });
 
-<<<<<<< HEAD
-=======
-// NewsPost -> Reactions (like/dislike)
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
 db.NewsPost.hasMany(db.NewsReaction, {
   foreignKey: "newsPostId",
   as: "reactions",
@@ -165,10 +139,6 @@ db.NewsReaction.belongsTo(db.NewsPost, {
   as: "newsPost",
 });
 
-<<<<<<< HEAD
-=======
-// User -> Reactions
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
 db.User.hasMany(db.NewsReaction, {
   foreignKey: "userId",
   as: "newsReactions",
@@ -179,10 +149,6 @@ db.NewsReaction.belongsTo(db.User, {
   as: "user",
 });
 
-<<<<<<< HEAD
-=======
-// NewsPost -> Comments
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
 db.NewsPost.hasMany(db.NewsComment, {
   foreignKey: "newsPostId",
   as: "comments",
@@ -193,10 +159,6 @@ db.NewsComment.belongsTo(db.NewsPost, {
   as: "newsPost",
 });
 
-<<<<<<< HEAD
-=======
-// User -> Comments
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
 db.User.hasMany(db.NewsComment, {
   foreignKey: "userId",
   as: "newsComments",
@@ -205,7 +167,6 @@ db.User.hasMany(db.NewsComment, {
 db.NewsComment.belongsTo(db.User, {
   foreignKey: "userId",
   as: "user",
-<<<<<<< HEAD
 });
 
 /* ===========================
@@ -264,8 +225,253 @@ db.User.hasMany(db.ViewingRequest, {
 db.ViewingRequest.belongsTo(db.User, {
   foreignKey: "landlordId",
   as: "landlord",
-=======
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
+});
+
+/* ===========================
+    LeaseApplication Relationships
+=========================== */
+
+db.User.hasMany(db.LeaseApplication, {
+  foreignKey: "tenantId",
+  as: "myApplications",
+  onDelete: "CASCADE",
+});
+db.LeaseApplication.belongsTo(db.User, {
+  foreignKey: "tenantId",
+  as: "tenant",
+});
+
+db.User.hasMany(db.LeaseApplication, {
+  foreignKey: "landlordId",
+  as: "receivedApplications",
+  onDelete: "CASCADE",
+});
+db.LeaseApplication.belongsTo(db.User, {
+  foreignKey: "landlordId",
+  as: "landlord",
+});
+
+db.Property.hasMany(db.LeaseApplication, {
+  foreignKey: "propertyId",
+  as: "applications",
+  onDelete: "CASCADE",
+});
+db.LeaseApplication.belongsTo(db.Property, {
+  foreignKey: "propertyId",
+  as: "property",
+});
+
+/* ===========================
+    Agreement Relationships
+=========================== */
+
+db.User.hasMany(db.Agreement, {
+  foreignKey: "landlordId",
+  as: "landlordAgreements",
+  onDelete: "CASCADE",
+});
+db.Agreement.belongsTo(db.User, {
+  foreignKey: "landlordId",
+  as: "landlord",
+});
+
+db.User.hasMany(db.Agreement, {
+  foreignKey: "tenantId",
+  as: "tenantAgreements",
+  onDelete: "CASCADE",
+});
+db.Agreement.belongsTo(db.User, {
+  foreignKey: "tenantId",
+  as: "tenant",
+});
+
+db.Property.hasMany(db.Agreement, {
+  foreignKey: "propertyId",
+  as: "agreements",
+  onDelete: "CASCADE",
+});
+db.Agreement.belongsTo(db.Property, {
+  foreignKey: "propertyId",
+  as: "property",
+});
+
+db.LeaseApplication.hasOne(db.Agreement, {
+  foreignKey: "leaseApplicationId",
+  as: "agreement",
+});
+db.Agreement.belongsTo(db.LeaseApplication, {
+  foreignKey: "leaseApplicationId",
+  as: "application",
+});
+
+/* ===========================
+    Payment Relationships
+=========================== */
+
+db.User.hasMany(db.Payment, {
+  foreignKey: "tenantId",
+  as: "tenantPayments",
+  onDelete: "CASCADE",
+});
+db.Payment.belongsTo(db.User, {
+  foreignKey: "tenantId",
+  as: "tenant",
+});
+
+db.User.hasMany(db.Payment, {
+  foreignKey: "landlordId",
+  as: "landlordPayments",
+  onDelete: "CASCADE",
+});
+db.Payment.belongsTo(db.User, {
+  foreignKey: "landlordId",
+  as: "landlord",
+});
+
+db.Agreement.hasMany(db.Payment, {
+  foreignKey: "agreementId",
+  as: "payments",
+  onDelete: "CASCADE",
+});
+db.Payment.belongsTo(db.Agreement, {
+  foreignKey: "agreementId",
+  as: "agreement",
+});
+
+db.Property.hasMany(db.Payment, {
+  foreignKey: "propertyId",
+  as: "payments",
+  onDelete: "CASCADE",
+});
+db.Payment.belongsTo(db.Property, {
+  foreignKey: "propertyId",
+  as: "property",
+});
+
+/* ===========================
+    Dispute Relationships
+=========================== */
+
+db.User.hasMany(db.Dispute, {
+  foreignKey: "reporterId",
+  as: "filedDisputes",
+  onDelete: "CASCADE",
+});
+db.Dispute.belongsTo(db.User, {
+  foreignKey: "reporterId",
+  as: "reporter",
+});
+
+db.User.hasMany(db.Dispute, {
+  foreignKey: "respondentId",
+  as: "receivedDisputes",
+  onDelete: "SET NULL",
+});
+db.Dispute.belongsTo(db.User, {
+  foreignKey: "respondentId",
+  as: "respondent",
+});
+
+db.Property.hasMany(db.Dispute, {
+  foreignKey: "propertyId",
+  as: "disputes",
+  onDelete: "SET NULL",
+});
+db.Dispute.belongsTo(db.Property, {
+  foreignKey: "propertyId",
+  as: "property",
+});
+
+db.Dispute.hasMany(db.DisputeMessage, {
+  foreignKey: "disputeId",
+  as: "messages",
+  onDelete: "CASCADE",
+});
+db.DisputeMessage.belongsTo(db.Dispute, {
+  foreignKey: "disputeId",
+  as: "dispute",
+});
+
+db.User.hasMany(db.DisputeMessage, {
+  foreignKey: "senderId",
+  as: "disputeMessages",
+  onDelete: "CASCADE",
+});
+db.DisputeMessage.belongsTo(db.User, {
+  foreignKey: "senderId",
+  as: "sender",
+});
+
+db.Dispute.hasMany(db.DisputeEvidence, {
+  foreignKey: "disputeId",
+  as: "evidence",
+  onDelete: "CASCADE",
+});
+db.DisputeEvidence.belongsTo(db.Dispute, {
+  foreignKey: "disputeId",
+  as: "dispute",
+});
+
+db.User.hasMany(db.DisputeEvidence, {
+  foreignKey: "uploadedBy",
+  as: "uploadedEvidence",
+  onDelete: "CASCADE",
+});
+db.DisputeEvidence.belongsTo(db.User, {
+  foreignKey: "uploadedBy",
+  as: "uploader",
+});
+
+/* ===========================
+    Message Relationships
+=========================== */
+
+db.User.hasMany(db.Message, {
+  foreignKey: "senderId",
+  as: "sentMessages",
+  onDelete: "CASCADE",
+});
+db.Message.belongsTo(db.User, {
+  foreignKey: "senderId",
+  as: "sender",
+});
+
+db.User.hasMany(db.Message, {
+  foreignKey: "receiverId",
+  as: "receivedMessages",
+  onDelete: "CASCADE",
+});
+db.Message.belongsTo(db.User, {
+  foreignKey: "receiverId",
+  as: "receiver",
+});
+
+/* ===========================
+    TrustScoreLog Relationships
+=========================== */
+
+db.User.hasMany(db.TrustScoreLog, {
+  foreignKey: "tenantId",
+  as: "trustScoreLogs",
+  onDelete: "CASCADE",
+});
+db.TrustScoreLog.belongsTo(db.User, {
+  foreignKey: "tenantId",
+  as: "tenant",
+});
+
+/* ===========================
+    Notification Relationships
+=========================== */
+
+db.User.hasMany(db.Notification, {
+  foreignKey: "userId",
+  as: "notifications",
+  onDelete: "CASCADE",
+});
+db.Notification.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "user",
 });
 
 module.exports = db;
