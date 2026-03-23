@@ -6,7 +6,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { API_BASE } from "../../config";
 
 import AgreementCard from "./agreements/AgreementCard";
-// import SignModal     from "./agreements/SignModal";
+import SignModal     from "./agreements/SignModal";
 import { isPendingStatus } from "./agreements/agreementHelpers";
 
 export default function TenantAgreements({ token, user }) {
@@ -105,6 +105,7 @@ export default function TenantAgreements({ token, user }) {
         {/* Sign modal — shown inline when tenant clicks Sign Agreement */}
         {signing && (
           <SignModal
+          
             agreement={signing}
             tenantName={tenantName}
             token={token}

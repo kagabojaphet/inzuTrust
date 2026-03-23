@@ -24,23 +24,6 @@ export default function InzuTrustHelpCenter() {
   return (
     <div className="bg-white font-sans text-slate-900 antialiased">
 
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10flex items-center justify-center"><img src={logo} alt="logo"/></div>
-              <span className="text-2xl font-bold tracking-tight text-sky-700">InzuTrust</span>
-              <span className="ml-2 px-2 py-1 bg-gray-100 text-xs font-semibold rounded uppercase tracking-wider text-gray-500">Help Center</span>
-            </div>
-            <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-600">
-              <a className="hover:text-sky-700 transition-colors" href="#">Submit Request</a>
-              <a className="hover:text-sky-700 transition-colors" href="#">My Tickets</a>
-              <a className="px-5 py-2.5 bg-sky-700 text-white rounded-full hover:bg-sky-800 transition-all" href="#">Go to Platform</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* ── HERO ── */}
       <header
         className="pt-16 pb-24 px-4 border-b border-blue-50"
