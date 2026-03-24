@@ -1,6 +1,6 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
-// Import logos from your local directory
 import GovLogo from '../../assets/logo/Government.png';
 import RRALogo from '../../assets/logo/RRA.png';
 import IERLogo from '../../assets/logo/IER.png';
@@ -12,6 +12,8 @@ import IMLogo from '../../assets/logo/IM.png';
 import VisaLogo from '../../assets/logo/Visa.png';
 
 const Partners = () => {
+  const { t } = useLanguage();
+
   const partners = [
     { name: "Government of Rwanda", logo: GovLogo,},
     { name: "RRA", logo: RRALogo },
@@ -30,13 +32,11 @@ const Partners = () => {
     <section className="w-full py-16 bg-white overflow-hidden border-y border-slate-50">
       <div className="w-full px-6 md:px-12 text-center mb-12">
         <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none">
-          Regulated & Trusted BY
+          {t("partners.title")}
         </h2>
       </div>
 
-      {/* Unified Animation Track */}
       <div className="relative flex w-full items-center">
-        {/* All logos move inside this single div */}
         <div className="flex animate-infinite-scroll whitespace-nowrap items-center gap-20 md:gap-32">
           {scrollingPartners.map((partner, index) => (
             <div 
@@ -50,13 +50,11 @@ const Partners = () => {
                   partner.isGov ? 'h-24 md:h-32' : 'h-14 md:h-18'
                 } w-auto object-contain block`} 
               />
-
             </div>
           ))}
         </div>
       </div>
 
-      {/* Critical CSS for the moving effect */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes scroll {
           0% { transform: translateX(0); }
@@ -67,7 +65,6 @@ const Partners = () => {
           width: max-content;
           animation: scroll 30s linear infinite;
         }
-        /* Pause on hover to let users look at a specific partner */
         .animate-infinite-scroll:hover {
           animation-play-state: paused;
         }

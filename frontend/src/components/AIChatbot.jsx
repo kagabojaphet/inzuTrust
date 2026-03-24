@@ -1,114 +1,253 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { HiOutlineChatAlt2, HiX, HiPaperAirplane } from "react-icons/hi";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import "./AiChatbox.css";
+import iraLogo from "../assets/ira-logo.png";
+import ChatMessage from "./ChatMessage";
 
-const AIChatbot = () => {
+const knowledgeBase = [ /* ... keep your existing knowledgeBase ... */ ];
+
+const quickSuggestions = [
+  "How do I search for properties?",
+  "How do I request a viewing?",
+  "How do favorites work?",
+  "How can landlords post a property?",
+];
+
+const initialMessages = [
+  {
+    id: 1,
+    sender: "bot",
+    text: "Hi 👋 I'm IRA, your smart rental assistant. Ask me anything about properties, viewings, or using InzuTrust!",
+    time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  },
+];
+
+const getBotResponse = (message) => {
+  const clean = message
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "") // remove symbols/emojis
+    .trim();
+
+  // 👋 greetings
+  if (["hi", "hello", "hey"].some(g => clean.includes(g))) {
+    return {
+      text: "Hey 👋 What would you like to do?",
+      actions: [
+        { label: "Find a house 🏠", value: "find_house" },
+        { label: "Request a viewing 📅", value: "request_viewing" },
+        { label: "Post a property 📤", value: "post_property" },
+      ],
+    };
+  }
+
+  // 🎯 DIRECT INTENT MATCHING (IMPORTANT FIX)
+  if (clean.includes("search") || clean.includes("find")) {
+    return "🔍 To search for properties:\nGo to the Properties page and use filters like location, price, and type.";
+  }
+
+  if (clean.includes("viewing") || clean.includes("visit")) {
+    return "📅 To request a viewing:\nOpen a property → Click 'Request Viewing' → Select date & time.";
+  }
+
+  if (clean.includes("favorite")) {
+    return "⭐ You can save properties by clicking the 'Favorite' button and view them later in your dashboard.";
+  }
+
+  if (clean.includes("post") || clean.includes("upload")) {
+    return "📤 To post a property:\nGo to your dashboard → Add Property → Fill details → Upload images.";
+  }
+
+  // 🧠 fallback
+  return "Hmm 🤔 I didn’t get that.\nTry:\n• Find a house\n• Request a viewing\n• Post a property";
+};
+export default function AiChatbox() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false); // New state for delayed entry
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("inzutrust_chat_history");
+    return saved ? JSON.parse(saved) : initialMessages;
+  });
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hello! I am the InzuTrust Assistant. Ask me about our Mission, Vision, or Services." }
-  ]);
-  
-  const scrollRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [timeoutId, setTimeoutId] = useState(null);
 
-  // Phase 1: Delayed Entry - Icon appears after 3 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 3000); // 3-second delay
-    return () => clearTimeout(timer);
-  }, []);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
+  // Debounced localStorage
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    const id = setTimeout(() => {
+      const limited = messages.slice(-50);
+      localStorage.setItem("inzutrust_chat_history", JSON.stringify(limited));
+    }, 300);
+    return () => clearTimeout(id);
   }, [messages]);
 
-  const KNOWLEDGE_BASE = {
-    mission: "Our mission is to make renting secure, transparent, and easy for everyone in East Africa.",
-    vision: "Our vision is to be the leading digital trust platform, empowering landlords and tenants with verified data.",
-    services: "We provide real-time messaging, virtual tours, smart scheduling, and premium support.",
-    fallback: "I am only trained to answer questions about InzuTrust's Mission, Vision, and Services. Please ask me about those topics!"
-  };
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const userMessage = { role: 'user', text: input };
-    setMessages(prev => [...prev, userMessage]);
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      setTimeout(() => inputRef.current.focus(), 100);
+    }
+  }, [isOpen]);
 
-    const query = input.toLowerCase();
-    let botReply = KNOWLEDGE_BASE.fallback;
+  // Escape key
+  useEffect(() => {
+    const handleEsc = (e) => e.key === "Escape" && isOpen && setIsOpen(false);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen]);
 
-    if (query.includes("mission") || query.includes("goal")) botReply = KNOWLEDGE_BASE.mission;
-    if (query.includes("vision") || query.includes("future")) botReply = KNOWLEDGE_BASE.vision;
-    if (query.includes("service") || query.includes("offer")) botReply = KNOWLEDGE_BASE.services;
+  const sendMessage = useCallback((text) => {
+    if (!text?.trim() || isTyping) return;
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'bot', text: botReply }]);
-    }, 500);
+    const userMessage = {
+      id: Date.now(),
+      sender: "user",
+      text: text.trim(),
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setIsTyping(true);
+
+    const id = setTimeout(() => {
+      const response = getBotResponse(text);
+      
+      const botReply = {
+        id: Date.now() + 1,
+        sender: "bot",
+        text: typeof response === "string" ? response : response.text,
+        actions: response.actions || [],
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      
+      setMessages((prev) => [...prev, botReply]);
+      setIsTyping(false);
+    }, 650);
+
+    setTimeoutId(id);
+  }, [isTyping]);
+
+  const stopTyping = useCallback(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+    setIsTyping(false);
+  }, [timeoutId]);
+
+  const handleSubmit = useCallback((e) => {
+    e.preventDefault();
+    sendMessage(input);
     setInput("");
-  };
+  }, [input, sendMessage]);
 
-  // If the timer hasn't finished, show nothing
-  if (!isVisible) return null;
+  const clearChat = useCallback(() => {
+    setMessages(initialMessages);
+    localStorage.removeItem("inzutrust_chat_history");
+  }, []);
+
+  const copyToClipboard = useCallback((text) => {
+    navigator.clipboard.writeText(text);
+    // Optional: You can add a toast notification here later
+  }, []);
+
+  const suggestions = useMemo(() => quickSuggestions, []);
 
   return (
-    /* Fix: Lowered Z-index of the outer container so it doesn't block the Navbar */
-    <div className="fixed bottom-8 right-8 z-[50] font-sans text-left">
-      
+    <>
+      <button
+        className="chat-toggle-btn"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "Close chat" : "Open IRA assistant"}
+      >
+        {isOpen ? "✕" : <img src={iraLogo} alt="IRA" className="chat-logo" />}
+      </button>
+
       {isOpen && (
-        /* Chat window adjusted to ensure it stays below fixed navigation bars if necessary */
-        <div className="absolute bottom-20 right-0 w-[350px] h-[500px] bg-white rounded-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 z-[60]">
-          
-          {/* Header using Brand Blue */}
-          <div className="bg-blue-600 p-6 text-white flex justify-between items-center shadow-md">
-            <h4 className="font-black text-lg tracking-tight">InzuTrust AI</h4>
-            <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform">
-              <HiX className="text-xl" />
+        <div className="chatbox-wrapper" role="dialog" aria-labelledby="chat-title">
+          <div className="chatbox-header">
+            <div className="chat-header-info">
+              <img src={iraLogo} alt="IRA" className="header-logo" />
+              <div>
+                <h3 id="chat-title">IRA</h3>
+                <p>Your Inzu Rental Assistant • Online</p>
+              </div>
+            </div>
+            <button className="clear-btn" onClick={clearChat}>
+              Clear
             </button>
           </div>
 
-          <div ref={scrollRef} className="flex-1 p-4 bg-slate-50 overflow-y-auto space-y-4">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'bot' ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-semibold leading-relaxed shadow-sm ${
-                  msg.role === 'bot' ? 'bg-white text-slate-700 rounded-tl-none border border-slate-100' : 'bg-blue-600 text-white rounded-tr-none'
-                }`}>
-                  {msg.text}
+          <div className="chatbox-body">
+            {messages.map((msg) => (
+              <ChatMessage 
+                key={msg.id} 
+                msg={msg} 
+                onCopy={copyToClipboard}
+                onActionClick={sendMessage}
+              />
+            ))}
+
+            {isTyping && (
+              <div className="chat-message-row bot-row">
+                <div className="bot-avatar">
+                  <img src={iraLogo} alt="IRA" />
+                </div>
+                <div className="typing-wrapper">
+                  <div className="chat-message bot typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <button onClick={stopTyping} className="stop-btn">
+                    Stop
+                  </button>
                 </div>
               </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="chat-suggestions">
+            {suggestions.map((suggestion, index) => (
+              <button
+                key={index}
+                className="suggestion-btn"
+                onClick={() => sendMessage(suggestion)}
+                disabled={isTyping}
+              >
+                {suggestion}
+              </button>
             ))}
           </div>
 
-          <div className="p-4 bg-white border-t border-slate-100 flex gap-2">
-            <input 
+          <form className="chatbox-input-area" onSubmit={handleSubmit}>
+            <input
+              ref={inputRef}
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about our Vision..." 
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(input);
+                  setInput("");
+                }
+              }}
+              placeholder="Ask IRA anything about renting..."
+              disabled={isTyping}
             />
-            <button onClick={handleSend} className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors">
-              <HiPaperAirplane />
+            <button type="submit" disabled={!input.trim() || isTyping}>
+              Send
             </button>
-          </div>
+          </form>
         </div>
       )}
-
-      {/* Blue Trigger Button with Icons */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 bg-brand-blue-bright rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all text-white active:scale-95 animate-in zoom-in-0 duration-500"
-      >
-        {isOpen ? (
-          <HiX className="text-3xl" />
-        ) : (
-          <HiOutlineChatAlt2 className="text-3xl" />
-        )}
-      </button>
-    </div>
+    </>
   );
-};
-
-export default AIChatbot;
+}
