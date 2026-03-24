@@ -11,9 +11,9 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import RegisterTenant from './pages/TenantRegister'
 import RegisterLandlord from './pages/LandlordRegister'
-import TenantDashboard from './pages/TenantDashboard'
-import LandlordDashboard from './pages/LandlordDashboard'
-import AdminDashboard from './pages/AdminDashboard' 
+import TenantDashboard from './pages/TenantDashboard' 
+import LandlordDashboard from './pages/LandlordDashboard' // Updated import name
+import AdminDashboard from './pages/AdminDashboard'
 import Properties from './pages/Properties'
 import Profile from './pages/Profile'
 import AIChatbot from './components/AIChatbot';
@@ -26,8 +26,10 @@ import Board from './pages/Board';
 import Careers from './pages/Careers';
 import Pricing from './pages/Pricing';
 import VerifyOTP from './components/VerifyOTP';
-
-
+import HelpCenter from './pages/HelpCenter'
+import ContactUs from './pages/ContactUs'
+import Documentation from './pages/Documentation'
+import TermsAndConditions from './pages/TermsAndConditions'
 import './App.css'
 
 function PublicLayout({ children, showFooter = true }) {
@@ -91,6 +93,7 @@ export default function App() {
             } 
           />
 
+          Landlord specific dashboard
           <Route 
             path="/landlord/dashboard" 
             element={
@@ -101,7 +104,10 @@ export default function App() {
           />
 
           {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+         <Route path="/help-center" element={<PublicLayout><HelpCenter /></PublicLayout>} />
+<Route path="/contact-us" element={<PublicLayout><ContactUs /></PublicLayout>} />
+<Route path="/documentation" element={<PublicLayout><Documentation /></PublicLayout>} /> 
+<Route path="/terms-and-conditions" element={<PublicLayout><TermsAndConditions /></PublicLayout>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

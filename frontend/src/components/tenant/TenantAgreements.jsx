@@ -105,6 +105,7 @@ export default function TenantAgreements({ token, user }) {
         {/* Sign modal — shown inline when tenant clicks Sign Agreement */}
         {signing && (
           <SignModal
+          
             agreement={signing}
             tenantName={tenantName}
             token={token}
