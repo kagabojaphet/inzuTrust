@@ -2,13 +2,13 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 88px;
-  height: 78px;
+  width: 58px;
+  height: 58px;
   border: none;
   border-radius: 50%;
   background: #ffffff;
   color: rgb(4, 0, 255);
-  font-size: 40px;
+  font-size: 43px;
   font-weight: bold;
   overflow: hidden;
   cursor: pointer;

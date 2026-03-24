@@ -1,279 +1,578 @@
+// src/components/landlord/LDProperties.jsx
 import React, { useEffect, useState } from "react";
 import LDPropertyDetail from "./LDPropertyDetail";
-import { HiPlus, HiPencil, HiTrash, HiEye, HiSearch } from "react-icons/hi";
+import {
+  HiPlus, HiPencil, HiTrash, HiEye, HiSearch,
+  HiDotsVertical, HiOfficeBuilding, HiCheckCircle,
+  HiExclamationCircle, HiCurrencyDollar, HiViewGrid,
+  HiViewList, HiFilter, HiLocationMarker, HiPhotograph,
+  HiRefresh, HiChevronDown, HiAdjustments
+} from "react-icons/hi";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { API_BASE } from "../../config";
 
-// ── API status → display label + style ───────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const STATUS_MAP = {
-  available: { label: "Vacant",   style: "bg-yellow-50 text-yellow-700 border border-yellow-100" },
-  occupied:  { label: "Occupied", style: "bg-green-50  text-green-700  border border-green-100"  },
+  available: { label: "Vacant",   style: "bg-amber-50 text-amber-700 border border-amber-200",  dot: "bg-amber-400"  },
+  occupied:  { label: "Occupied", style: "bg-green-50 text-green-700 border border-green-200",  dot: "bg-green-500"  },
+  draft:     { label: "Draft",    style: "bg-gray-100 text-gray-500 border border-gray-200",    dot: "bg-gray-400"   },
 };
 
-// ── images comes back as a JSON string from your backend ─────────────────────
-const parseImages = (raw) => {
+const parseImages = raw => {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw;
   try { return JSON.parse(raw); } catch { return []; }
 };
 
-const formatRWF = (n) => `${Number(n).toLocaleString()} RWF`;
+const fmtRWF = n => n ? `RWF ${Number(n).toLocaleString()}` : "—";
 
-// ── Property card skeleton ────────────────────────────────────────────────────
-function PropertyCardSkeleton() {
+// ── Stat card ─────────────────────────────────────────────────────────────────
+function StatCard({ icon: Icon, iconBg, label, value, sub }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-      <Skeleton height={128} borderRadius={0} />
-      <div className="p-4 space-y-2.5">
-        <div className="flex items-center justify-between gap-2">
-          <Skeleton width={140} height={14} borderRadius={6} />
-          <Skeleton width={56}  height={20} borderRadius={20} />
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center gap-4">
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+        <Icon className="text-xl text-white"/>
+      </div>
+      <div>
+        <p className="text-xs text-gray-400 font-medium">{label}</p>
+        <p className="text-2xl font-black text-gray-900 leading-tight">{value}</p>
+        {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
+      </div>
+    </div>
+  );
+}
+
+// ── Actions menu ──────────────────────────────────────────────────────────────
+function ActionsMenu({ pid, onView, onEdit, onDelete }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen(o => !o)}
+        className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
+        <HiDotsVertical/>
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)}/>
+          <div className="absolute right-0 top-9 z-20 bg-white border border-gray-200 rounded-xl shadow-lg w-36 py-1 overflow-hidden">
+            <button onClick={() => { onView(pid); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+              <HiEye className="text-gray-400"/> View
+            </button>
+            <button onClick={() => { onEdit(pid); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+              <HiPencil className="text-gray-400"/> Edit
+            </button>
+            <div className="border-t border-gray-100 my-1"/>
+            <button onClick={() => { onDelete(pid); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+              <HiTrash className="text-red-400"/> Delete
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Table row ─────────────────────────────────────────────────────────────────
+function PropertyRow({ p, checked, onCheck, onView, onEdit, onDelete }) {
+  const pid    = p.id || p._id;
+  const thumb  = p.imagesList?.[0] || p.mainImage || null;
+  const status = STATUS_MAP[p.status] || STATUS_MAP.available;
+
+  return (
+    <div className={`grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-gray-50 transition border-b border-gray-50 last:border-0 ${
+      checked ? "bg-blue-50/40" : ""
+    }`}>
+      {/* Checkbox */}
+      <div className="col-span-1 flex items-center">
+        <input type="checkbox" checked={checked} onChange={() => onCheck(pid)}
+          className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer"/>
+      </div>
+
+      {/* Property — col 4 */}
+      <div className="col-span-4 flex items-center gap-3 min-w-0">
+        <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+          {thumb
+            ? <img src={thumb} alt={p.title} className="w-full h-full object-cover"/>
+            : <div className="w-full h-full flex items-center justify-center">
+                <HiPhotograph className="text-gray-300 text-xl"/>
+              </div>
+          }
         </div>
-        <Skeleton width={160} height={12} borderRadius={6} />
-        <div className="flex items-center justify-between">
-          <Skeleton width={110} height={14} borderRadius={6} />
-          <Skeleton width={70}  height={20} borderRadius={20} />
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-gray-900 truncate">{p.title || p.name}</p>
+          <p className="text-[11px] text-gray-400 mt-0.5">
+            {p.bedrooms > 0 ? `${p.bedrooms} Bed` : ""}
+            {p.bathrooms > 0 ? ` • ${p.bathrooms} Bath` : ""}
+            {p.area ? ` • ${p.area}m²` : ""}
+          </p>
         </div>
-        <div className="flex gap-2 pt-1">
-          <Skeleton height={34} borderRadius={12} containerClassName="flex-1" />
-          <Skeleton height={34} borderRadius={12} containerClassName="flex-1" />
-          <Skeleton width={40}  height={34} borderRadius={12} />
+      </div>
+
+      {/* Location — col 2 */}
+      <div className="col-span-2 min-w-0">
+        <p className="text-sm text-gray-700 font-medium truncate">{p.district}</p>
+        <p className="text-[11px] text-gray-400 truncate">{p.sector || "—"}</p>
+      </div>
+
+      {/* Rent — col 2 */}
+      <div className="col-span-2">
+        <p className="text-sm font-black text-gray-900">{fmtRWF(p.rentAmount)}</p>
+        <p className="text-[10px] text-gray-400 mt-0.5">Due 1st of month</p>
+      </div>
+
+      {/* Status — col 1 */}
+      <div className="col-span-1">
+        <span className={`inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full ${status.style}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`}/>
+          {status.label}
+        </span>
+      </div>
+
+      {/* Type — col 1 */}
+      <div className="col-span-1">
+        <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-lg font-semibold capitalize">
+          {p.type || "—"}
+        </span>
+      </div>
+
+      {/* Actions — col 1 */}
+      <div className="col-span-1 flex justify-end">
+        <ActionsMenu pid={pid} onView={onView} onEdit={onEdit} onDelete={onDelete}/>
+      </div>
+    </div>
+  );
+}
+
+// ── Grid card ─────────────────────────────────────────────────────────────────
+function PropertyCard({ p, onView, onEdit, onDelete }) {
+  const pid    = p.id || p._id;
+  const thumb  = p.imagesList?.[0] || p.mainImage || null;
+  const status = STATUS_MAP[p.status] || STATUS_MAP.available;
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition group">
+      <div className="h-36 bg-gray-100 overflow-hidden relative">
+        {thumb
+          ? <img src={thumb} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300"/>
+          : <div className="w-full h-full flex items-center justify-center">
+              <HiPhotograph className="text-gray-300 text-4xl"/>
+            </div>
+        }
+        <span className={`absolute top-2.5 right-2.5 inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full ${status.style}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`}/>
+          {status.label}
+        </span>
+      </div>
+      <div className="p-4">
+        <p className="font-black text-gray-900 text-sm truncate mb-0.5">{p.title || p.name}</p>
+        <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
+          <HiLocationMarker className="shrink-0"/> {p.district}{p.sector ? `, ${p.sector}` : ""}
+        </p>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm font-black text-blue-600">{fmtRWF(p.rentAmount)}<span className="text-gray-400 font-normal">/mo</span></span>
+          <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-lg font-semibold capitalize">{p.type}</span>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => onView(pid)}
+            className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-bold border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+            <HiEye/> View
+          </button>
+          <button onClick={() => onEdit(pid)}
+            className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-bold border border-blue-200 rounded-xl text-blue-600 hover:bg-blue-50 transition">
+            <HiPencil/> Edit
+          </button>
+          <button onClick={() => onDelete(pid)}
+            className="w-9 flex items-center justify-center border border-red-100 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition">
+            <HiTrash/>
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
+// ── Main component ────────────────────────────────────────────────────────────
 export default function LDProperties({ token, setActive }) {
-  const [properties, setProperties] = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState("");
-  const [search,     setSearch]     = useState("");
-  const [selectedId,  setSelectedId]  = useState(null); // null = list, id = detail
+  const [properties,  setProperties]  = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState("");
+  const [search,      setSearch]      = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [viewMode,    setViewMode]    = useState("table"); // "table" | "grid"
+  const [selected,    setSelected]    = useState(new Set());
+  const [selectedId,  setSelectedId]  = useState(null);
+  const [page,         setPage]         = useState(1);
+  const PAGE_SIZE = 5;
+
+  const resolvedToken = token || localStorage.getItem("inzu_token") || "";
 
   const fetchProperties = async () => {
-    // Use the landlord-specific endpoint — requires auth, returns only their properties
-    const resolvedToken = token || localStorage.getItem("inzu_token") || "";
-
-    if (!resolvedToken) {
-      setError("Not authenticated — please log out and log in again.");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
+    if (!resolvedToken) { setError("Not authenticated."); setLoading(false); return; }
+    setLoading(true); setError("");
     try {
       const res = await fetch(`${API_BASE}/properties/my/list`, {
         headers: { Authorization: `Bearer ${resolvedToken}` },
       });
-
-      const contentType = res.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        setError(`Unexpected server response (${res.status}). Check your API URL.`);
-        return;
-      }
-
+      const ct = res.headers.get("content-type") || "";
+      if (!ct.includes("application/json")) { setError(`Server error (${res.status})`); return; }
       const d = await res.json();
-
       if (res.ok) {
-        // Normalise each property: parse images string → array, map status → display
-        const normalised = (d.data || []).map(p => ({
+        setProperties((d.data || []).map(p => ({
           ...p,
-          imagesList:    parseImages(p.images),
-          statusDisplay: STATUS_MAP[p.status] || STATUS_MAP.available,
-        }));
-        setProperties(normalised);
+          imagesList: parseImages(p.images),
+        })));
       } else {
-        setError(d.message || `Server error ${res.status}`);
+        setError(d.message || `Error ${res.status}`);
       }
-    } catch (err) {
-      setError("Network error — is the server running?");
-      console.error("fetchProperties error:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("Network error — is the server running?"); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { fetchProperties(); }, [token]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this property?")) return;
-    const resolvedToken = token || localStorage.getItem("inzu_token") || "";
+  const handleDelete = async pid => {
+    if (!window.confirm("Delete this property?")) return;
     try {
-      const res = await fetch(`${API_BASE}/properties/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${resolvedToken}` },
+      const res = await fetch(`${API_BASE}/properties/${pid}`, {
+        method: "DELETE", headers: { Authorization: `Bearer ${resolvedToken}` },
       });
-      if (res.ok) {
-        setProperties(prev => prev.filter(p => p.id !== id && p._id !== id));
-      } else {
-        const d = await res.json();
-        alert(d.message || "Delete failed");
-      }
-    } catch {
-      alert("Network error during delete.");
-    }
+      if (res.ok) setProperties(prev => prev.filter(p => (p.id || p._id) !== pid));
+      else { const d = await res.json(); alert(d.message || "Delete failed"); }
+    } catch { alert("Network error."); }
   };
+
+  const toggleCheck = pid => setSelected(prev => {
+    const next = new Set(prev);
+    next.has(pid) ? next.delete(pid) : next.add(pid);
+    return next;
+  });
+
+  const toggleAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map(p => p.id || p._id)));
+  };
+
+  // Reset page when filters change
+  React.useEffect(() => { setPage(1); }, [search, statusFilter]);
 
   const filtered = properties.filter(p => {
     const q = search.toLowerCase();
-    return (
-      p.title?.toLowerCase().includes(q)    ||
+    const matchSearch = !search ||
+      p.title?.toLowerCase().includes(q) ||
       p.district?.toLowerCase().includes(q) ||
-      p.sector?.toLowerCase().includes(q)
-    );
+      p.sector?.toLowerCase().includes(q);
+    const matchStatus = statusFilter === "all" || p.status === statusFilter;
+    return matchSearch && matchStatus;
   });
+
+  const totalPages      = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginatedFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Stats
+  const total    = properties.length;
+  const occupied = properties.filter(p => p.status === "occupied").length;
+  const vacant   = properties.filter(p => p.status === "available").length;
+  const revenue  = properties.reduce((s, p) => s + Number(p.rentAmount || 0), 0);
+  const occupancy = total > 0 ? Math.round((occupied / total) * 100) : 0;
+
+  // Detail view
+  if (selectedId) {
+    return (
+      <LDPropertyDetail
+        propertyId={selectedId}
+        token={token}
+        onBack={() => setSelectedId(null)}
+      />
+    );
+  }
 
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-      {/* ── Property Detail / Edit view ── */}
-      {selectedId && (
-        <LDPropertyDetail
-          propertyId={selectedId}
-          token={token}
-          onBack={() => setSelectedId(null)}
-        />
-      )}
+      <div className="space-y-6">
 
-      {/* ── Properties list ── */}
-      {!selectedId && (
-      <div className="space-y-5 animate-in fade-in duration-500">
+        {/* ── Breadcrumb ── */}
+        <div className="flex items-center gap-2 text-xs text-gray-400">
+          <span className="hover:text-blue-600 cursor-pointer">Portfolio</span>
+          <span>/</span>
+          <span className="text-gray-700 font-semibold">Properties List</span>
+        </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
+        {/* ── Page header ── */}
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-black text-gray-900">Properties</h2>
-            <p className="text-sm text-gray-400 mt-0.5">
-              {loading
-                ? <Skeleton width={130} height={13} borderRadius={6} inline />
-                : `${properties.length} total propert${properties.length === 1 ? "y" : "ies"}`
-              }
+            <h2 className="text-2xl font-black text-gray-900">My Properties</h2>
+            <p className="text-sm text-gray-400 mt-1">
+              Manage your rental portfolio, track occupancy, and view performance metrics.
             </p>
           </div>
-          {/* Navigates to the Add Property multi-step form page */}
-          <button
-            onClick={() => setActive("add-property")}
-            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition shadow-sm"
-          >
-            <HiPlus /> Add Property
+          <button onClick={() => setActive("add-property")}
+            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition shadow-sm shrink-0">
+            <HiPlus/> Add New Property
           </button>
         </div>
 
-        {/* Search */}
-        <div className="relative w-72">
-          <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name or district..."
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 transition"
-          />
+        {/* ── Stat cards ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {loading ? (
+            Array.from({length:4}).map((_,i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-200 p-5">
+                <Skeleton width={44} height={44} borderRadius={12} className="mb-3"/>
+                <Skeleton width={60} height={11} borderRadius={4} className="mb-1"/>
+                <Skeleton width={80} height={28} borderRadius={6}/>
+              </div>
+            ))
+          ) : (
+            <>
+              <StatCard icon={HiOfficeBuilding}    iconBg="bg-blue-500"   label="Total Properties" value={total}       sub={`${total} in portfolio`}/>
+              <StatCard icon={HiCheckCircle}        iconBg="bg-green-500"  label="Occupancy Rate"   value={`${occupancy}%`} sub={`${occupied} of ${total} occupied`}/>
+              <StatCard icon={HiExclamationCircle}  iconBg="bg-amber-500"  label="Vacant Units"     value={vacant}      sub="Available now"/>
+              <StatCard icon={HiCurrencyDollar}     iconBg="bg-purple-500" label="Monthly Revenue"  value={`RWF ${(revenue/1000000).toFixed(1)}M`} sub="Total portfolio"/>
+            </>
+          )}
         </div>
 
-        {/* Error banner */}
+        {/* ── Search + filters + view toggle ── */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Search */}
+          <div className="relative flex-1 min-w-[200px]">
+            <HiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"/>
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search by property name, address..."
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 transition"/>
+          </div>
+
+          {/* Status filter */}
+          <div className="relative">
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+              className="appearance-none pl-4 pr-9 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 font-medium outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer">
+              <option value="all">All Statuses</option>
+              <option value="occupied">Occupied</option>
+              <option value="available">Vacant</option>
+              <option value="draft">Draft</option>
+            </select>
+            <HiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm"/>
+          </div>
+
+          {/* Refresh */}
+          <button onClick={fetchProperties}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 font-medium hover:bg-gray-50 transition">
+            <HiRefresh/> Refresh
+          </button>
+
+          {/* Filter icon button */}
+          <button className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 font-medium hover:bg-gray-50 transition">
+            <HiAdjustments className="text-base"/>
+          </button>
+
+          {/* View toggle */}
+          <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <button onClick={() => setViewMode("table")}
+              className={`px-3 py-2.5 flex items-center gap-1.5 text-sm font-medium transition ${
+                viewMode === "table" ? "bg-blue-600 text-white" : "text-gray-500 hover:bg-gray-50"
+              }`}>
+              <HiViewList className="text-base"/>
+            </button>
+            <button onClick={() => setViewMode("grid")}
+              className={`px-3 py-2.5 flex items-center gap-1.5 text-sm font-medium transition ${
+                viewMode === "grid" ? "bg-blue-600 text-white" : "text-gray-500 hover:bg-gray-50"
+              }`}>
+              <HiViewGrid className="text-base"/>
+            </button>
+          </div>
+        </div>
+
+        {/* ── Error banner ── */}
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
-            <span className="shrink-0">⚠️</span>
+            <span>⚠️</span>
             <span className="flex-1">{error}</span>
-            <button onClick={fetchProperties}
-              className="text-xs font-bold underline hover:text-red-700">
-              Retry
+            <button onClick={fetchProperties} className="text-xs font-bold underline hover:text-red-700">Retry</button>
+          </div>
+        )}
+
+        {/* ── Bulk action bar ── */}
+        {selected.size > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl px-5 py-3 flex items-center gap-4">
+            <span className="text-sm font-bold text-blue-800">{selected.size} selected</span>
+            <button onClick={() => {
+              if (window.confirm(`Delete ${selected.size} properties?`)) {
+                selected.forEach(pid => handleDelete(pid));
+                setSelected(new Set());
+              }
+            }} className="flex items-center gap-1.5 text-sm font-bold text-red-600 hover:text-red-700 transition">
+              <HiTrash/> Delete selected
+            </button>
+            <button onClick={() => setSelected(new Set())} className="ml-auto text-xs text-blue-600 font-bold hover:underline">
+              Clear
             </button>
           </div>
         )}
 
-        {/* ── Skeleton grid ── */}
-        {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <PropertyCardSkeleton key={i} />
-            ))}
+        {/* ── Table view ── */}
+        {viewMode === "table" && (
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            {/* Table header */}
+            <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100 text-[9px] font-black uppercase tracking-wider text-gray-400">
+              <div className="col-span-1 flex items-center">
+                <input type="checkbox"
+                  checked={filtered.length > 0 && selected.size === filtered.length}
+                  onChange={toggleAll}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer"/>
+              </div>
+              <div className="col-span-4">Property</div>
+              <div className="col-span-2">Location</div>
+              <div className="col-span-2">Monthly Rent</div>
+              <div className="col-span-1">Status</div>
+              <div className="col-span-1">Type</div>
+              <div className="col-span-1 text-right">Actions</div>
+            </div>
+
+            <div>
+              {loading ? (
+                Array.from({length:5}).map((_,i) => (
+                  <div key={i} className="grid grid-cols-12 gap-4 px-5 py-4 items-center border-b border-gray-50">
+                    <div className="col-span-1"><Skeleton width={16} height={16} borderRadius={4}/></div>
+                    <div className="col-span-4 flex items-center gap-3">
+                      <Skeleton width={48} height={48} borderRadius={12}/>
+                      <div><Skeleton width={110} height={13} borderRadius={6}/><Skeleton width={80} height={10} borderRadius={6} className="mt-1"/></div>
+                    </div>
+                    <div className="col-span-2"><Skeleton width={80} height={12} borderRadius={6}/></div>
+                    <div className="col-span-2"><Skeleton width={90} height={12} borderRadius={6}/></div>
+                    <div className="col-span-1"><Skeleton width={60} height={22} borderRadius={20}/></div>
+                    <div className="col-span-1"><Skeleton width={50} height={22} borderRadius={8}/></div>
+                    <div className="col-span-1 flex justify-end"><Skeleton circle width={28} height={28}/></div>
+                  </div>
+                ))
+              ) : filtered.length === 0 ? (
+                <div className="text-center py-16">
+                  <HiOfficeBuilding className="text-5xl text-gray-200 mx-auto mb-3"/>
+                  <p className="text-gray-600 font-semibold">
+                    {search || statusFilter !== "all" ? "No properties match your filters" : "No properties yet"}
+                  </p>
+                  {!search && statusFilter === "all" && (
+                    <button onClick={() => setActive("add-property")}
+                      className="mt-4 bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition">
+                      Add First Property
+                    </button>
+                  )}
+                </div>
+              ) : (
+                paginatedFiltered.map(p => (
+                  <PropertyRow
+                    key={p.id || p._id}
+                    p={p}
+                    checked={selected.has(p.id || p._id)}
+                    onCheck={toggleCheck}
+                    onView={setSelectedId}
+                    onEdit={setSelectedId}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
+            </div>
           </div>
         )}
 
-        {/* ── Property grid ── */}
-        {!loading && !error && filtered.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map(p => {
-              const thumb = p.imagesList?.[0] || p.mainImage || null;
-              const pid   = p.id || p._id;
-              return (
-                <div key={pid}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition group">
-
-                  {/* Image */}
-                  <div className="h-32 bg-gray-50 flex items-center justify-center overflow-hidden">
-                    {thumb ? (
-                      <img src={thumb} alt={p.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <span className="text-4xl group-hover:scale-110 transition-transform duration-300">🏠</span>
-                    )}
-                  </div>
-
-                  {/* Body */}
-                  <div className="p-4">
-                    <div className="flex items-start justify-between mb-1 gap-2">
-                      <h4 className="font-bold text-gray-900 text-sm truncate">{p.title || p.name}</h4>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${p.statusDisplay.style}`}>
-                        {p.statusDisplay.label}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-gray-400 mb-2 truncate">
-                      📍 {p.district}{p.sector ? `, ${p.sector}` : ""}
-                    </p>
-
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-black text-blue-600">
-                        {formatRWF(p.rentAmount || p.rent)}/mo
-                      </span>
-                      <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-semibold capitalize">
-                        {p.type}
-                      </span>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button onClick={() => setSelectedId(pid)} className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-bold border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <HiEye /> View
-                      </button>
-                      <button onClick={() => setSelectedId(pid)} className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-bold border border-blue-200 rounded-xl text-blue-600 hover:bg-blue-50 transition">
-                        <HiPencil /> Edit
-                      </button>
-                      <button onClick={() => handleDelete(pid)}
-                        className="w-10 flex items-center justify-center border border-red-100 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition">
-                        <HiTrash />
-                      </button>
-                    </div>
+        {/* ── Grid view ── */}
+        {viewMode === "grid" && (
+          loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {Array.from({length:6}).map((_,i) => (
+                <div key={i} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                  <Skeleton height={144} borderRadius={0}/>
+                  <div className="p-4 space-y-2.5">
+                    <Skeleton width={140} height={14} borderRadius={6}/>
+                    <Skeleton width={100} height={11} borderRadius={6}/>
+                    <div className="flex justify-between"><Skeleton width={110} height={14} borderRadius={6}/><Skeleton width={60} height={22} borderRadius={20}/></div>
+                    <div className="flex gap-2 pt-1"><Skeleton height={34} borderRadius={12} containerClassName="flex-1"/><Skeleton height={34} borderRadius={12} containerClassName="flex-1"/><Skeleton width={36} height={34} borderRadius={12}/></div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-2xl border border-gray-200">
+              <HiOfficeBuilding className="text-5xl text-gray-200 mx-auto mb-3"/>
+              <p className="text-gray-600 font-semibold">No properties match your filters</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filtered.map(p => (
+                <PropertyCard
+                  key={p.id || p._id}
+                  p={p}
+                  onView={setSelectedId}
+                  onEdit={setSelectedId}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )
         )}
 
-        {/* Empty state */}
-        {!loading && !error && filtered.length === 0 && (
-          <div className="bg-gray-50 rounded-3xl p-12 text-center border border-gray-100">
-            <p className="text-3xl mb-3">🏠</p>
-            <p className="text-gray-600 font-semibold">
-              {search ? "No properties match your search." : "You haven't added any properties yet."}
+        {/* ── Footer: count + pagination ── */}
+        {!loading && filtered.length > 0 && (
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            {/* Count */}
+            <p className="text-xs text-gray-400">
+              Showing{" "}
+              <span className="font-bold text-gray-600">
+                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)}
+              </span>{" "}
+              of{" "}
+              <span className="font-bold text-gray-600">{filtered.length}</span> properties
             </p>
-            {!search && (
-              <button onClick={() => setActive("add-property")}
-                className="mt-4 bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition">
-                Add Your First Property
-              </button>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                {/* Prev */}
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm"
+                >‹</button>
+
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                  .reduce((acc, n, idx, arr) => {
+                    if (idx > 0 && n - arr[idx - 1] > 1) acc.push("...");
+                    acc.push(n);
+                    return acc;
+                  }, [])
+                  .map((n, i) =>
+                    n === "..." ? (
+                      <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-xs text-gray-400">…</span>
+                    ) : (
+                      <button key={n} onClick={() => setPage(n)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-black transition ${
+                          page === n
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                        }`}>
+                        {n}
+                      </button>
+                    )
+                  )
+                }
+
+                {/* Next */}
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm"
+                >›</button>
+              </div>
             )}
           </div>
         )}
 
       </div>
-    
-      )}
     </SkeletonTheme>
   );
 }
