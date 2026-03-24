@@ -1,0 +1,198 @@
+{
+  "navbar": {
+    "home": "Ahabanza",
+    "properties": "Amazu",
+    "news": "Amakuru",
+    "contact": "Twandikire",
+    "login": "Injira",
+    "register": "Iyandikishe",
+    "favorites": "Izo wabitse",
+    "dashboard": "Imbonerahamwe",
+    "logout": "Sohoka"
+  },
+  "home": {
+    "title": "Shaka Inzu y’Inzozi zawe",
+    "subtitle": "Reba amazu meza yo gukodesha mu buryo bworoshye",
+    "search": "Shakisha Inzu",
+    "featured": "Amazu Yatoranyijwe",
+    "viewMore": "Reba Izindi"
+  },
+  "property": {
+    "title": "Inzu",
+    "district": "Akarere",
+    "sector": "Umurenge",
+    "address": "Aho iherereye",
+    "type": "Ubwoko",
+    "rent": "Igiciro cy’Ubukode",
+    "bedrooms": "Ibyumba byo kuryamamo",
+    "bathrooms": "Ubwogero",
+    "description": "Ibisobanuro",
+    "status": "Imiterere",
+    "available": "Iraboneka",
+    "occupied": "Yarakodeshejwe",
+    "requestViewing": "Saba Kuyisura",
+    "addToFavorites": "Bika mu Zo Ukunda"
+  },
+  "contact": {
+    "title": "Twandikire",
+    "name": "Amazina",
+    "email": "Imeyili",
+    "subject": "Impamvu",
+    "message": "Ubutumwa",
+    "send": "Ohereza Ubutumwa"
+  },
+  "auth": {
+    "loginTitle": "Injira",
+    "registerTitle": "Iyandikishe",
+    "firstName": "Izina",
+    "lastName": "Izina ry’Umuryango",
+    "password": "Ijambobanga",
+    "phone": "Numero ya Telefoni",
+    "nationalId": "Indangamuntu",
+    "role": "Uruhare",
+    "tenant": "Ukodesha",
+    "landlord": "Nyir’inzu",
+    "admin": "Umuyobozi"
+  },
+  "news": {
+    "title": "Amakuru",
+    "like": "Kunda",
+    "dislike": "Ntabwo nkunda",
+    "comment": "Tanga Igitekerezo",
+    "share": "Sangiza Abandi",
+    "comments": "Ibitekerezo"
+  },
+  "common": {
+    "submit": "Ohereza",
+    "cancel": "Hagarika",
+    "loading": "Birimo gufunguka...",
+    "search": "Shakisha",
+    "noData": "Nta makuru abonetse",
+    "explore": "Reba byinshi",
+    "learnMore": "Soma Ibindi"
+  },
+  "hero": {
+    "titleLine1": "Cunga Ubukode",
+    "titleLine2": "mu buryo bwa",
+    "confidence": "Icyizere",
+    "security": "Umutekano",
+    "ease": "Uburyo bworoshye",
+    "trust": "Kwizerana",
+    "subtitle": "Urubuga rwose hamwe rugufasha kwishyura mu mutekano, gukoresha amasezerano ya digitale no kubaka amanota y’icyizere cy’umukodesha. Turimo kubaka uburyo bw’ubukode buboneye mu Rwanda.",
+    "getStarted": "Tangira",
+    "browseRentals": "Reba Amazu akodeshwa",
+    "joinUsers": "Injira mu bantu barenga 2,000 bishimiye gukoresha urubuga rwacu",
+    "trustScore": "Amanota y’Icyizere",
+    "excellent": "Byiza cyane",
+    "status": "Imiterere",
+    "paymentVerified": "Ubwishyu bwemejwe"
+  },
+  "featuresSection": {
+    "verifiedTitle": "Amazu Yagenzuwe",
+    "verifiedDesc": "Buri nzu igenzurwa n’ikipe yacu kugira ngo tumenye ko ifite umutekano kandi yujuje ubuziranenge.",
+    "trustScore": "Amanota y’Icyizere",
+    "trustTitle": "Kubaka Icyizere mu Bukode",
+    "trustDesc": "Kubaka izina ryiza hashingiwe ku kwishyura ku gihe no ku mateka y’amasezerano ya digitale kugira ngo ubashe kubona amazu arushijeho kuba meza.",
+    "payTitle": "Ishyura Byoroshye",
+    "payDesc": "Ishyura ubukode bwawe ukoresheje MTN Mobile Money, Airtel Money cyangwa banki ukunda."
+  },
+  "howItWorks": {
+    "title": "Uko Bikora",
+    "subtitle": "Kurikiza izi ntambwe zoroshye kugira ngo ubone inzu yawe itaha mu Rwanda.",
+    "step1Title": "Iyandikishe kandi Winjire",
+    "step1Desc": "Fungura konti yawe mu mutekano hanyuma winjire kugira ngo ubone serivisi zose z’urubuga.",
+    "step2Title": "Shakisha Inzu Wifuza",
+    "step2Desc": "Reba amazu yagenzuwe maze uhitemo inzu ijyanye n’ubuzima bwawe.",
+    "step3Title": "Ishyura mu Mutekano",
+    "step3Desc": "Rangiza ubwishyu bwawe ukoresheje MTN, Airtel cyangwa banki zihuza n’urubuga rwacu.",
+    "step4Title": "Shyira Umukono ku Masezerano",
+    "step4Desc": "Rangiza kwimuka ushyira umukono ku masezerano y’ubukode kuri platform."
+  },
+  "partners": {
+    "title": "Bemejwe kandi Bizewe na"
+  },
+  "adminFeatures": {
+    "title": "Cunga ubukode bwawe nk’umunyamwuga",
+    "subtitle": "Dashboard yacu iguha ibikoresho byose bya kinyamwuga ukeneye kugira ngo uvugane n’abakodesha, ugenzure amakuru kandi ushyigikire ibikorwa byawe by’ubukode mu buryo bumwe.",
+    "button": "Reba byinshi",
+    "messagingTitle": "Ubutumwa bw’Ako Kanya",
+    "messagingDesc": "Ganira ako kanya hagati ya nyir’inzu n’umukodesha, harimo gusangiza dosiye no kubika amateka y’ibiganiro mu mutekano.",
+    "videoTitle": "Amashusho yo Kuganira kure",
+    "videoDesc": "Kora visitas z’inzu n’ibiganiro n’abakodesha uri kure hifashishijwe uburyo bw’amashusho bufite ubwiza buhanitse.",
+    "scheduleTitle": "Gahunda y’Akazi Yubwenge",
+    "scheduleDesc": "Sisitemu itegura mu buryo bwikora gahunda yo gusura amazu no gukora inama, kandi igahuzwa na kalendari yawe ya digitale.",
+    "supportTitle": "Ubufasha Buhoraho 24/7",
+    "supportDesc": "Ubuvuzi bw’ikoranabuhanga n’ubuhuza mu makimbirane biboneka amasaha yose kugira ngo ubukode bugende neza."
+  },
+  "adminAnalytics": {
+    "title": "Dashboard yawe, Amakuru yawe, Iterambere ryawe",
+    "subtitle": "Kurikirana imikorere y’amazu yawe, imyitwarire y’abakodesha n’imigendekere y’imari ukoresheje sisitemu yacu y’isesengura.",
+    "overview": "Incamake",
+    "monthly": "Buri kwezi",
+    "ratings": "Amanota",
+    "newVotes": "Amanota mashya",
+    "scoreHistory": "Amateka y’Amanota",
+    "verifiedStatus": "Urwego rwa 4 rwemejwe"
+  },
+  "ratings": {
+    "topRatedHouses": "Amazu Afite Amanota Meza",
+    "verifiedTenants": "Abakodesha Bemejwe",
+    "trustedLandlords": "Ba Nyir’amazu Bizewe",
+    "verifiedQuality": "Ubuziranenge bwemejwe",
+    "highTrustScore": "Amanota y’icyizere yo hejuru",
+    "reliableService": "Serivisi yizewe"
+  },
+  "newsSection": {
+    "title": "Amakuru Mashya n’Ibitekerezo",
+    "readMore": "Soma Ibindi",
+    "marketTrends": "Imigendekere y’Isoko",
+    "tenantTips": "Inama ku Bakodesha",
+    "updates": "Amavugurura",
+    "legal": "Amategeko",
+    "community": "Umuryango",
+    "finance": "Imari",
+    "article1Title": "Izamuka ry’Imicungire y’Amazu hakoreshejwe Ikoranabuhanga",
+    "article1Desc": "Reba uko ikoranabuhanga n’igenzura rya digitale biri guhindura uburyo bw’ubukode i Kigali.",
+    "article2Title": "Uko Wongera Amanota y’Icyizere cyawe nk’Umukodesha",
+    "article2Desc": "Ubuyobozi ku buryo kwishyura buri gihe hakoreshejwe uburyo bwa digitale bigufasha kubona amahitamo meza y’imiturire.",
+    "article3Title": "Ubufatanye Bushya n’Amabanki mu Kwishyura",
+    "article3Desc": "Ihuriro rishya ryacu rituma gukusanya ubukode birushaho koroha ku ba nyir’amazu b’umwuga.",
+    "article4Title": "Gusobanukirwa Amategeko Mashya agenga Ubukode",
+    "article4Desc": "Iby’ingenzi bikubiye mu mabwiriza ajyanye na serivisi zimwe z’imiturire.",
+    "article5Title": "Gahunda zo Kubaho mu Mutekano i Kigali",
+    "article5Desc": "Reba uko ubufatanye mu kurinda umutekano mu baturanyi buri kuzamura amanota y’umutekano ku bakodesha.",
+    "article6Title": "Inguzanyo Nto ku Ngwate y’Ubukode",
+    "article6Desc": "Ibicuruzwa bishya by’imari bigenewe gufasha abakodesha bemejwe kwimuka vuba."
+  },
+  "faq": {
+    "title": "Ibibazo Bikunze Kubazwa",
+    "subtitle": "Ibyo ugomba kumenya byose ku rubuga rw’ubukode ruteye imbere mu Rwanda.",
+    "q1": "Ni gute amanota yanjye y’icyizere mu bukode abarwa?",
+    "a1": "Amanota y’icyizere abarwa hakoreshejwe uburyo bwihariye bushingiye ku bintu bine by’ingenzi: kwemeza umwirondoro, amateka yo kwishyura ubukode ku gihe, isuzuma ritangwa na ba nyir’amazu mwabanye, n’uko wubahiriza amasezerano ya digitale.",
+    "q2": "Ese amakuru yanjye bwite n’ubwishyu bwanjye biratekanye?",
+    "a2": "Umutekano ni wo dushyira imbere. Ubwishyu bwose bunyuzwa mu miyoboro ifite ubwirinzi buhanitse kandi twubahiriza uburyo bwizewe bwo kurinda amakuru yawe.",
+    "q3": "Ni gute igenzura ry’inzu rikorwa mbere yo kuyishyira ku rubuga?",
+    "a3": "Ikipe yacu isura inzu ku giti cyayo, ikagenzura imiterere yayo, ikemeza nyirayo n’ibisobanuro byayo mbere y’uko ishyirwa ku rubuga nk’inzu yemejwe.",
+    "q4": "Amasezerano ya digitale akora ate kuri uru rubuga?",
+    "a4": "Iyo wowe na nyir’inzu mwumvikanye, dukora amasezerano ya digitale. Mwayasoma, mukagira ibyo muhindura, mukayasinyira kuri platform kandi akabikwa neza muri konti yanyu.",
+    "q5": "Bigenda bite habaye amakimbirane hagati yanjye na nyir’inzu?",
+    "a5": "Urubuga rufite uburyo bwo gukemura amakimbirane. Ushobora gutanga ikibazo cyawe, maze ikipe yacu ikareba ubutumwa, amasezerano n’amakuru ajyanye na cyo kugira ngo ifashe mu buryo buboneye.",
+    "stillQuestions": "Uracyafite ibindi bibazo?",
+    "supportText": "Turahari kugira ngo tugufashe amasaha 24 kuri 24. Twandikire niba hari icyo ukeneye.",
+    "contactSupport": "Vugana n’Ubufasha"
+  },
+  "cta": {
+    "title": "Witeguye kunoza uburyo bwawe bwo gukodesha?",
+    "subtitle": "Injira mu bihumbi by’abakodesha na ba nyir’amazu mu Rwanda bari gukoresha uburyo bwizewe, bwihuse kandi buboneye bwo gukodesha.",
+    "startFree": "Tangira ku Buntu",
+    "contactSales": "Vugana n’Ishami ry’Ubucuruzi"
+  },
+  "navExtra": {
+  "about": "Ibyerekeye",
+  "aboutUs": "Tumenye",
+  "services": "Serivisi",
+  "board": "Inama y'Ubuyobozi",
+  "prices": "Ibiciro",
+  "careers": "Akazi"
+}
+}
