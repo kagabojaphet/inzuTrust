@@ -481,19 +481,7 @@ export default function LandlordRegister() {
   return (
     <div className="min-h-screen bg-[#f0f4f8] flex flex-col">
 
-      {/* ── Top Navbar ── */}
-      <nav className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-black text-sm">I</span>
-          </div>
-          <span className="text-lg font-black text-gray-900">InzuTrust</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          Already have an account?
-          <a href="#" className="text-blue-600 font-bold hover:underline ml-1">Log in</a>
-        </div>
-      </nav>
+   
 
       {/* ── Page body ── */}
       <div className="flex-1 flex items-start gap-8 px-10 py-8 max-w-5xl">

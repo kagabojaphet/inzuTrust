@@ -49,8 +49,8 @@ export default function App() {
         <Routes>
           {/* Public Pages */}
           <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-          <Route path="/register/tenant" element={<RegisterTenant />} />
-          <Route path="/register/landlord" element={<RegisterLandlord />} />
+          <Route path="/register/tenant" element={<PublicLayout><RegisterTenant /></PublicLayout>} />
+          <Route path="/register/landlord" element={<PublicLayout><RegisterLandlord /></PublicLayout>} />
           <Route path="/properties" element={<PublicLayout><Properties /></PublicLayout>} />
           <Route path="/about" element={<PublicLayout><AboutUs /></PublicLayout>} />
           <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
@@ -60,7 +60,7 @@ export default function App() {
           <Route path="/verify-otp" element={<VerifyOTP />} />
           <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
           <Route path="/properties/:id" element={<PublicLayout><PropertyDetail /></PublicLayout>} />
-          <Route path="/register/*" element={<Register />} />
+          <Route path="/register/*" element={<PublicLayout><Register /></PublicLayout>} />
 
           {/* Admin Protected Route */}
           <Route 
