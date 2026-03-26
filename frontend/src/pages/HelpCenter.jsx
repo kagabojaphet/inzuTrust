@@ -1,7 +1,10 @@
 import { useState } from "react";
 import logo from "../assets/logo/logo.jpeg"
+import Four from "../assets/image/Four.jpg"
+import { useNavigate } from "react-router-dom";
 export default function InzuTrustHelpCenter() {
   const [openFaq, setOpenFaq] = useState({ 0: true, 1: true, 2: true });
+  const navigate = useNavigate();
 
   const toggleFaq = (i) =>
     setOpenFaq((prev) => ({ ...prev, [i]: !prev[i] }));
@@ -145,7 +148,7 @@ export default function InzuTrustHelpCenter() {
               <img
                 alt="Professional interaction"
                 className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCawg4_1SIlos4CLZcU6bh6LtddXT_oE-xxiOkp-MfdjuFPxnnrbAQJiJqXmQMskf0S2ocbKzbQ8BVpwsr54eng3cUBFZ-4H7JKHMzLTyIEpgEhVLtEfFl8lwHL2wDPV32uz6WoICpyb1_QJ-Hm9neGAT09nonxOoN_clhjD-iFM8_KsBv3ijiIug-N8YIJ76d9GgRaE-L4t1rAlB77qSCpn29QyCfsvQvBmB5Josp7tkFZA7D-uOYDwLpbNU3-racAVnrBXkeGa3Y"
+                src={Four}
               />
             </div>
           </div>
@@ -247,31 +250,13 @@ export default function InzuTrustHelpCenter() {
               </div>
             ))}
           </div>
-          <div className="mt-12">
+          <div onClick={() => navigate("/contact-us")} className="mt-12">
             <button className="bg-emerald-500 text-slate-900 px-10 py-4 rounded-full font-bold hover:scale-105 transition-transform">
               Contact Support Now
             </button>
           </div>
         </section>
       </main>
-
-      {/* ── FOOTER ── */}
-      <footer className="bg-gray-50 border-t border-gray-100 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gray-300 rounded-md flex items-center justify-center text-white font-bold text-sm">I</div>
-              <span className="text-xl font-bold tracking-tight text-gray-500">InzuTrust</span>
-            </div>
-            <div className="flex gap-8 text-sm text-gray-500">
-              {["Terms", "Privacy", "Accessibility", "Security"].map((l) => (
-                <a key={l} className="hover:text-sky-700" href="#">{l}</a>
-              ))}
-            </div>
-            <div className="text-sm text-gray-400">© 2024 InzuTrust Inc. All rights reserved.</div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

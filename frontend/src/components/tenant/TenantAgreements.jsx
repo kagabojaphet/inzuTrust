@@ -6,7 +6,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { API_BASE } from "../../config";
 
 import AgreementCard from "./agreements/AgreementCard";
-import SignModal     from "./agreements/SignModal";
+import SignModal from "./agreements/Signmodal";
 import { isPendingStatus } from "./agreements/agreementHelpers";
 
 export default function TenantAgreements({ token, user }) {

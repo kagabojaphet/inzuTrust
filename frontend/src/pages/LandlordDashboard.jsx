@@ -9,12 +9,12 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useAuth } from "../context/AuthContext";
 
-import LDOverview    from "../components/landlord/Ldoverview";
-import LDProperties  from "../components/landlord/Ldproperties";
-import LDTenants     from "../components/landlord/Ldtenants";
-import LDAgreements  from "../components/landlord/Ldagreements";
-import LDPayments    from "../components/landlord/Ldpayments";
-import LDSettings    from "../components/landlord/Ldsettings";
+import LDOverview    from "../components/landlord/LDOverview";
+import LDProperties  from "../components/landlord/LDProperties";
+import LDTenants     from "../components/landlord/LDTenants";
+import LDAgreements  from "../components/landlord/LDAgreements";
+import LDPayments    from "../components/landlord/LDPayments";
+import LDSettings    from "../components/landlord/LDSettings";
 import LDAddProperty from "../components/landlord/LDAddProperty";
 import Messages        from "../components/shared/Messages";
 import LDApplications  from "../components/landlord/LDApplications";

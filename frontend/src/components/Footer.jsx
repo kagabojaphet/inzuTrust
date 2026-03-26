@@ -7,19 +7,39 @@ export default function Footer() {
   const footerSections = [
     {
       title: "Product",
-      links: ["Features", "Pricing", "Trust Score", "Integrations"]
+      links: [
+        { label: "Features", href: "#" },
+        { label: "Pricing", href: "#" },
+        { label: "Trust Score", href: "#" },
+        { label: "Integrations", href: "#" }
+      ]
     },
     {
       title: "Resources",
-      links: ["Documentation", "Media Kit", "API Status", "Safety"]
+      links: [
+        { label: "Documentation", href: "/documentation" },
+        { label: "Media Kit", href: "#" },
+        { label: "API Status", href: "#" },
+        { label: "Safety", href: "#" }
+      ]
     },
     {
       title: "Company",
-      links: ["About Us", "Careers", "Press", "Contact"]
+      links: [
+        { label: "About Us", href: "#" },
+        { label: "Careers", href: "#" },
+        { label: "Press", href: "#" },
+        { label: "Contact", href: "/contact-us" }
+      ]
     },
     {
       title: "Support",
-      links: ["Help Center", "Privacy Policy", "Terms of Service", "Trust Center"]
+      links: [
+        { label: "Help Center", href: "/help-center" },
+        { label: "Privacy Policy", href: "#" },
+        { label: "Terms of Service", href: "/terms-and-conditions" },
+        { label: "Trust Center", href: "#" }
+      ]
     }
   ];
 
@@ -41,7 +61,6 @@ export default function Footer() {
               className="w-full sm:w-72 pl-12 pr-4 py-4 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all font-bold text-black"
             />
           </div>
-          {/* Removed uppercase and tracking from button */}
           <button className="bg-brand-blue-bright text-white px-8 py-4 rounded-lg font-bold hover:bg-blue-700 transition-all shadow-lg text-md">
             Subscribe
           </button>
@@ -68,15 +87,14 @@ export default function Footer() {
         {/* Links Columns */}
         {footerSections.map((section) => (
           <div key={section.title} className="text-left">
-            {/* Title: Removed uppercase and tracking */}
             <h4 className="font-black text-black mb-8 text-lg">
               {section.title}
             </h4>
             <ul className="space-y-4 text-black text-sm font-bold">
               {section.links.map((link) => (
-                <li key={link}>
-                  <a href="#" className="hover:text-brand-blue-bright transition-colors duration-300">
-                    {link}
+                <li key={link.label}>
+                  <a href={link.href} className="hover:text-brand-blue-bright transition-colors duration-300">
+                    {link.label}
                   </a>
                 </li>
               ))}

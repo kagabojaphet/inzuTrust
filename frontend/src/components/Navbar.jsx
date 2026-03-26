@@ -2,10 +2,15 @@ import React from 'react';
 import { HiChevronDown } from "react-icons/hi";
 import { useLanguage } from '../context/LanguageContext';
 import logo from '../assets/logo/logo.jpeg';
-
+import { useNavigate } from 'react-router-dom';
 export default function Navbar() {
+<<<<<<< HEAD
   const { language, setLanguage, t } = useLanguage();
 
+=======
+  const [lang, setLang] = useState('EN');
+  const navigate = useNavigate()
+>>>>>>> 6f84079 (linking some buttom to different pages)
   const aboutLinks = [
     { name: "About Us", href: "/about" },
     { name: "Services", href: "/services" },
@@ -73,7 +78,7 @@ export default function Navbar() {
         </div>
 
         <button className="text-black font-bold hover:text-brand-blue-dark transition-colors"><a href="/login">Log In</a></button>
-        <button className="bg-brand-green-mid hover:bg-brand-green-dark text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95"> <a href="/register">
+        <button onClick={() => navigate("/register")} className="bg-brand-green-mid hover:bg-brand-green-dark text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95"> <a href="/register">
           Get Started </a>
         </button>
       </div>
