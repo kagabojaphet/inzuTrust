@@ -11,12 +11,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Hero = ({ images }) => {
   const [isWordComplete, setIsWordComplete] = useState(false);
-<<<<<<< HEAD
-  const { t } = useLanguage();
-
-=======
  const navigate = useNavigate();
->>>>>>> 6f84079 (linking some buttom to different pages)
   return (
     <section className="relative w-full pt-12 pb-20 overflow-hidden bg-[#F8FAFC]">
       <div className="w-full px-6 md:px-12 grid md:grid-cols-2 items-center gap-10">
@@ -58,13 +53,8 @@ const Hero = ({ images }) => {
           </p>
           
           <div className="flex flex-wrap gap-4 justify-start mb-8">
-<<<<<<< HEAD
-            <button className="bg-brand-blue-bright text-white font-bold px-8 py-4 rounded-lg shadow-lg flex items-center gap-3">
-              {t("hero.getStarted")} <HiArrowRight />
-=======
             <button onClick={() => navigate("/register")} className="bg-brand-blue-bright text-white font-bold px-8 py-4 rounded-lg shadow-lg flex items-center gap-3">
               Get Started <HiArrowRight />
->>>>>>> 6f84079 (linking some buttom to different pages)
             </button>
             <button className="bg-white border border-slate-200 text-slate-800 font-bold px-8 py-4 rounded-lg flex items-center gap-3">
               <HiSearch className="text-brand-blue-bright" /> {t("hero.browseRentals")}

@@ -43,11 +43,6 @@ function PublicLayout({ children, showFooter = true }) {
   );
 }
 const Layout = PublicLayout;
-
-
-// Alias — some routes use <Layout>, keep both pointing to the same component
-const Layout = PublicLayout;
-
 // ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
@@ -57,7 +52,6 @@ export default function App() {
         <BackToTop />
         <Routes>
 
-<<<<<<< HEAD
           {/* ── Public ── */}
           <Route path="/"          element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/login"     element={<PublicLayout><Login /></PublicLayout>} />
@@ -81,9 +75,6 @@ export default function App() {
           <Route path="/terms-and-conditions" element={<Layout><TermsAndConditions /></Layout>} />
 
           {/* ── Protected: general ── */}
-=======
-          {/* General Protected Routes */}
->>>>>>> 6f84079 (linking some buttom to different pages)
           <Route path="/profile" element={
             <ProtectedRoute>
               <PublicLayout><Profile /></PublicLayout>

@@ -4,13 +4,8 @@ import { useLanguage } from '../context/LanguageContext';
 import logo from '../assets/logo/logo.jpeg';
 import { useNavigate } from 'react-router-dom';
 export default function Navbar() {
-<<<<<<< HEAD
-  const { language, setLanguage, t } = useLanguage();
-
-=======
   const [lang, setLang] = useState('EN');
   const navigate = useNavigate()
->>>>>>> 6f84079 (linking some buttom to different pages)
   const aboutLinks = [
     { name: "About Us", href: "/about" },
     { name: "Services", href: "/services" },
