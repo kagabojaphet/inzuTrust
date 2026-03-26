@@ -80,7 +80,6 @@ const createProperty = async (req, res) => {
 // GET /api/properties (public)
 const getAllProperties = async (req, res) => {
   try {
-<<<<<<< HEAD
     const result = await propertyService.getAllProperties(req.query);
 
     return res.json({
@@ -91,10 +90,6 @@ const getAllProperties = async (req, res) => {
       totalPages: result.totalPages,
       data: result.properties,
     });
-=======
-    const properties = await propertyService.getAllProperties();
-    return res.json({ success: true, data: properties });
->>>>>>> 47d2d9b (Add News feature: posts, likes, dislikes, comments, shares and image upload)
   } catch (error) {
     return res.status(500).json({
       success: false,

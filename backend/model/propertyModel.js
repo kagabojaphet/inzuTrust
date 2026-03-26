@@ -5,21 +5,20 @@ const sequelize = require("../config/database");
 const Property = sequelize.define(
   "Property",
   {
-    // CHANGE 1: Use UUID for the Property itself
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
 
-    // CHANGE 2: landlordId must match User.id type (UUID)
+    // ── No `references` blocks anywhere in this file ───────────────────────────
+    // Sequelize creates an index for every `references` declaration.
+    // With many models, this pushes MySQL past its 64-key-per-table limit.
+    // Relationships are fully handled by associations in model/index.js instead.
+
     landlordId: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: {
-        model: 'users',
-        key: 'id',
-      },
     },
 
     title: {
@@ -81,13 +80,68 @@ const Property = sequelize.define(
     },
 
     images: {
-      type: DataTypes.JSON, 
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+
+    // ── Verification fields (for admin property verification flow) ─────────────
+    verificationStatus: {
+      type: DataTypes.ENUM("pending", "under_review", "verified", "rejected"),
+      defaultValue: "pending",
+    },
+
+    verifiedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    // Stored as STRING(36) — avoids Sequelize creating a FK index for this column
+    verifiedBy: {
+      type: DataTypes.STRING(36),
+      allowNull: true,
+    },
+
+    rejectionReason: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    // ── Document flags ─────────────────────────────────────────────────────────
+    upiNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    hasLandTitle: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    hasTaxProof: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    hasOwnerIdDoc: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    // ── Location coords ────────────────────────────────────────────────────────
+    latitude: {
+      type: DataTypes.DECIMAL(10, 8),
+      allowNull: true,
+    },
+
+    longitude: {
+      type: DataTypes.DECIMAL(11, 8),
       allowNull: true,
     },
   },
   {
     tableName: "properties",
     timestamps: true,
+    indexes: [], // ← prevent Sequelize from auto-generating extra indexes
   }
 );
 
