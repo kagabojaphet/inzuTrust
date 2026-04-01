@@ -2,8 +2,10 @@
 const sequelize = require("../config/database");
 
 // ── Models ────────────────────────────────────────────────────────────────────
+const AgentProperty      = require("./agentProperty");
+const MaintenanceRequest = require("./maintenanceRequest");
+const MaintenanceComment = require("./maintenanceComment");
 const User             = require("./userModel");
-const AgentProperty    = require("./agentProperty"); // Ensure this file exports correctly
 const Property         = require("./propertyModel");
 const Meeting          = require("./meetingModel");
 const TenantProfile    = require("./tenantProfile");
@@ -29,8 +31,10 @@ const db = {};
 db.sequelize = sequelize;
 
 // ── Attach models ─────────────────────────────────────────────────────────────
+db.AgentProperty      = AgentProperty;
+db.MaintenanceRequest = MaintenanceRequest;
+db.MaintenanceComment = MaintenanceComment;
 db.User            = User;
-db.AgentProperty   = AgentProperty;
 db.Property        = Property;
 db.Meeting         = Meeting;
 db.TenantProfile   = TenantProfile;
@@ -53,26 +57,40 @@ db.Notification     = Notification;
 db.AuditLog         = AuditLog;
 
 /* ===========================
-    Property & Agent Relationships
-=========================== */
-// 1. Standard Landlord Ownership
-db.User.hasMany(db.Property, { foreignKey: "landlordId", as: "ownedProperties", onDelete: "CASCADE" });
-db.Property.belongsTo(db.User, { foreignKey: "landlordId", as: "landlord" });
-
-// 2. Agent to Property (The worker relationship)
-db.User.hasMany(db.AgentProperty, { foreignKey: "agentId", as: "agentAssignments", onDelete: "CASCADE" });
-db.AgentProperty.belongsTo(db.User, { foreignKey: "agentId", as: "agent" });
-
-db.Property.hasMany(db.AgentProperty, { foreignKey: "propertyId", as: "assignedAgents", onDelete: "CASCADE" });
-db.AgentProperty.belongsTo(db.Property, { foreignKey: "propertyId", as: "property" });
-
-// 3. Track who did the assigning
-db.User.hasMany(db.AgentProperty, { foreignKey: "assignedById", as: "assignmentsCreated", onDelete: "CASCADE" });
-db.AgentProperty.belongsTo(db.User, { foreignKey: "assignedById", as: "assigner" });
-
-/* ===========================
     Profile Relationships
 =========================== */
+
+// Agent ↔ Property (many-to-many through AgentProperty)
+db.User.hasMany(db.AgentProperty, { foreignKey: "agentId",      as: "agentAssignments",   onDelete: "CASCADE" });
+db.AgentProperty.belongsTo(db.User, { foreignKey: "agentId",    as: "agent" });
+ 
+db.Property.hasMany(db.AgentProperty, { foreignKey: "propertyId", as: "assignedAgents", onDelete: "CASCADE" });
+db.AgentProperty.belongsTo(db.Property, { foreignKey: "propertyId", as: "property" });
+ 
+db.User.hasMany(db.AgentProperty, { foreignKey: "assignedById", as: "assignmentsCreated", onDelete: "CASCADE" });
+db.AgentProperty.belongsTo(db.User, { foreignKey: "assignedById", as: "assigner" });
+ 
+// MaintenanceRequest associations
+db.Property.hasMany(db.MaintenanceRequest, { foreignKey: "propertyId",  as: "maintenanceRequests", onDelete: "CASCADE" });
+db.MaintenanceRequest.belongsTo(db.Property, { foreignKey: "propertyId", as: "property" });
+ 
+db.User.hasMany(db.MaintenanceRequest, { foreignKey: "tenantId",   as: "filedMaintenance",    onDelete: "CASCADE" });
+db.MaintenanceRequest.belongsTo(db.User, { foreignKey: "tenantId", as: "tenant" });
+ 
+db.User.hasMany(db.MaintenanceRequest, { foreignKey: "landlordId",   as: "receivedMaintenance", onDelete: "CASCADE" });
+db.MaintenanceRequest.belongsTo(db.User, { foreignKey: "landlordId", as: "landlord" });
+ 
+db.User.hasMany(db.MaintenanceRequest, { foreignKey: "assignedAgentId", as: "agentMaintenance", onDelete: "SET NULL" });
+db.MaintenanceRequest.belongsTo(db.User, { foreignKey: "assignedAgentId", as: "assignedAgent" });
+ 
+// MaintenanceComment associations
+db.MaintenanceRequest.hasMany(db.MaintenanceComment, { foreignKey: "requestId", as: "comments", onDelete: "CASCADE" });
+db.MaintenanceComment.belongsTo(db.MaintenanceRequest, { foreignKey: "requestId", as: "request" });
+ 
+db.User.hasMany(db.MaintenanceComment, { foreignKey: "authorId", as: "maintenanceComments", onDelete: "SET NULL" });
+db.MaintenanceComment.belongsTo(db.User, { foreignKey: "authorId", as: "author" });
+ 
+
 db.User.hasOne(db.TenantProfile, { foreignKey: "userId", as: "tenantProfile", onDelete: "CASCADE" });
 db.TenantProfile.belongsTo(db.User, { foreignKey: "userId", as: "user" });
 

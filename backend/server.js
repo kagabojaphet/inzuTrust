@@ -33,7 +33,8 @@ app.use("/api/trust-score",        require("./router/trustScoreRoutes"));
 app.use("/api/admin",              require("./router/adminRoutes"));
 app.use("/api/calls",              require("./router/callRoutes")); // ← Daily.co rooms
 app.use("/api/meetings", require("./router/meetingRoutes"));
-app.use("/api/agents", require("./router/agentRoutes"));
+app.use("/api/agents",      require("./router/agentRoutes"));
+app.use("/api/maintenance", require("./router/maintenanceRoutes"));
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
