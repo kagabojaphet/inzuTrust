@@ -33,6 +33,7 @@ app.use("/api/trust-score",        require("./router/trustScoreRoutes"));
 app.use("/api/admin",              require("./router/adminRoutes"));
 app.use("/api/calls",              require("./router/callRoutes")); // ← Daily.co rooms
 app.use("/api/meetings", require("./router/meetingRoutes"));
+app.use("/api/agents", require("./router/agentRoutes"));
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
@@ -53,13 +54,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── Start server ──────────────────────────────────────────────────────────────
+// In server.js
 const startServer = async () => {
   try {
     await db.sequelize.authenticate();
     console.log("✔ MySQL Connected...");
 
-    await db.sequelize.sync({ alter: true });
+    // Switch to 'force: true' ONLY if 'alter: true' keeps failing 
+    // and you are okay with clearing the DB once to fix the schema.
+    await db.sequelize.sync({ alter: true }); 
     console.log("✔ Database synced — all new tables created.");
 
     const PORT = process.env.PORT || 5000;
@@ -68,6 +71,7 @@ const startServer = async () => {
     });
   } catch (err) {
     console.error("✘ Server failed to start:", err.message);
+    // If it still fails, the error is likely in the Property or User model ID definition.
     process.exit(1);
   }
 };

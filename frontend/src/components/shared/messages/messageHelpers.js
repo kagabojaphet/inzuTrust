@@ -1,57 +1,72 @@
 // src/components/shared/messages/messageHelpers.js
+import { API_BASE } from "../../../config";
 
-export const API_BASE_URL = (typeof window !== "undefined" && window.__API_BASE__)
-  || import.meta?.env?.VITE_API_URL
-  || "http://localhost:5000/api";
+// ── API base URL — uses your project's central config ─────────────────────────
+export const API_BASE_URL = (() => {
+  const base = API_BASE
+    || (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL)
+    || "http://localhost:5000/api";
+  return base.replace(/\/$/, ""); // strip trailing slash
+})();
 
-// ── Role styling ──────────────────────────────────────────────────────────────
-export const ROLE_META = {
-  tenant:   { badge: "bg-green-100 text-green-700",  label: "TENANT"   },
-  landlord: { badge: "bg-blue-100 text-blue-700",    label: "LANDLORD" },
-  admin:    { badge: "bg-red-100 text-red-700",      label: "ADMIN"    },
-  agent:    { badge: "bg-purple-100 text-purple-700",label: "AGENT"    },
-};
-
-// ── Message type labels ───────────────────────────────────────────────────────
-export const MSG_TYPE_META = {
-  lease_draft:     { icon: "📄", label: "Lease Draft",      color: "blue"   },
-  payment_request: { icon: "💳", label: "Payment Request",  color: "amber"  },
-  proposal:        { icon: "📅", label: "Proposal",         color: "purple" },
-  system:          { icon: "🔔", label: "System Notice",    color: "gray"   },
-  text:            { icon: null, label: null,               color: null     },
-};
-
-// ── Formatters ────────────────────────────────────────────────────────────────
-export const fmtTime = (d) =>
-  d ? new Date(d).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
-
-export const fmtDateLabel = (d) => {
-  if (!d) return "";
-  const date  = new Date(d);
-  const today = new Date();
-  const diff  = Math.floor((today - date) / 86400000);
-  if (diff === 0) return "TODAY";
-  if (diff === 1) return "YESTERDAY";
-  return date.toLocaleDateString("en-RW", { weekday: "long", month: "short", day: "numeric" });
-};
-
-export const getInitials = (firstName = "", lastName = "") =>
-  `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
-
-// ── Online presence ───────────────────────────────────────────────────────────
-// A user is "online" if their lastSeenAt was within the last 3 minutes
+// ── Online presence check (lastSeenAt within last 3 minutes) ─────────────────
 export const isOnline = (lastSeenAt) => {
   if (!lastSeenAt) return false;
   return Date.now() - new Date(lastSeenAt).getTime() < 3 * 60 * 1000;
 };
 
-// ── API helpers ───────────────────────────────────────────────────────────────
-export const apiGet = (url, token) =>
-  fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json());
+// ── Initials ──────────────────────────────────────────────────────────────────
+export const getInitials = (firstName = "", lastName = "") =>
+  `${(firstName || "")[0] || ""}${(lastName || "")[0] || ""}`.toUpperCase() || "??";
 
-export const apiPost = (url, body, token) =>
-  fetch(url, {
+// ── Time formatter ────────────────────────────────────────────────────────────
+export const fmtTime = (d) =>
+  d ? new Date(d).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+
+// ── Date label for separators ─────────────────────────────────────────────────
+export const fmtDateLabel = (d) => {
+  if (!d) return "";
+  const date      = new Date(d);
+  const today     = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString())     return "Today";
+  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+  return date.toLocaleDateString("en-GB", { weekday: "long", month: "short", day: "numeric" });
+};
+
+// ── Role metadata ─────────────────────────────────────────────────────────────
+export const ROLE_META = {
+  tenant:   { label: "Tenant",   badge: "bg-blue-50 text-blue-700"     },
+  landlord: { label: "Landlord", badge: "bg-indigo-50 text-indigo-700" },
+  admin:    { label: "Admin",    badge: "bg-slate-100 text-slate-700"  },
+};
+
+// ── Message type metadata ─────────────────────────────────────────────────────
+export const MSG_TYPE_META = {
+  lease_draft:     { label: "Lease Draft",     color: "blue",  icon: true },
+  payment_request: { label: "Payment Request", color: "amber", icon: true },
+  proposal:        { label: "Proposal",        color: "blue",  icon: true },
+};
+
+// ── Fetch helpers ─────────────────────────────────────────────────────────────
+export const apiGet = async (url, token) => {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+  return data;
+};
+
+export const apiPost = async (url, body, token) => {
+  const res = await fetch(url, {
     method:  "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body:    JSON.stringify(body),
-  }).then(r => r.json());
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+  return data;
+};

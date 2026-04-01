@@ -2,17 +2,18 @@
 const sequelize = require("../config/database");
 
 // ── Models ────────────────────────────────────────────────────────────────────
-const Meeting         = require("./meetingModel");
-const User            = require("./userModel");
-const TenantProfile   = require("./tenantProfile");
-const LandlordProfile = require("./landlordProfile");
-const Property        = require("./propertyModel");
-const Contact         = require("./contactModel");
-const NewsPost        = require("./newsPostModel");
-const NewsReaction    = require("./newsReactionModel");
-const NewsComment     = require("./newsCommentModel");
-const Favorite        = require("./favoriteModel");
-const ViewingRequest  = require("./viewingRequestModel");
+const User             = require("./userModel");
+const AgentProperty    = require("./agentProperty"); // Ensure this file exports correctly
+const Property         = require("./propertyModel");
+const Meeting          = require("./meetingModel");
+const TenantProfile    = require("./tenantProfile");
+const LandlordProfile  = require("./landlordProfile");
+const Contact          = require("./contactModel");
+const NewsPost         = require("./newsPostModel");
+const NewsReaction     = require("./newsReactionModel");
+const NewsComment      = require("./newsCommentModel");
+const Favorite         = require("./favoriteModel");
+const ViewingRequest   = require("./viewingRequestModel");
 const LeaseApplication = require("./leaseapplication");
 const Agreement        = require("./agreement");
 const Payment          = require("./payment");
@@ -21,19 +22,20 @@ const DisputeMessage   = require("./disputeMessage");
 const DisputeEvidence  = require("./disputeEvidence");
 const Message          = require("./message");
 const TrustScoreLog    = require("./trustScoreLog");
-const Notification     = require("./notification");
-const AuditLog         = require("./auditLog");        // ← FIX: was missing
+const Notification      = require("./notification");
+const AuditLog          = require("./auditLog");
 
 const db = {};
 db.sequelize = sequelize;
 
 // ── Attach models ─────────────────────────────────────────────────────────────
-db.Meeting          = Meeting;
-db.User             = User;
-db.TenantProfile    = TenantProfile;
-db.LandlordProfile  = LandlordProfile;
-db.Property         = Property;
-db.Contact          = Contact;
+db.User            = User;
+db.AgentProperty   = AgentProperty;
+db.Property        = Property;
+db.Meeting         = Meeting;
+db.TenantProfile   = TenantProfile;
+db.LandlordProfile = LandlordProfile;
+db.Contact         = Contact;
 db.NewsPost         = NewsPost;
 db.NewsReaction     = NewsReaction;
 db.NewsComment      = NewsComment;
@@ -48,16 +50,25 @@ db.DisputeEvidence  = DisputeEvidence;
 db.Message          = Message;
 db.TrustScoreLog    = TrustScoreLog;
 db.Notification     = Notification;
-db.AuditLog         = AuditLog;                        // ← FIX: was missing
+db.AuditLog         = AuditLog;
 
 /* ===========================
-    Meeting Relationships
+    Property & Agent Relationships
 =========================== */
-db.User.hasMany(db.Meeting, { foreignKey: "organizerId",   as: "organizedMeetings",    onDelete: "CASCADE" });
-db.Meeting.belongsTo(db.User, { foreignKey: "organizerId", as: "organizer" });
+// 1. Standard Landlord Ownership
+db.User.hasMany(db.Property, { foreignKey: "landlordId", as: "ownedProperties", onDelete: "CASCADE" });
+db.Property.belongsTo(db.User, { foreignKey: "landlordId", as: "landlord" });
 
-db.User.hasMany(db.Meeting, { foreignKey: "participantId",   as: "participatingMeetings", onDelete: "CASCADE" });
-db.Meeting.belongsTo(db.User, { foreignKey: "participantId", as: "participant" });
+// 2. Agent to Property (The worker relationship)
+db.User.hasMany(db.AgentProperty, { foreignKey: "agentId", as: "agentAssignments", onDelete: "CASCADE" });
+db.AgentProperty.belongsTo(db.User, { foreignKey: "agentId", as: "agent" });
+
+db.Property.hasMany(db.AgentProperty, { foreignKey: "propertyId", as: "assignedAgents", onDelete: "CASCADE" });
+db.AgentProperty.belongsTo(db.Property, { foreignKey: "propertyId", as: "property" });
+
+// 3. Track who did the assigning
+db.User.hasMany(db.AgentProperty, { foreignKey: "assignedById", as: "assignmentsCreated", onDelete: "CASCADE" });
+db.AgentProperty.belongsTo(db.User, { foreignKey: "assignedById", as: "assigner" });
 
 /* ===========================
     Profile Relationships
@@ -69,10 +80,13 @@ db.User.hasOne(db.LandlordProfile, { foreignKey: "userId", as: "landlordProfile"
 db.LandlordProfile.belongsTo(db.User, { foreignKey: "userId", as: "user" });
 
 /* ===========================
-    Property Relationships
+    Meeting Relationships
 =========================== */
-db.User.hasMany(db.Property, { foreignKey: "landlordId", as: "ownedProperties", onDelete: "CASCADE" });
-db.Property.belongsTo(db.User, { foreignKey: "landlordId", as: "landlord" });
+db.User.hasMany(db.Meeting, { foreignKey: "organizerId", as: "organizedMeetings", onDelete: "CASCADE" });
+db.Meeting.belongsTo(db.User, { foreignKey: "organizerId", as: "organizer" });
+
+db.User.hasMany(db.Meeting, { foreignKey: "participantId", as: "participatingMeetings", onDelete: "CASCADE" });
+db.Meeting.belongsTo(db.User, { foreignKey: "participantId", as: "participant" });
 
 /* ===========================
     News Relationships
@@ -164,7 +178,6 @@ db.Dispute.belongsTo(db.User, { foreignKey: "reporterId", as: "reporter" });
 db.User.hasMany(db.Dispute, { foreignKey: "respondentId", as: "receivedDisputes", onDelete: "SET NULL" });
 db.Dispute.belongsTo(db.User, { foreignKey: "respondentId", as: "respondent" });
 
-// Admin assigned to handle the dispute
 db.User.hasMany(db.Dispute, { foreignKey: "assignedTo", as: "assignedDisputes", onDelete: "SET NULL" });
 db.Dispute.belongsTo(db.User, { foreignKey: "assignedTo", as: "assignedAdmin" });
 
@@ -203,12 +216,5 @@ db.TrustScoreLog.belongsTo(db.User, { foreignKey: "tenantId", as: "tenant" });
 =========================== */
 db.User.hasMany(db.Notification, { foreignKey: "userId", as: "notifications", onDelete: "CASCADE" });
 db.Notification.belongsTo(db.User, { foreignKey: "userId", as: "user" });
-
-/* ===========================
-    AuditLog Relationships
-    actorId is NOT a hard FK — logs survive user deletion
-=========================== */
-// No Sequelize association needed since actorId is STRING(36), not a FK reference.
-// AuditLog is queried directly by actorId string when needed.
 
 module.exports = db;

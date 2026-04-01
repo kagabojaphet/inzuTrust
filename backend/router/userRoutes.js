@@ -5,7 +5,9 @@ const {
   googleAuth,
   registerUser,
   loginUser,
+  logoutUser,
   verifyOTP,
+  resendOTP,
   getUserProfile,
   updateUserProfile,
 } = require("../controllers/userController");
@@ -16,12 +18,14 @@ router.post("/register",    registerUser);
 router.post("/login",       loginUser);
 router.post("/google-auth", googleAuth);
 router.post("/verify-otp",  verifyOTP);
+router.post("/resend-otp",  resendOTP);
 
 // ── Private ───────────────────────────────────────────────────────────────────
-router.get("/profile", protect, getUserProfile);
-router.put("/profile", protect, updateUserProfile);
+router.get ("/profile", protect, getUserProfile);
+router.put ("/profile", protect, updateUserProfile);
+router.post("/logout",  protect, logoutUser);
 
-// ── Landlord profile (used by tenant dashboard to show landlord info) ─────────
+// ── Landlord profile ──────────────────────────────────────────────────────────
 router.post("/landlords/profile", protect, landlordOnly, async (req, res) => {
   try {
     const { LandlordProfile } = require("../model");
@@ -36,9 +40,7 @@ router.post("/landlords/profile", protect, landlordOnly, async (req, res) => {
         bio:             req.body.bio             || null,
       },
     });
-    if (!created) {
-      await profile.update(req.body);
-    }
+    if (!created) await profile.update(req.body);
     return res.status(created ? 201 : 200).json({
       success: true,
       message: created ? "Profile created" : "Profile updated",

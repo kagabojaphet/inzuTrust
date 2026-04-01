@@ -133,7 +133,7 @@ const loginUser = async ({ email, password }) => {
     throw new Error("Invalid email or password");
   }
 
-  if (!user.isVerified) throw new Error("Please verify your email first");
+  if (!user.isEmailVerified) throw new Error("Please verify your email first");
 
   const token = generateToken(user.id);
 

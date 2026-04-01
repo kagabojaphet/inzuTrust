@@ -15,6 +15,74 @@ const fromReq = (req) => ({
   userAgent: req.headers["user-agent"] || null,
 });
 
+// ── Give/Remove Verification Badge ──────────────────────────────────────────
+router.put("/users/:id/verify", protect, adminOnly, async (req, res) => {
+  try {
+    const { User } = getDb();
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    await user.update({ isVerified: true });
+
+    log({
+      ...fromReq(req),
+      action: `Admin granted Verification Badge to: ${user.email}`,
+      severity: "SUCCESS",
+      target: `User: ${user.firstName} ${user.lastName}`,
+    });
+
+    return res.json({ success: true, message: "User verified and badged", data: { isVerified: true } });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ── Red Flag Toggle (Warning) ────────────────────────────────────────────────
+router.put("/users/:id/red-flag", protect, adminOnly, async (req, res) => {
+  try {
+    const { User } = getDb();
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const newFlagStatus = !user.isRedFlagged;
+    await user.update({ isRedFlagged: newFlagStatus });
+
+    log({
+      ...fromReq(req),
+      action: newFlagStatus ? `Red flagged user: ${user.email}` : `Removed red flag: ${user.email}`,
+      severity: newFlagStatus ? "WARNING" : "INFO",
+      target: user.email,
+    });
+
+    return res.json({ success: true, message: newFlagStatus ? "User red flagged" : "Flag removed", data: { isRedFlagged: newFlagStatus } });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ── Suspend/Reactivate ───────────────────────────────────────────────────────
+router.put("/users/:id/suspend", protect, adminOnly, async (req, res) => {
+  try {
+    const { User } = getDb();
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const nowSuspended = !user.isSuspended;
+    await user.update({ isSuspended: nowSuspended });
+
+    log({
+      ...fromReq(req),
+      action: nowSuspended ? `Suspended user: ${user.email}` : `Reactivated user: ${user.email}`,
+      severity: nowSuspended ? "CRITICAL" : "INFO",
+      target: user.email,
+    });
+
+    return res.json({ success: true, message: nowSuspended ? "User suspended" : "User reactivated", data: { isSuspended: nowSuspended } });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // ═══════════════════════════════════════════════════════
 //  DASHBOARD STATS
 // ═══════════════════════════════════════════════════════
