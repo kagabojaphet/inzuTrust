@@ -1,36 +1,37 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
-import { LanguageProvider } from './context/LanguageContext'
-import ProtectedRoute from './components/ProtectedRoute'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
+// src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
+import ProtectedRoute    from './components/ProtectedRoute';
+import Navbar            from './components/Navbar';
+import Footer            from './components/Footer';
+import AIChatbot         from './components/AIChatbot';
+import BackToTop         from './components/BackToTop';
+import VerifyOTP         from './components/VerifyOTP';
+import './App.css';
 
-// Pages
-import Home               from './pages/Home'
-import Login              from './pages/Login'
-import Register           from './pages/Register'
-import RegisterTenant     from './pages/TenantRegister'
-import RegisterLandlord   from './pages/LandlordRegister'
-import TenantDashboard    from './pages/TenantDashboard'
-import LandlordDashboard  from './pages/LandlordDashboard'
-import AdminDashboard     from './pages/AdminDashboard'
-import Properties         from './pages/Properties'
-import Profile            from './pages/Profile'
-import PropertyDetail     from './pages/PropertyDetail'
-import AboutUs            from './pages/AboutUs'
-import Services           from './pages/Services'
-import Board              from './pages/Board'
-import Careers            from './pages/Careers'
-import Pricing            from './pages/Pricing'
-import HelpCenter         from './pages/HelpCenter'
-import ContactUs          from './pages/ContactUs'
-import Documentation      from './pages/Documentation'
-import TermsAndConditions from './pages/TermsAndConditions'
-
-import AIChatbot  from './components/AIChatbot'
-import BackToTop  from './components/BackToTop'
-import VerifyOTP  from './components/VerifyOTP'
-import './App.css'
+// ── Pages ─────────────────────────────────────────────────────────────────────
+import Home               from './pages/Home';
+import Login              from './pages/Login';
+import Register           from './pages/Register';
+import RegisterTenant     from './pages/TenantRegister';
+import RegisterLandlord   from './pages/LandlordRegister';
+import TenantDashboard    from './pages/TenantDashboard';
+import LandlordDashboard  from './pages/LandlordDashboard';
+import AdminDashboard     from './pages/AdminDashboard';
+import AgentDashboard     from './pages/AgentDashboard';
+import Properties         from './pages/Properties';
+import Profile            from './pages/Profile';
+import PropertyDetail     from './pages/PropertyDetail';
+import AboutUs            from './pages/AboutUs';
+import Services           from './pages/Services';
+import Board              from './pages/Board';
+import Careers            from './pages/Careers';
+import Pricing            from './pages/Pricing';
+import HelpCenter         from './pages/HelpCenter';
+import ContactUs          from './pages/ContactUs';
+import Documentation      from './pages/Documentation';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 // ── Layouts ───────────────────────────────────────────────────────────────────
 function PublicLayout({ children, showFooter = true }) {
@@ -43,10 +44,9 @@ function PublicLayout({ children, showFooter = true }) {
   );
 }
 
-// Alias — some routes use <Layout>, keep both pointing to the same component
+// Alias kept for any routes that use <Layout>
 const Layout = PublicLayout;
 
-// ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <BrowserRouter>
@@ -102,6 +102,13 @@ export default function App() {
           <Route path="/admin/dashboard" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* ── Protected: agent ── */}
+          <Route path="/agent/dashboard" element={
+            <ProtectedRoute allowedRoles={['agent']}>
+              <AgentDashboard />
             </ProtectedRoute>
           } />
 

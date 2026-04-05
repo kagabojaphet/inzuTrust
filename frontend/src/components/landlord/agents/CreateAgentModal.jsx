@@ -1,199 +1,200 @@
 // src/components/landlord/agents/CreateAgentModal.jsx
-import React, { useState } from "react";
-import { HiUserAdd, HiCheck, HiX } from "react-icons/hi";
-import { PERM_LABELS, apiCreateAgent, apiAssign } from "./agentHelpers";
+// Step 1: Create agent account (backend sends OTP welcome email)
+// Step 2: Assign properties with granular permissions
+import { useState } from "react";
+import { HiX, HiUserAdd, HiOfficeBuilding, HiCheck, HiEye, HiEyeOff } from "react-icons/hi";
 
-export default function CreateAgentModal({ token, properties, onCreated, onClose }) {
-  const [step,    setStep]    = useState(1);
-  const [form,    setForm]    = useState({ firstName: "", lastName: "", email: "", password: "", phone: "" });
-  const [agentId, setAgentId] = useState(null);
+const PERM_DEFS = [
+  { key: "canEditDetails",       label: "Edit Property Details",   desc: "Can update title, description, rent, images" },
+  { key: "canManageTenants",     label: "Manage Tenants",          desc: "Review & accept/reject tenant applications" },
+  { key: "canViewPayments",      label: "View Payments",           desc: "Read-only access to payment records" },
+  { key: "canHandleMaintenance", label: "Handle Maintenance",      desc: "Acknowledge, schedule and resolve requests" },
+  { key: "canViewTenants",       label: "View Tenant Profiles",    desc: "See tenant contact info and history" },
+  { key: "canCreateProperty",    label: "Create Properties",       desc: "List new properties (landlord is notified)" },
+  { key: "canRespondDisputes",   label: "Respond to Disputes",     desc: "Reply on behalf of landlord in disputes" },
+];
+
+export default function CreateAgentModal({ token, properties, onClose, onSuccess }) {
+  const [step,         setStep]        = useState(1);
+  const [createdAgent, setCreatedAgent] = useState(null);
+  const [loading,      setLoading]     = useState(false);
+  const [error,        setError]       = useState("");
+  const [showPass,     setShowPass]    = useState(false);
+
+  // Step 1 form
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", phone: "" });
+
+  // Step 2: assignment
   const [selectedProps, setSelectedProps] = useState([]);
-  const [perms, setPerms] = useState({
-    canEditDetails: true, canManageTenants: true,
-    canViewPayments: false, canHandleMaintenance: true,
+  const [permissions,   setPermissions]   = useState({
+    canEditDetails: true, canManageTenants: true, canViewPayments: false,
+    canHandleMaintenance: true, canViewTenants: true,
+    canCreateProperty: false, canRespondDisputes: false,
   });
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState("");
 
+  // ── Step 1: Create account ────────────────────────────────────────────────
   const handleCreate = async () => {
-    if (!form.firstName || !form.lastName || !form.email || !form.password) {
-      setError("First name, last name, email, and password are required."); return;
-    }
-    setLoading(true); setError("");
-    const data = await apiCreateAgent(token, form).catch(e => ({ success: false, message: e.message }));
-    setLoading(false);
-    if (data.success) { setAgentId(data.data.id); setStep(2); }
-    else setError(data.message || "Failed to create agent");
-  };
-
-  const handleFinish = async () => {
-    setLoading(true); setError("");
+    setError(""); setLoading(true);
     try {
-      if (selectedProps.length > 0 && agentId) {
-        const data = await apiAssign(token, { agentId, propertyIds: selectedProps, permissions: perms });
-        if (!data.success) { setError(data.message); setLoading(false); return; }
-      }
-      onCreated();
-    } catch (e) { setError(e.message); }
+      const res  = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/agents/create`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!data.success) { setError(data.message); return; }
+      setCreatedAgent(data.data);
+      setStep(2);
+    } catch { setError("Network error. Please try again."); }
     finally { setLoading(false); }
   };
 
+  // ── Step 2: Assign properties ─────────────────────────────────────────────
+  const handleAssign = async () => {
+    if (selectedProps.length === 0) { setError("Select at least one property."); return; }
+    setError(""); setLoading(true);
+    try {
+      const res  = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/agents/assign`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId: createdAgent.id, propertyIds: selectedProps, permissions }),
+      });
+      const data = await res.json();
+      if (!data.success) { setError(data.message); return; }
+      onSuccess();
+      onClose();
+    } catch { setError("Assignment failed. Please try again."); }
+    finally { setLoading(false); }
+  };
+
+  const toggleProp = id => setSelectedProps(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const togglePerm = key => setPermissions(p => ({ ...p, [key]: !p[key] }));
+  const inp = (label, key, type = "text") => (
+    <div>
+      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1 block">{label}</label>
+      <input type={type} value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50"/>
+    </div>
+  );
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose}/>
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-          <div>
-            <h3 className="font-black text-gray-900">
-              {step === 1 ? "Create Agent Account" : "Assign Properties"}
-            </h3>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {step === 1 ? "Step 1 of 2 — Agent details" : "Step 2 of 2 — Optional assignment"}
-            </p>
-            {/* Progress bar */}
-            <div className="flex gap-1.5 mt-2">
-              {[1, 2].map(s => (
-                <div key={s} className={`h-1 rounded-full transition-all duration-300 ${s <= step ? "bg-blue-600 w-8" : "bg-gray-200 w-4"}`} />
-              ))}
-            </div>
+        <div className="px-6 pt-6 pb-4 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-black text-gray-900 text-lg">Create Agent Account</h2>
+            <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400"><HiX/></button>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white rounded-xl text-gray-400">
-            <HiX className="text-lg" />
-          </button>
+          <p className="text-xs text-gray-400">Step {step} of 2 — {step === 1 ? "Agent details" : "Assign properties"}</p>
+          {/* Progress bar */}
+          <div className="flex gap-2 mt-3">
+            <div className="flex-1 h-1 rounded-full bg-blue-600"/>
+            <div className={`flex-1 h-1 rounded-full ${step === 2 ? "bg-blue-600" : "bg-gray-200"}`}/>
+          </div>
         </div>
 
-        <div className="p-6">
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-600 font-bold">
-              {error}
-            </div>
-          )}
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+          {error && <div className="bg-red-50 text-red-600 text-xs font-bold px-4 py-3 rounded-xl border border-red-100">{error}</div>}
 
-          {/* Step 1 — Details */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { key: "firstName", label: "First Name",        type: "text",     placeholder: "Patrick",            full: false },
-                  { key: "lastName",  label: "Last Name",         type: "text",     placeholder: "Niyonzima",          full: false },
-                  { key: "email",     label: "Email Address",     type: "email",    placeholder: "agent@example.com",  full: true  },
-                  { key: "password",  label: "Password",          type: "password", placeholder: "Min 8 characters",   full: true  },
-                  { key: "phone",     label: "Phone (optional)",  type: "tel",      placeholder: "+250 788 000 000",   full: true  },
-                ].map(f => (
-                  <div key={f.key} className={f.full ? "col-span-2" : "col-span-1"}>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">
-                      {f.label}
-                    </label>
-                    <input
-                      type={f.type}
-                      placeholder={f.placeholder}
-                      value={form[f.key]}
-                      onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
-                    />
-                  </div>
-                ))}
+          {step === 1 ? (
+            <>
+              <div className="bg-blue-50 rounded-xl p-4 text-xs text-blue-700 font-semibold border border-blue-100">
+                📧 A welcome email with login credentials and a verification OTP will be sent to the agent automatically.
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {inp("First Name", "firstName")}
+                {inp("Last Name",  "lastName")}
+              </div>
+              {inp("Email Address", "email", "email")}
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1 block">Password</label>
+                <div className="relative">
+                  <input type={showPass ? "text" : "password"} value={form.password}
+                    onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                    placeholder="Min. 8 characters"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm pr-12 focus:outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50"/>
+                  <button type="button" onClick={() => setShowPass(!showPass)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {showPass ? <HiEyeOff/> : <HiEye/>}
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1 ml-1">Agent can change this password after first login</p>
+              </div>
+              {inp("Phone (optional)", "phone", "tel")}
+            </>
+          ) : (
+            <>
+              <div className="bg-green-50 rounded-xl p-4 flex items-center gap-3 border border-green-100">
+                <HiCheck className="text-green-600 text-xl shrink-0"/>
+                <div>
+                  <p className="text-xs font-black text-green-800">Agent account created!</p>
+                  <p className="text-xs text-green-700">Welcome email sent to <strong>{createdAgent?.email}</strong></p>
+                </div>
               </div>
 
-              <button
-                onClick={handleCreate}
-                disabled={loading}
-                className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {loading
-                  ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <HiUserAdd />}
-                Create Agent Account
-              </button>
-            </div>
-          )}
-
-          {/* Step 2 — Assign */}
-          {step === 2 && (
-            <div className="space-y-5">
-              <p className="text-sm text-gray-600">
-                Select properties for this agent to manage (you can also skip and assign later).
-              </p>
-
-              {/* Properties */}
+              {/* Property selection */}
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">Properties</p>
-                <div className="max-h-40 overflow-y-auto space-y-1.5 border border-gray-100 rounded-xl p-3">
-                  {properties.length === 0 ? (
-                    <p className="text-xs text-gray-400 text-center py-4">No properties yet</p>
-                  ) : (
-                    properties.map(p => (
-                      <label
-                        key={p.id}
-                        className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition ${
-                          selectedProps.includes(p.id) ? "bg-blue-50 border border-blue-200" : "hover:bg-gray-50 border border-transparent"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedProps.includes(p.id)}
-                          onChange={e => setSelectedProps(prev =>
-                            e.target.checked ? [...prev, p.id] : prev.filter(id => id !== p.id)
-                          )}
-                          className="w-4 h-4 accent-blue-600"
-                        />
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-gray-900 truncate">{p.title}</p>
-                          <p className="text-[10px] text-gray-400">{p.district} · {p.type}</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">Select Properties</p>
+                {properties.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">No properties available. Add properties first.</p>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {properties.map(p => (
+                      <label key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                        selectedProps.includes(p.id) ? "border-blue-400 bg-blue-50" : "border-gray-200 hover:bg-gray-50"
+                      }`}>
+                        <input type="checkbox" checked={selectedProps.includes(p.id)} onChange={() => toggleProp(p.id)} className="accent-blue-600"/>
+                        <HiOfficeBuilding className={selectedProps.includes(p.id) ? "text-blue-600" : "text-gray-400"}/>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-gray-800 truncate">{p.title}</p>
+                          <p className="text-xs text-gray-400">{p.district} · RWF {Number(p.rentAmount).toLocaleString()}/mo</p>
                         </div>
                       </label>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Permissions */}
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">Default Permissions</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(PERM_LABELS).map(([key, { label }]) => (
-                    <label
-                      key={key}
-                      className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition text-xs font-bold ${
-                        perms[key]
-                          ? "bg-blue-50 border-blue-200 text-blue-700"
-                          : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={perms[key]}
-                        onChange={() => setPerms(p => ({ ...p, [key]: !p[key] }))}
-                        className="w-3.5 h-3.5 accent-blue-600"
-                      />
-                      {label}
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">Permissions</p>
+                <div className="space-y-2">
+                  {PERM_DEFS.map(({ key, label, desc }) => (
+                    <label key={key} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                      permissions[key] ? "border-blue-200 bg-blue-50" : "border-gray-200 hover:bg-gray-50"
+                    }`}>
+                      <input type="checkbox" checked={!!permissions[key]} onChange={() => togglePerm(key)} className="mt-0.5 accent-blue-600"/>
+                      <div>
+                        <p className="text-xs font-black text-gray-800">{label}</p>
+                        <p className="text-[10px] text-gray-400">{desc}</p>
+                      </div>
                     </label>
                   ))}
                 </div>
               </div>
-
-              <div className="flex gap-3 pt-1">
-                <button
-                  onClick={onCreated}
-                  className="flex-1 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition"
-                >
-                  Skip for now
-                </button>
-                <button
-                  onClick={handleFinish}
-                  disabled={loading}
-                  className="flex-1 py-3 bg-green-600 text-white rounded-xl text-sm font-black hover:bg-green-700 disabled:opacity-60 transition flex items-center justify-center gap-2"
-                >
-                  {loading
-                    ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    : <HiCheck />}
-                  {selectedProps.length > 0 ? "Assign & Finish" : "Finish"}
-                </button>
-              </div>
-            </div>
+            </>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+          {step === 2 && (
+            <button onClick={() => { setStep(1); setError(""); }}
+              className="flex-1 py-3 border border-gray-200 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-50 transition">
+              Back
+            </button>
+          )}
+          <button
+            onClick={step === 1 ? handleCreate : handleAssign}
+            disabled={loading || (step === 1 && (!form.firstName || !form.email || !form.password))}
+            className="flex-1 py-3 bg-blue-600 text-white text-sm font-black rounded-xl hover:bg-blue-700 disabled:opacity-50 transition flex items-center justify-center gap-2">
+            <HiUserAdd/>
+            {loading ? "Please wait..." : step === 1 ? "Create Agent Account" : "Assign & Finish"}
+          </button>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 // router/agentRoutes.js
-// ⚠️  ORDER MATTERS: /my-properties MUST come before /:agentId
+// ⚠️ Named routes MUST come before /:agentId wildcard
 const router = require("express").Router();
 const ctrl   = require("../controllers/agentController");
 const { protect, landlordOnly, agentOnly } = require("../middleware/authMiddleware");
@@ -13,7 +13,9 @@ router.get("/",            protect, landlordOnly, ctrl.getMyAgents);
 
 // ── Agent only — BEFORE /:agentId wildcard ────────────────────────────────────
 router.get("/my-properties", protect, agentOnly, ctrl.getAgentProperties);
-// ── Single agent detail (wildcard last) ──────────────────────────────────────
+router.get("/my-tenants",    protect, agentOnly, ctrl.getMyTenants);
+
+// ── Wildcard last ─────────────────────────────────────────────────────────────
 router.get("/:agentId", protect, landlordOnly, ctrl.getAgentDetail);
 
 module.exports = router;

@@ -33,6 +33,8 @@ app.use("/api/calls",              require("./router/callRoutes"));
 app.use("/api/meetings",           require("./router/meetingRoutes"));
 app.use("/api/agents",             require("./router/agentRoutes"));
 app.use("/api/maintenance",        require("./router/maintenanceRoutes"));
+app.use("/api/notifications", require("./router/notificationRoutes"));
+app.use("/api/search",     require("./router/searchRoutes"));
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ message: "InzuTrust API Running" }));
