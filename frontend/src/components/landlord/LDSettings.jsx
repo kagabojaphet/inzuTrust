@@ -1,354 +1,275 @@
 // src/components/landlord/LDSettings.jsx
-import React, { useState, useEffect } from "react";
+// Real data: fetches + updates user profile, landlord profile, password change
+import { useState, useEffect, useRef } from "react";
 import {
-  HiCheck, HiPencil, HiShieldCheck, HiRefresh,
-  HiUser, HiBell, HiLockClosed, HiOfficeBuilding,
+  HiUser, HiOfficeBuilding, HiLockClosed, HiBell, HiSave,
+  HiEye, HiEyeOff, HiCheckCircle, HiExclamationCircle, HiCamera,
 } from "react-icons/hi";
-import { API_BASE } from "../../config";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-const hdrs = (tk) => ({ Authorization: `Bearer ${tk}`, "Content-Type": "application/json" });
+const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const hdrs = tk => ({ Authorization: `Bearer ${tk}`, "Content-Type": "application/json" });
 
-// ── Section wrapper ───────────────────────────────────────────────────────────
-function Section({ icon, title, children }) {
+function Alert({ type, msg }) {
+  if (!msg) return null;
+  const ok = type === "success";
+  return (
+    <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border ${
+      ok ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"
+    }`}>
+      {ok ? <HiCheckCircle className="shrink-0"/> : <HiExclamationCircle className="shrink-0"/>}
+      {msg}
+    </div>
+  );
+}
+
+function Section({ title, icon: Icon, children }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-          {icon}
+        <div className="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+          <Icon className="text-blue-600 text-sm"/>
         </div>
-        <h3 className="text-base font-black text-gray-900">{title}</h3>
+        <h3 className="font-black text-gray-900 text-sm">{title}</h3>
       </div>
       <div className="p-6">{children}</div>
     </div>
   );
 }
 
-// ── Field ─────────────────────────────────────────────────────────────────────
-function Field({ label, value, editing, onChange, type = "text", placeholder = "" }) {
+function Field({ label, children }) {
   return (
     <div>
-      <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1.5">
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value || ""}
-        disabled={!editing}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder || label}
-        className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none transition ${
-          editing
-            ? "border-blue-300 focus:ring-2 focus:ring-blue-100 bg-white"
-            : "border-gray-100 bg-gray-50 text-gray-600 cursor-default"
-        }`}
-      />
+      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5 block">{label}</label>
+      {children}
     </div>
   );
 }
 
-// ── Notification toggle ───────────────────────────────────────────────────────
-function NotifToggle({ label, desc, defaultOn }) {
-  const [on, setOn] = useState(defaultOn);
-  return (
-    <div className="flex items-center justify-between py-3.5 border-b border-gray-50 last:border-0">
-      <div>
-        <p className="text-sm font-semibold text-gray-900">{label}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
-      </div>
-      <button
-        onClick={() => setOn(!on)}
-        className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${on ? "bg-blue-600" : "bg-gray-200"}`}
-        role="switch"
-        aria-checked={on}
-      >
-        <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${on ? "translate-x-5" : "translate-x-0.5"}`} />
-      </button>
-    </div>
-  );
-}
+const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition";
 
-// ── Main ──────────────────────────────────────────────────────────────────────
-export default function LDSettings({ token }) {
-  const [profile,     setProfile]     = useState(null);
-  const [form,        setForm]        = useState({});
-  const [editing,     setEditing]     = useState(false);
-  const [loading,     setLoading]     = useState(true);
-  const [saving,      setSaving]      = useState(false);
-  const [saved,       setSaved]       = useState(false);
-  const [error,       setError]       = useState(null);
+export default function LDSettings({ token, user: propUser }) {
+  const [loading, setLoading] = useState(true);
 
-  // ── Fetch full profile on mount ─────────────────────────────────────────────
+  // Personal profile state
+  const [personal, setPersonal] = useState({ firstName: "", lastName: "", phone: "", email: "" });
+  const [pSaving,  setPSaving]  = useState(false);
+  const [pAlert,   setPAlert]   = useState({ type: "", msg: "" });
+
+  // Business profile state
+  const [business, setBusiness] = useState({ companyName: "", tinNumber: "", businessAddress: "", website: "", bio: "" });
+  const [bSaving,  setBSaving]  = useState(false);
+  const [bAlert,   setBAlert]   = useState({ type: "", msg: "" });
+
+  // Password state
+  const [pass,    setPass]    = useState({ currentPassword: "", newPassword: "", confirm: "" });
+  const [showPw,  setShowPw]  = useState({ cur: false, nw: false, cf: false });
+  const [pwSave,  setPwSave]  = useState(false);
+  const [pwAlert, setPwAlert] = useState({ type: "", msg: "" });
+
+  // Fetch full profile on mount
   useEffect(() => {
     if (!token) return;
     setLoading(true);
-    fetch(`${API_BASE}/users/profile`, { headers: hdrs(token) })
+    fetch(`${API}/users/profile`, { headers: hdrs(token) })
       .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          const u = data.data;
-          const p = u.landlordProfile || {};
-          setProfile(u);
-          setForm({
-            firstName:       u.firstName       || "",
-            lastName:        u.lastName        || "",
-            email:           u.email           || "",
-            phone:           u.phone           || "",
-            companyName:     p.companyName     || "",
-            tinNumber:       p.tinNumber       || "",
-            businessAddress: p.businessAddress || "",
-            website:         p.website         || "",
-            bio:             p.bio             || "",
-          });
-        } else {
-          setError(data.message);
-        }
+      .then(d => {
+        if (!d.success) return;
+        const u = d.data;
+        setPersonal({
+          firstName: u.firstName || "",
+          lastName:  u.lastName  || "",
+          phone:     u.phone     || "",
+          email:     u.email     || "",
+        });
+        const lp = u.landlordProfile || {};
+        setBusiness({
+          companyName:     lp.companyName     || "",
+          tinNumber:       lp.tinNumber       || "",
+          businessAddress: lp.businessAddress || "",
+          website:         lp.website         || "",
+          bio:             lp.bio             || "",
+        });
       })
-      .catch(e => setError(e.message))
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, [token]);
 
-  const handleCancel = () => {
-    if (!profile) return;
-    const p = profile.landlordProfile || {};
-    setForm({
-      firstName:       profile.firstName       || "",
-      lastName:        profile.lastName        || "",
-      email:           profile.email           || "",
-      phone:           profile.phone           || "",
-      companyName:     p.companyName           || "",
-      tinNumber:       p.tinNumber             || "",
-      businessAddress: p.businessAddress       || "",
-      website:         p.website               || "",
-      bio:             p.bio                   || "",
-    });
-    setEditing(false);
-    setError(null);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setError(null);
+  // ── Save personal ─────────────────────────────────────────────────────────
+  const savePersonal = async () => {
+    setPSaving(true); setPAlert({ type: "", msg: "" });
     try {
-      // Update user basic info
-      const userRes  = await fetch(`${API_BASE}/users/profile`, {
-        method:  "PUT",
-        headers: hdrs(token),
-        body:    JSON.stringify({
-          firstName: form.firstName,
-          lastName:  form.lastName,
-          phone:     form.phone,
-        }),
+      const r = await fetch(`${API}/users/profile`, {
+        method: "PUT", headers: hdrs(token),
+        body: JSON.stringify({ firstName: personal.firstName, lastName: personal.lastName, phone: personal.phone }),
       });
-      const userData = await userRes.json();
-      if (!userRes.ok) throw new Error(userData.message || "Failed to update user profile");
-
-      // Update landlord-specific profile fields
-      const ldRes  = await fetch(`${API_BASE}/users/landlords/profile`, {
-        method:  "POST",
-        headers: hdrs(token),
-        body:    JSON.stringify({
-          companyName:     form.companyName,
-          tinNumber:       form.tinNumber,
-          businessAddress: form.businessAddress,
-          website:         form.website,
-          bio:             form.bio,
-        }),
-      });
-      const ldData = await ldRes.json();
-      if (!ldRes.ok) throw new Error(ldData.message || "Failed to update landlord profile");
-
-      // Refresh profile from server
-      const freshRes  = await fetch(`${API_BASE}/users/profile`, { headers: hdrs(token) });
-      const freshData = await freshRes.json();
-      if (freshData.success) setProfile(freshData.data);
-
-      setEditing(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setSaving(false);
-    }
+      const d = await r.json();
+      setPAlert({ type: d.success ? "success" : "error", msg: d.success ? "Personal info saved successfully." : d.message });
+    } catch { setPAlert({ type: "error", msg: "Network error." }); }
+    finally { setPSaving(false); }
   };
 
-  const set = (key) => (val) => setForm(f => ({ ...f, [key]: val }));
+  // ── Save business ─────────────────────────────────────────────────────────
+  const saveBusiness = async () => {
+    setBSaving(true); setBAlert({ type: "", msg: "" });
+    try {
+      const r = await fetch(`${API}/users/landlords/profile`, {
+        method: "POST", headers: hdrs(token),
+        body: JSON.stringify(business),
+      });
+      const d = await r.json();
+      setBAlert({ type: d.success ? "success" : "error", msg: d.success ? "Business profile saved successfully." : d.message });
+    } catch { setBAlert({ type: "error", msg: "Network error." }); }
+    finally { setBSaving(false); }
+  };
 
-  if (loading) {
-    return (
-      <div className="space-y-6 max-w-2xl animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-32" />
-        {[1, 2].map(i => (
-          <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-            <div className="h-5 bg-gray-200 rounded w-40" />
-            <div className="grid grid-cols-2 gap-4">
-              {Array.from({ length: 4 }).map((_, j) => (
-                <div key={j} className="space-y-1.5">
-                  <div className="h-3 bg-gray-100 rounded w-20" />
-                  <div className="h-10 bg-gray-100 rounded-xl" />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+  // ── Change password ───────────────────────────────────────────────────────
+  const changePassword = async () => {
+    if (pass.newPassword !== pass.confirm) {
+      setPwAlert({ type: "error", msg: "New passwords do not match." }); return;
+    }
+    if (pass.newPassword.length < 8) {
+      setPwAlert({ type: "error", msg: "Password must be at least 8 characters." }); return;
+    }
+    setPwSave(true); setPwAlert({ type: "", msg: "" });
+    try {
+      const r = await fetch(`${API}/users/change-password`, {
+        method: "PUT", headers: hdrs(token),
+        body: JSON.stringify({ currentPassword: pass.currentPassword, newPassword: pass.newPassword }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        setPwAlert({ type: "success", msg: "Password changed successfully." });
+        setPass({ currentPassword: "", newPassword: "", confirm: "" });
+      } else {
+        setPwAlert({ type: "error", msg: d.message || "Failed to change password." });
+      }
+    } catch { setPwAlert({ type: "error", msg: "Network error." }); }
+    finally { setPwSave(false); }
+  };
+
+  const PwField = ({ label, fKey, showKey }) => (
+    <Field label={label}>
+      <div className="relative">
+        <input type={showPw[showKey] ? "text" : "password"} value={pass[fKey]}
+          onChange={e => setPass(p => ({ ...p, [fKey]: e.target.value }))}
+          className={`${inputCls} pr-12`}/>
+        <button type="button" onClick={() => setShowPw(p => ({ ...p, [showKey]: !p[showKey] }))}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          {showPw[showKey] ? <HiEyeOff/> : <HiEye/>}
+        </button>
       </div>
-    );
-  }
+    </Field>
+  );
+
+  const avatar = `https://ui-avatars.com/api/?name=${personal.firstName||"L"}+${personal.lastName||"A"}&background=dbeafe&color=2563eb&bold=true&size=96`;
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-black text-gray-900">Settings</h2>
-        {saved && (
-          <span className="flex items-center gap-1.5 text-sm text-green-600 font-bold bg-green-50 px-3 py-1.5 rounded-xl border border-green-200">
-            <HiCheck /> Saved successfully
-          </span>
-        )}
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h1 className="text-2xl font-black text-gray-900">Settings</h1>
+        <p className="text-sm text-gray-500 mt-1">Manage your account and business profile.</p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 font-medium">
-          {error}
-        </div>
-      )}
-
-      {/* ── Personal Info ── */}
-      <Section icon={<HiUser />} title="Personal Information">
-        {/* Avatar row */}
-        <div className="flex items-center gap-4 mb-6">
-          <img
-            src={`https://ui-avatars.com/api/?name=${form.firstName}+${form.lastName}&background=dbeafe&color=2563eb&bold=true&size=64`}
-            className="w-14 h-14 rounded-full border border-gray-100"
-            alt="avatar"
-          />
-          <div>
-            <p className="font-black text-gray-900">{form.firstName} {form.lastName}</p>
-            <p className="text-sm text-gray-400">{form.email}</p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <HiShieldCheck className="text-green-500 text-sm" />
-              <span className="text-xs font-bold text-green-600">
-                {profile?.isVerified ? "Verified Landlord" : "Pending Verification"}
-              </span>
-            </div>
+      {/* Personal Info */}
+      <Section title="Personal Information" icon={HiUser}>
+        {loading ? (
+          <div className="space-y-4">
+            {Array.from({length:4}).map((_,i)=><div key={i}><Skeleton width={80} height={10} borderRadius={4}/><Skeleton height={44} borderRadius={12} className="mt-1.5"/></div>)}
           </div>
-        </div>
-
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-xs text-gray-400">Update your personal details</p>
-          {!editing ? (
-            <button
-              onClick={() => setEditing(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-700 transition"
-            >
-              <HiPencil /> Edit Profile
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-700 disabled:opacity-60 transition"
-              >
-                {saving ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <HiCheck />}
-                Save Changes
-              </button>
+        ) : (
+          <div className="space-y-4">
+            {/* Avatar display */}
+            <div className="flex items-center gap-4 mb-2">
+              <div className="relative">
+                <img src={avatar} alt="avatar" className="w-16 h-16 rounded-2xl border border-gray-200"/>
+                <div className="absolute bottom-0 right-0 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white">
+                  <HiCamera className="text-white text-[9px]"/>
+                </div>
+              </div>
+              <div>
+                <p className="font-black text-gray-900 text-sm">{personal.firstName} {personal.lastName}</p>
+                <p className="text-xs text-gray-400">{personal.email}</p>
+                <span className="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full mt-1 inline-block">Landlord</span>
+              </div>
             </div>
-          )}
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="First Name"   value={form.firstName} editing={editing} onChange={set("firstName")} />
-          <Field label="Last Name"    value={form.lastName}  editing={editing} onChange={set("lastName")}  />
-          <Field label="Email Address" value={form.email}   editing={false}   onChange={() => {}} />
-          <Field label="Phone Number" value={form.phone}    editing={editing} onChange={set("phone")} type="tel" />
-        </div>
-      </Section>
-
-      {/* ── Business Info ── */}
-      <Section icon={<HiOfficeBuilding />} title="Business Information">
-        <p className="text-xs text-gray-400 mb-4">
-          This information appears on lease agreements and invoices.
-        </p>
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Company Name"     value={form.companyName}     editing={editing} onChange={set("companyName")}     placeholder="Your company or trading name" />
-          <Field label="TIN Number"       value={form.tinNumber}       editing={editing} onChange={set("tinNumber")}       placeholder="Tax Identification Number" />
-          <Field label="Business Address" value={form.businessAddress} editing={editing} onChange={set("businessAddress")} placeholder="Full business address" />
-          <Field label="Website"          value={form.website}         editing={editing} onChange={set("website")}         placeholder="https://yourwebsite.com" type="url" />
-        </div>
-        <div className="mt-4">
-          <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1.5">Bio / About</label>
-          <textarea
-            value={form.bio || ""}
-            disabled={!editing}
-            onChange={e => set("bio")(e.target.value)}
-            rows={3}
-            placeholder="Describe your business or rental portfolio..."
-            className={`w-full border rounded-xl px-4 py-2.5 text-sm outline-none resize-none transition ${
-              editing
-                ? "border-blue-300 focus:ring-2 focus:ring-blue-100 bg-white"
-                : "border-gray-100 bg-gray-50 text-gray-600 cursor-default"
-            }`}
-          />
-        </div>
-        {!editing && (
-          <button
-            onClick={() => setEditing(true)}
-            className="mt-4 flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline"
-          >
-            <HiPencil className="text-sm" /> Edit business info
-          </button>
+            <Alert type={pAlert.type} msg={pAlert.msg}/>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="First Name">
+                <input className={inputCls} value={personal.firstName} onChange={e => setPersonal(p => ({...p, firstName: e.target.value}))}/>
+              </Field>
+              <Field label="Last Name">
+                <input className={inputCls} value={personal.lastName} onChange={e => setPersonal(p => ({...p, lastName: e.target.value}))}/>
+              </Field>
+            </div>
+            <Field label="Email Address">
+              <input className={`${inputCls} cursor-not-allowed opacity-60`} value={personal.email} disabled title="Email cannot be changed"/>
+            </Field>
+            <Field label="Phone Number">
+              <input className={inputCls} value={personal.phone} onChange={e => setPersonal(p => ({...p, phone: e.target.value}))} placeholder="+250 7XX XXX XXX"/>
+            </Field>
+            <button onClick={savePersonal} disabled={pSaving}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white text-sm font-black rounded-xl hover:bg-blue-700 disabled:opacity-60 transition">
+              <HiSave/> {pSaving ? "Saving..." : "Save Personal Info"}
+            </button>
+          </div>
         )}
       </Section>
 
-      {/* ── Notifications ── */}
-      <Section icon={<HiBell />} title="Notification Preferences">
-        <p className="text-xs text-gray-400 mb-2">Choose which events send you an alert.</p>
-        {[
-          { label: "Rent payment received",   desc: "When a tenant completes a rent payment",    on: true  },
-          { label: "Late payment alert",       desc: "When a payment is overdue by 3+ days",      on: true  },
-          { label: "New lease signed",         desc: "When a tenant signs a lease agreement",     on: true  },
-          { label: "Maintenance requests",     desc: "When a tenant submits a maintenance ticket", on: true  },
-          { label: "New lease application",    desc: "When a tenant applies for your property",   on: true  },
-          { label: "Dispute filed",            desc: "When a tenant files a dispute",             on: true  },
-          { label: "Agent activity",           desc: "When one of your agents takes an action",   on: false },
-        ].map((n, i) => <NotifToggle key={i} {...n} defaultOn={n.on} />)}
+      {/* Business Profile */}
+      <Section title="Business Profile" icon={HiOfficeBuilding}>
+        {loading ? (
+          <div className="space-y-4">
+            {Array.from({length:5}).map((_,i)=><div key={i}><Skeleton width={80} height={10} borderRadius={4}/><Skeleton height={44} borderRadius={12} className="mt-1.5"/></div>)}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <Alert type={bAlert.type} msg={bAlert.msg}/>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Company Name">
+                <input className={inputCls} value={business.companyName} onChange={e => setBusiness(p => ({...p, companyName: e.target.value}))} placeholder="Optional"/>
+              </Field>
+              <Field label="TIN Number">
+                <input className={inputCls} value={business.tinNumber} onChange={e => setBusiness(p => ({...p, tinNumber: e.target.value}))} placeholder="Tax ID"/>
+              </Field>
+            </div>
+            <Field label="Business Address">
+              <input className={inputCls} value={business.businessAddress} onChange={e => setBusiness(p => ({...p, businessAddress: e.target.value}))} placeholder="KG 123 ST, Kigali"/>
+            </Field>
+            <Field label="Website">
+              <input className={inputCls} value={business.website} onChange={e => setBusiness(p => ({...p, website: e.target.value}))} placeholder="https://"/>
+            </Field>
+            <Field label="Bio / About">
+              <textarea rows={3} className={inputCls} value={business.bio} onChange={e => setBusiness(p => ({...p, bio: e.target.value}))} placeholder="Tell tenants about your properties..."/>
+            </Field>
+            <button onClick={saveBusiness} disabled={bSaving}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white text-sm font-black rounded-xl hover:bg-blue-700 disabled:opacity-60 transition">
+              <HiSave/> {bSaving ? "Saving..." : "Save Business Profile"}
+            </button>
+          </div>
+        )}
       </Section>
 
-      {/* ── Security ── */}
-      <Section icon={<HiLockClosed />} title="Security">
+      {/* Password */}
+      <Section title="Change Password" icon={HiLockClosed}>
         <div className="space-y-4">
-          <div className="flex items-center justify-between py-3 border-b border-gray-50">
-            <div>
-              <p className="text-sm font-semibold text-gray-900">Password</p>
-              <p className="text-xs text-gray-400">Last changed — unknown</p>
-            </div>
-            <button className="text-xs font-bold text-blue-600 hover:underline">Change password</button>
-          </div>
-          <div className="flex items-center justify-between py-3">
-            <div>
-              <p className="text-sm font-semibold text-gray-900">Two-factor authentication</p>
-              <p className="text-xs text-gray-400">Add an extra layer of security to your account</p>
-            </div>
-            <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Coming soon</span>
-          </div>
+          <Alert type={pwAlert.type} msg={pwAlert.msg}/>
+          <PwField label="Current Password"  fKey="currentPassword" showKey="cur"/>
+          <PwField label="New Password"      fKey="newPassword"      showKey="nw"/>
+          <PwField label="Confirm New Password" fKey="confirm"       showKey="cf"/>
+          <button onClick={changePassword} disabled={pwSave || !pass.currentPassword || !pass.newPassword}
+            className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white text-sm font-black rounded-xl hover:bg-black disabled:opacity-50 transition">
+            <HiLockClosed/> {pwSave ? "Changing..." : "Change Password"}
+          </button>
         </div>
       </Section>
 
-      {/* ── Account ── */}
-      <div className="bg-red-50 border border-red-200 rounded-2xl p-5">
-        <h3 className="text-sm font-black text-red-800 mb-1">Danger Zone</h3>
-        <p className="text-xs text-red-600 mb-4">
-          Deactivating your account will remove all your listings and cannot be undone.
-        </p>
-        <button className="text-xs font-bold text-red-600 border border-red-300 px-4 py-2 rounded-xl hover:bg-red-100 transition">
-          Deactivate Account
-        </button>
+      {/* Account status info */}
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <p className="text-xs font-black text-amber-800 mb-1">KYC Verification</p>
+        <p className="text-xs text-amber-700">To unlock all platform features, ensure your identity is verified by the InzuTrust admin. Contact support if your KYC status is pending.</p>
       </div>
     </div>
   );
