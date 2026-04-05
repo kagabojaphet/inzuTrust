@@ -1,5 +1,4 @@
 // model/agentProperty.js
-// Junction table: which Agent is assigned to which Property, by whom, with what permissions
 const { DataTypes } = require("sequelize");
 const sequelize     = require("../config/database");
 
@@ -10,65 +9,26 @@ const AgentProperty = sequelize.define("AgentProperty", {
     primaryKey:   true,
   },
 
-  // The assigned agent
-  agentId: {
-    type:      DataTypes.UUID,
-    allowNull: false,
-  },
+  agentId:      { type: DataTypes.UUID, allowNull: false },
+  propertyId:   { type: DataTypes.UUID, allowNull: false },
+  assignedById: { type: DataTypes.UUID, allowNull: false },
 
-  // The property they manage
-  propertyId: {
-    type:      DataTypes.UUID,
-    allowNull: false,
-  },
+  // ── Granular permissions ──────────────────────────────────────────────────
+  canEditDetails:        { type: DataTypes.BOOLEAN, defaultValue: true  },
+  canManageTenants:      { type: DataTypes.BOOLEAN, defaultValue: true  },
+  canViewPayments:       { type: DataTypes.BOOLEAN, defaultValue: false },
+  canHandleMaintenance:  { type: DataTypes.BOOLEAN, defaultValue: true  },
+  canCreateProperty:     { type: DataTypes.BOOLEAN, defaultValue: false }, // NEW: agent can list new properties (notifies landlord)
+  canViewTenants:        { type: DataTypes.BOOLEAN, defaultValue: true  }, // NEW: see tenant profiles for this property
+  canRespondDisputes:    { type: DataTypes.BOOLEAN, defaultValue: false }, // NEW: respond to disputes on behalf of landlord
 
-  // Who created this assignment (landlord or admin)
-  assignedById: {
-    type:      DataTypes.UUID,
-    allowNull: false,
-  },
-
-  // ── Granular permissions ───────────────────────────────────────────────────
-  // Agent can update property details (title, description, images, etc.)
-  canEditDetails: {
-    type:         DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
-
-  // Agent can review/accept/reject tenant applications for this property
-  canManageTenants: {
-    type:         DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
-
-  // Agent can view payments for this property (read-only)
-  canViewPayments: {
-    type:         DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-
-  // Agent can create/respond to maintenance requests
-  canHandleMaintenance: {
-    type:         DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
-
-  // Optional: assignment expiry date (null = no expiry)
-  expiresAt: {
-    type:      DataTypes.DATE,
-    allowNull: true,
-  },
-
-  // Whether the assignment is currently active
-  isActive: {
-    type:         DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
+  expiresAt: { type: DataTypes.DATE,    allowNull: true },
+  isActive:  { type: DataTypes.BOOLEAN, defaultValue: true },
 
 }, {
   tableName:  "agent_properties",
   timestamps: true,
-  indexes:    [], // prevent extra auto-indexes
+  indexes:    [],
 });
 
 module.exports = AgentProperty;

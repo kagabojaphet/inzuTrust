@@ -50,7 +50,12 @@ const Login = () => {
         navigate('/landlord/dashboard', { replace: true });
       } else if (role === 'tenant') {
         navigate('/tenant/dashboard', { replace: true });
-      } else {
+      } 
+      
+       else if (role === 'agent') {
+  navigate('/agent/dashboard', { replace: true });
+}
+      else {
         // Fallback for general users
         navigate('/', { replace: true });
       }
