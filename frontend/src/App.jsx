@@ -51,7 +51,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AIChatbot />
+        {/* <AIChatbot /> */}
         <BackToTop />
         <Routes>
 

@@ -1,11 +1,8 @@
 // controllers/leaseApplicationController.js
 const notificationService = require("../services/notificationService");
-
-// Lazy-load DB to avoid circular require on startup
 const getDb = () => require("../model");
 
-
-// POST /api/lease-applications  (tenant)
+// ── POST /api/lease-applications  (tenant) ────────────────────────────────────
 const apply = async (req, res) => {
   try {
     const { propertyId, message, moveInDate, duration } = req.body;
@@ -20,13 +17,10 @@ const apply = async (req, res) => {
     if (existing) return res.status(400).json({ success:false, message:"You already have an active application for this property" });
 
     const app = await getDb().LeaseApplication.create({
-      tenantId, propertyId,
-      landlordId: property.landlordId,
-      message, moveInDate, duration,
-      status: "pending",
+      tenantId, propertyId, landlordId: property.landlordId,
+      message, moveInDate, duration, status:"pending",
     });
 
-    // Notify landlord
     await notificationService.send({
       userId: property.landlordId,
       type: "lease_application",
@@ -41,14 +35,22 @@ const apply = async (req, res) => {
   }
 };
 
-// GET /api/lease-applications/my  (tenant — their applications)
+// ── GET /api/lease-applications/my  (tenant) ──────────────────────────────────
 const getMyApplications = async (req, res) => {
   try {
-    const apps = await getDb().LeaseApplication.findAll({
+    const { LeaseApplication, Property, User } = getDb();
+    const apps = await LeaseApplication.findAll({
       where: { tenantId: req.user.id },
       include: [
-        { model: require("../model").Property, as:"property", attributes:["title","district","sector","mainImage","rentAmount"] },
-        { model: require("../model").User,     as:"landlord", attributes:["firstName","lastName","email"] },
+        {
+          model: Property, as:"property",
+          // ← FIX: include rentAmount so the rent column renders
+          attributes: ["id","title","district","sector","mainImage","rentAmount","type","bedrooms","bathrooms"],
+        },
+        {
+          model: User, as:"landlord",
+          attributes: ["firstName","lastName","email"],
+        },
       ],
       order: [["createdAt","DESC"]],
     });
@@ -58,14 +60,22 @@ const getMyApplications = async (req, res) => {
   }
 };
 
-// GET /api/lease-applications/received  (landlord)
+// ── GET /api/lease-applications/received  (landlord) ─────────────────────────
 const getReceived = async (req, res) => {
   try {
-    const apps = await getDb().LeaseApplication.findAll({
+    const { LeaseApplication, Property, User } = getDb();
+    const apps = await LeaseApplication.findAll({
       where: { landlordId: req.user.id },
       include: [
-        { model: require("../model").Property, as:"property", attributes:["title","district","sector","mainImage"] },
-        { model: require("../model").User,     as:"tenant",   attributes:["firstName","lastName","email","phone"] },
+        {
+          model: Property, as:"property",
+          // ← FIX: rentAmount was missing — this caused the empty rent column
+          attributes: ["id","title","district","sector","mainImage","rentAmount","type","bedrooms","bathrooms"],
+        },
+        {
+          model: User, as:"tenant",
+          attributes: ["id","firstName","lastName","email","phone","lastSeenAt"],
+        },
       ],
       order: [["createdAt","DESC"]],
     });
@@ -75,14 +85,22 @@ const getReceived = async (req, res) => {
   }
 };
 
-// PUT /api/lease-applications/:id/respond  (landlord)
+// ── PUT /api/lease-applications/:id/respond  (landlord) ───────────────────────
 const respond = async (req, res) => {
   try {
-    const { status, landlordNote } = req.body; // accepted | rejected
-    const app = await getDb().LeaseApplication.findOne({
+    const { status, landlordNote } = req.body;
+    if (!["accepted","rejected"].includes(status)) {
+      return res.status(400).json({ success:false, message:"Status must be accepted or rejected" });
+    }
+
+    const { LeaseApplication } = getDb();
+    const app = await LeaseApplication.findOne({
       where: { id: req.params.id, landlordId: req.user.id },
     });
     if (!app) return res.status(404).json({ success:false, message:"Application not found" });
+    if (app.status !== "pending") {
+      return res.status(400).json({ success:false, message:"Application already responded to" });
+    }
 
     await app.update({ status, landlordNote, respondedAt: new Date() });
 
@@ -92,7 +110,7 @@ const respond = async (req, res) => {
       title: status === "accepted" ? "Application Accepted!" : "Application Update",
       message: status === "accepted"
         ? "Your lease application has been accepted. The landlord will send you an agreement."
-        : `Your lease application was not approved. Reason: ${landlordNote || "N/A"}`,
+        : `Your application was not approved. ${landlordNote ? `Reason: ${landlordNote}` : ""}`,
       referenceId: app.id, referenceType: "LeaseApplication",
     });
 
