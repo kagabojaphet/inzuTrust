@@ -1,8 +1,8 @@
-// controllers/leaseApplicationController.js
+// controllers/leaseApplicationController.js — COMPLETE FILE with admin getAllApplications
 const notificationService = require("../services/notificationService");
 const getDb = () => require("../model");
 
-// ── POST /api/lease-applications  (tenant) ────────────────────────────────────
+// ─── POST /api/lease-applications  (tenant applies) ───────────────────────
 const apply = async (req, res) => {
   try {
     const { propertyId, message, moveInDate, duration } = req.body;
@@ -11,8 +11,9 @@ const apply = async (req, res) => {
     const property = await getDb().Property.findByPk(propertyId);
     if (!property) return res.status(404).json({ success:false, message:"Property not found" });
 
+    const { Op } = require("sequelize");
     const existing = await getDb().LeaseApplication.findOne({
-      where: { tenantId, propertyId, status: ["draft","pending"] },
+      where: { tenantId, propertyId, status: { [Op.in]: ["draft","pending"] } },
     });
     if (existing) return res.status(400).json({ success:false, message:"You already have an active application for this property" });
 
@@ -35,22 +36,15 @@ const apply = async (req, res) => {
   }
 };
 
-// ── GET /api/lease-applications/my  (tenant) ──────────────────────────────────
+// ─── GET /api/lease-applications/my  (tenant) ─────────────────────────────
 const getMyApplications = async (req, res) => {
   try {
     const { LeaseApplication, Property, User } = getDb();
     const apps = await LeaseApplication.findAll({
       where: { tenantId: req.user.id },
       include: [
-        {
-          model: Property, as:"property",
-          // ← FIX: include rentAmount so the rent column renders
-          attributes: ["id","title","district","sector","mainImage","rentAmount","type","bedrooms","bathrooms"],
-        },
-        {
-          model: User, as:"landlord",
-          attributes: ["firstName","lastName","email"],
-        },
+        { model: Property, as:"property", attributes:["id","title","district","sector","mainImage","rentAmount","type","bedrooms","bathrooms"] },
+        { model: User,     as:"landlord", attributes:["id","firstName","lastName","email"] },
       ],
       order: [["createdAt","DESC"]],
     });
@@ -60,22 +54,15 @@ const getMyApplications = async (req, res) => {
   }
 };
 
-// ── GET /api/lease-applications/received  (landlord) ─────────────────────────
+// ─── GET /api/lease-applications/received  (landlord) ─────────────────────
 const getReceived = async (req, res) => {
   try {
     const { LeaseApplication, Property, User } = getDb();
     const apps = await LeaseApplication.findAll({
       where: { landlordId: req.user.id },
       include: [
-        {
-          model: Property, as:"property",
-          // ← FIX: rentAmount was missing — this caused the empty rent column
-          attributes: ["id","title","district","sector","mainImage","rentAmount","type","bedrooms","bathrooms"],
-        },
-        {
-          model: User, as:"tenant",
-          attributes: ["id","firstName","lastName","email","phone","lastSeenAt"],
-        },
+        { model: Property, as:"property", attributes:["id","title","district","sector","mainImage","rentAmount","type","bedrooms","bathrooms"] },
+        { model: User,     as:"tenant",   attributes:["id","firstName","lastName","email","phone","lastSeenAt"] },
       ],
       order: [["createdAt","DESC"]],
     });
@@ -85,22 +72,35 @@ const getReceived = async (req, res) => {
   }
 };
 
-// ── PUT /api/lease-applications/:id/respond  (landlord) ───────────────────────
+// ─── GET /api/lease-applications/all  (admin — ALL applications) ──────────
+const getAllApplications = async (req, res) => {
+  try {
+    const { LeaseApplication, Property, User } = getDb();
+    const apps = await LeaseApplication.findAll({
+      include: [
+        { model: Property, as:"property", attributes:["id","title","district","sector","mainImage","rentAmount","type"] },
+        { model: User,     as:"tenant",   attributes:["id","firstName","lastName","email","phone"] },
+        { model: User,     as:"landlord", attributes:["id","firstName","lastName","email"] },
+      ],
+      order: [["createdAt","DESC"]],
+    });
+    return res.json({ success:true, data:apps });
+  } catch (err) {
+    return res.status(500).json({ success:false, message:err.message });
+  }
+};
+
+// ─── PUT /api/lease-applications/:id/respond  (landlord) ──────────────────
 const respond = async (req, res) => {
   try {
     const { status, landlordNote } = req.body;
     if (!["accepted","rejected"].includes(status)) {
       return res.status(400).json({ success:false, message:"Status must be accepted or rejected" });
     }
-
     const { LeaseApplication } = getDb();
-    const app = await LeaseApplication.findOne({
-      where: { id: req.params.id, landlordId: req.user.id },
-    });
+    const app = await LeaseApplication.findOne({ where: { id: req.params.id, landlordId: req.user.id } });
     if (!app) return res.status(404).json({ success:false, message:"Application not found" });
-    if (app.status !== "pending") {
-      return res.status(400).json({ success:false, message:"Application already responded to" });
-    }
+    if (app.status !== "pending") return res.status(400).json({ success:false, message:"Application already responded to" });
 
     await app.update({ status, landlordNote, respondedAt: new Date() });
 
@@ -110,7 +110,7 @@ const respond = async (req, res) => {
       title: status === "accepted" ? "Application Accepted!" : "Application Update",
       message: status === "accepted"
         ? "Your lease application has been accepted. The landlord will send you an agreement."
-        : `Your application was not approved. ${landlordNote ? `Reason: ${landlordNote}` : ""}`,
+        : `Your application was not approved.${landlordNote ? ` Reason: ${landlordNote}` : ""}`,
       referenceId: app.id, referenceType: "LeaseApplication",
     });
 
@@ -120,4 +120,4 @@ const respond = async (req, res) => {
   }
 };
 
-module.exports = { apply, getMyApplications, getReceived, respond };
+module.exports = { apply, getMyApplications, getReceived, getAllApplications, respond };
