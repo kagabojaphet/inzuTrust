@@ -1,9 +1,4 @@
 // src/components/landlord/LDProperties.jsx
-// Changes from previous version:
-//   1. Location filter dropdown (distinct districts from properties)
-//   2. Active Tenant column (avatar + name + since date)
-//   3. Figma-style pagination: < 1 2 3 … 10 >
-//   (No other changes — all data from backend)
 import React, { useEffect, useState } from "react";
 import LDPropertyDetail from "./LDPropertyDetail";
 import {

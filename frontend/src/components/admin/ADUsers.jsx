@@ -1,4 +1,5 @@
 // src/components/admin/ADUsers.jsx
+// Responsiveness added — no style/design changes
 import React, { useState, useEffect, useCallback } from "react";
 import {
   HiSearch, HiEye, HiBan, HiCheckCircle, HiX,
@@ -10,7 +11,6 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { API_BASE } from "../../config";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 const hdrs = tk => ({ Authorization: `Bearer ${tk}` });
 
 const fmtDate = d => d
@@ -32,10 +32,9 @@ const getInitials = u =>
 
 const isOnline = d => {
   if (!d) return false;
-  return (Date.now() - new Date(d)) < 3 * 60 * 1000; // 3 minutes
+  return (Date.now() - new Date(d)) < 3 * 60 * 1000;
 };
 
-// ── Trust score bar ───────────────────────────────────────────────────────────
 function TrustBar({ score }) {
   if (score == null) return <span className="text-xs text-gray-400">—</span>;
   const pct   = Math.min(Math.max(score, 0), 100);
@@ -51,7 +50,6 @@ function TrustBar({ score }) {
   );
 }
 
-// ── Status badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ user }) {
   if (user.isSuspended) return (
     <span className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-100 text-[10px] font-black px-2.5 py-1 rounded-full">
@@ -70,7 +68,6 @@ function StatusBadge({ user }) {
   );
 }
 
-// ── Role badge ────────────────────────────────────────────────────────────────
 function RoleBadge({ role }) {
   const s = {
     tenant:   "bg-blue-50 text-blue-700",
@@ -84,7 +81,6 @@ function RoleBadge({ role }) {
   );
 }
 
-// ── User detail drawer ────────────────────────────────────────────────────────
 function UserDrawer({ user: u, onClose, onSuspend, onVerifyKyc, onDelete }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const profile = u.tenantProfile || u.landlordProfile;
@@ -93,18 +89,13 @@ function UserDrawer({ user: u, onClose, onSuspend, onVerifyKyc, onDelete }) {
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/40" onClick={onClose}/>
       <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
-
-        {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
           <h3 className="text-base font-black text-gray-900">Account Details</h3>
           <button onClick={onClose} className="p-2 hover:bg-white rounded-xl text-gray-400 transition">
             <HiX className="text-lg"/>
           </button>
         </div>
-
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-7">
-          {/* Avatar */}
           <div className="text-center mb-8">
             <div className="relative inline-block">
               <div className="w-20 h-20 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-black mx-auto shadow-lg">
@@ -121,8 +112,6 @@ function UserDrawer({ user: u, onClose, onSuspend, onVerifyKyc, onDelete }) {
               <StatusBadge user={u}/>
             </div>
           </div>
-
-          {/* Trust + KYC cards */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
               <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Trust Score</p>
@@ -138,8 +127,6 @@ function UserDrawer({ user: u, onClose, onSuspend, onVerifyKyc, onDelete }) {
               </p>
             </div>
           </div>
-
-          {/* Detail rows */}
           <div className="divide-y divide-gray-50 mb-6">
             {[
               { label: "Account ID",  value: u.id.slice(0, 8).toUpperCase() + "..." },
@@ -158,8 +145,6 @@ function UserDrawer({ user: u, onClose, onSuspend, onVerifyKyc, onDelete }) {
             ))}
           </div>
         </div>
-
-        {/* Footer actions */}
         <div className="p-5 border-t border-gray-100 bg-gray-50 space-y-2">
           {!u.isVerified && u.role !== "admin" && (
             <button onClick={() => onVerifyKyc(u.id)}
@@ -200,24 +185,79 @@ function UserDrawer({ user: u, onClose, onSuspend, onVerifyKyc, onDelete }) {
   );
 }
 
-// ── Actions dropdown ──────────────────────────────────────────────────────────
+// ── Mobile user card (shown < md) ─────────────────────────────────────────────
+function MobileUserCard({ u, onView, onSuspend, onVerifyKyc }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-black text-sm shadow-sm">
+              {getInitials(u)}
+            </div>
+            {isOnline(u.lastSeenAt) && (
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"/>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-gray-900 truncate">{u.firstName} {u.lastName}</p>
+            <p className="text-[11px] text-gray-400 truncate">{u.email}</p>
+          </div>
+        </div>
+        <button onClick={() => onView(u)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+          <HiEye className="text-base"/>
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <RoleBadge role={u.role}/>
+        <StatusBadge user={u}/>
+      </div>
+
+      <div className="flex items-center justify-between pt-1 border-t border-gray-50">
+        <div>
+          <p className="text-[10px] text-gray-400 font-semibold">Trust Score</p>
+          <TrustBar score={u.trustScore}/>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] text-gray-400 font-semibold">Last Active</p>
+          <p className="text-xs text-gray-500 font-medium">{fmtLastActive(u.lastSeenAt)}</p>
+        </div>
+      </div>
+
+      <div className="flex gap-2 pt-1">
+        {!u.isVerified && (
+          <button onClick={() => onVerifyKyc(u.id)}
+            className="flex-1 py-2 bg-blue-600 text-white text-[11px] font-black rounded-xl hover:bg-blue-700 transition">
+            VERIFY KYC
+          </button>
+        )}
+        <button onClick={() => onSuspend(u.id)}
+          className={`flex-1 py-2 rounded-xl text-[11px] font-bold transition border ${
+            u.isSuspended
+              ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+              : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+          }`}>
+          {u.isSuspended ? "Reactivate" : "Suspend"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ActionsMenu({ user: u, onView, onSuspend, onVerifyKyc }) {
-  const [open, setOpen] = useState(false);
   return (
     <div className="relative flex items-center justify-end gap-1">
-      {/* Eye */}
       <button onClick={() => onView(u)} title="View"
         className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
         <HiEye className="text-base"/>
       </button>
-      {/* VERIFY pill (only unverified) */}
       {!u.isVerified && (
         <button onClick={() => onVerifyKyc(u.id)}
           className="px-2.5 py-1.5 bg-blue-600 text-white text-[10px] font-black rounded-lg hover:bg-blue-700 transition">
           VERIFY
         </button>
       )}
-      {/* Suspend / reactivate */}
       <button onClick={() => onSuspend(u.id)} title={u.isSuspended ? "Reactivate" : "Suspend"}
         className={`p-2 rounded-lg transition ${
           u.isSuspended
@@ -226,7 +266,6 @@ function ActionsMenu({ user: u, onView, onSuspend, onVerifyKyc }) {
         }`}>
         {u.isSuspended ? <HiCheckCircle className="text-base"/> : <HiBan className="text-base"/>}
       </button>
-      {/* Edit (placeholder) */}
       <button className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition" title="Edit">
         <HiPencil className="text-base"/>
       </button>
@@ -234,7 +273,6 @@ function ActionsMenu({ user: u, onView, onSuspend, onVerifyKyc }) {
   );
 }
 
-// ── Main ADUsers ──────────────────────────────────────────────────────────────
 export default function ADUsers({ token }) {
   const [users,        setUsers]        = useState([]);
   const [loading,      setLoading]      = useState(true);
@@ -248,24 +286,21 @@ export default function ADUsers({ token }) {
 
   const LIMIT = 10;
 
-  // Debounce search
   useEffect(() => {
     const t = setTimeout(() => setDebSearch(search), 400);
     return () => clearTimeout(t);
   }, [search]);
 
-  // Reset page on filter change
   useEffect(() => { setPage(1); }, [debSearch, roleFilter, statusFilter]);
 
-  // Fetch
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page, limit: LIMIT,
-        ...(debSearch                  && { search: debSearch        }),
-        ...(roleFilter   !== "all"     && { role:   roleFilter       }),
-        ...(statusFilter !== "all"     && { status: statusFilter     }),
+        ...(debSearch              && { search: debSearch   }),
+        ...(roleFilter   !== "all" && { role:   roleFilter  }),
+        ...(statusFilter !== "all" && { status: statusFilter}),
       });
       const res  = await fetch(`${API_BASE}/admin/users?${params}`, { headers: hdrs(token) });
       const data = await res.json();
@@ -279,7 +314,6 @@ export default function ADUsers({ token }) {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  // ── Actions ─────────────────────────────────────────────────────────────────
   const handleSuspend = async id => {
     await fetch(`${API_BASE}/admin/users/${id}/suspend`, { method: "PUT", headers: hdrs(token) });
     setUsers(prev => prev.map(u => u.id === id ? { ...u, isSuspended: !u.isSuspended } : u));
@@ -317,7 +351,6 @@ export default function ADUsers({ token }) {
     a.click();
   };
 
-  // Pagination numbers
   const pageNums = () => {
     const total = pagination.totalPages;
     if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -352,22 +385,21 @@ export default function ADUsers({ token }) {
               }
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button onClick={handleExportCSV}
               className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 bg-white rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition">
-              <HiDownload/> Export CSV
+              <HiDownload/> <span className="hidden sm:inline">Export CSV</span>
             </button>
             <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition">
-              <HiUserAdd/> Add User
+              <HiUserAdd/> <span className="hidden sm:inline">Add User</span>
             </button>
           </div>
         </div>
 
-        {/* Filters bar */}
-        <div className="bg-white rounded-2xl border border-gray-200 px-5 py-3.5 flex items-center gap-3 flex-wrap">
-          <span className="text-xs font-black text-gray-400 uppercase tracking-wider shrink-0">Filters:</span>
+        {/* Filters */}
+        <div className="bg-white rounded-2xl border border-gray-200 px-4 sm:px-5 py-3.5 flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-black text-gray-400 uppercase tracking-wider shrink-0 hidden sm:block">Filters:</span>
 
-          {/* Role */}
           <div className="relative">
             <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
               className="appearance-none pl-3 pr-8 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white cursor-pointer">
@@ -379,7 +411,6 @@ export default function ADUsers({ token }) {
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▾</span>
           </div>
 
-          {/* Status */}
           <div className="relative">
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
               className="appearance-none pl-3 pr-8 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white cursor-pointer">
@@ -391,8 +422,7 @@ export default function ADUsers({ token }) {
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▾</span>
           </div>
 
-          {/* Search */}
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative flex-1 min-w-[160px]">
             <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"/>
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search by name or email..."
@@ -405,7 +435,6 @@ export default function ADUsers({ token }) {
             )}
           </div>
 
-          {/* Clear */}
           {(roleFilter !== "all" || statusFilter !== "all" || search) && (
             <button onClick={() => { setRoleFilter("all"); setStatusFilter("all"); setSearch(""); }}
               className="text-blue-600 text-xs font-bold hover:underline shrink-0">
@@ -413,14 +442,44 @@ export default function ADUsers({ token }) {
             </button>
           )}
 
-          <button onClick={fetchUsers}
-            className="ml-auto p-2 text-gray-400 hover:text-blue-600 transition shrink-0">
+          <button onClick={fetchUsers} className="ml-auto p-2 text-gray-400 hover:text-blue-600 transition shrink-0">
             <HiRefresh className={`text-base ${loading ? "animate-spin" : ""}`}/>
           </button>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        {/* ── MOBILE: card layout (< md) ── */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            Array.from({length:4}).map((_,i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton width={40} height={40} borderRadius={12}/>
+                  <div><Skeleton width={120} height={13} borderRadius={6} className="mb-1"/><Skeleton width={160} height={10} borderRadius={6}/></div>
+                </div>
+                <div className="flex gap-2"><Skeleton width={60} height={22} borderRadius={8}/><Skeleton width={70} height={22} borderRadius={20}/></div>
+                <div className="flex justify-between"><Skeleton width={80} height={22} borderRadius={6}/><Skeleton width={80} height={12} borderRadius={6}/></div>
+              </div>
+            ))
+          ) : users.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-200 py-16 text-center">
+              <HiUserAdd className="text-4xl text-gray-200 mx-auto mb-3"/>
+              <p className="text-sm font-semibold text-gray-400">No users found</p>
+            </div>
+          ) : (
+            users.map(u => (
+              <MobileUserCard
+                key={u.id}
+                u={u}
+                onView={setSelected}
+                onSuspend={handleSuspend}
+                onVerifyKyc={handleVerifyKyc}
+              />
+            ))
+          )}
+        </div>
+
+        {/* ── DESKTOP: table layout (≥ md) ── */}
+        <div className="hidden md:block bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[700px]">
               <thead className="bg-gray-50 border-b border-gray-100">
@@ -461,7 +520,6 @@ export default function ADUsers({ token }) {
                 ) : (
                   users.map(u => (
                     <tr key={u.id} className="hover:bg-gray-50/60 transition-all">
-                      {/* User details */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="relative shrink-0">
@@ -485,11 +543,7 @@ export default function ADUsers({ token }) {
                         <span className="text-xs text-gray-500 font-medium">{fmtLastActive(u.lastSeenAt)}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <ActionsMenu user={u}
-                          onView={setSelected}
-                          onSuspend={handleSuspend}
-                          onVerifyKyc={handleVerifyKyc}
-                        />
+                        <ActionsMenu user={u} onView={setSelected} onSuspend={handleSuspend} onVerifyKyc={handleVerifyKyc}/>
                       </td>
                     </tr>
                   ))
@@ -498,7 +552,6 @@ export default function ADUsers({ token }) {
             </table>
           </div>
 
-          {/* Pagination footer */}
           {!loading && pagination.total > 0 && (
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3">
               <p className="text-xs text-gray-500">
@@ -531,6 +584,25 @@ export default function ADUsers({ token }) {
             </div>
           )}
         </div>
+
+        {/* Mobile pagination */}
+        {!loading && pagination.totalPages > 1 && (
+          <div className="md:hidden flex items-center justify-between">
+            <p className="text-xs text-gray-500">
+              Page {page} of {pagination.totalPages}
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}
+                className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 disabled:opacity-40">
+                <HiChevronLeft className="text-sm"/>
+              </button>
+              <button onClick={() => setPage(p => Math.min(pagination.totalPages,p+1))} disabled={page===pagination.totalPages}
+                className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 disabled:opacity-40">
+                <HiChevronRight className="text-sm"/>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </SkeletonTheme>
   );

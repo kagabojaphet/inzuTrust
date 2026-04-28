@@ -18,4 +18,6 @@ router.get("/my-tenants",    protect, agentOnly, ctrl.getMyTenants);
 // ── Wildcard last ─────────────────────────────────────────────────────────────
 router.get("/:agentId", protect, landlordOnly, ctrl.getAgentDetail);
 
+
+
 module.exports = router;

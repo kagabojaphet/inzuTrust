@@ -16,6 +16,7 @@ import Login              from './pages/Login';
 import Register           from './pages/Register';
 import RegisterTenant     from './pages/TenantRegister';
 import RegisterLandlord   from './pages/LandlordRegister';
+import AgentRegister from "./pages/AgentRegister";
 import TenantDashboard    from './pages/TenantDashboard';
 import LandlordDashboard  from './pages/LandlordDashboard';
 import AdminDashboard     from './pages/AdminDashboard';
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="/register/*"element={<PublicLayout><Register /></PublicLayout>} />
           <Route path="/register/tenant"   element={<PublicLayout><RegisterTenant /></PublicLayout>} />
           <Route path="/register/landlord" element={<PublicLayout><RegisterLandlord /></PublicLayout>} />
+          <Route path="/register/agent" element={<AgentRegister />} />
           <Route path="/verify-otp"element={<VerifyOTP />} />
 
           <Route path="/properties"    element={<PublicLayout><Properties /></PublicLayout>} />
