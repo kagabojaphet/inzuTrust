@@ -1,7 +1,13 @@
 import React from 'react';
-import { HiOutlineChatAlt2, HiOutlineVideoCamera, HiOutlineCalendar } from "react-icons/hi";
+import {
+  HiOutlineChatAlt2,
+  HiOutlineVideoCamera,
+  HiOutlineCalendar
+} from "react-icons/hi";
+
 import { useLanguage } from '../../context/LanguageContext';
-import SupportIcon from '../../assets/image/SupportIcon.png'; 
+import { Link } from 'react-router-dom';
+import SupportIcon from '../../assets/image/SupportIcon.png';
 
 const AdminFeatures = () => {
   const { t } = useLanguage();
@@ -38,47 +44,69 @@ const AdminFeatures = () => {
   ];
 
   return (
-    <section className="w-full py-24 bg-white font-sans">
-      <div className="w-full px-6 md:px-12 flex flex-col lg:flex-row items-start gap-16">
-        
+    <section className="w-full py-20 bg-white">
+      <div className="w-full px-6 md:px-12 flex flex-col lg:flex-row items-start gap-14">
+
+        {/* LEFT CONTENT */}
         <div className="w-full lg:w-1/3 text-left lg:sticky lg:top-24">
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-[1.1] tracking-tight">
+
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 leading-snug mb-5">
             {t("adminFeatures.title")}
           </h2>
-          <p className="text-black text-lg md:text-xl mb-10 leading-relaxed">
+
+          <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-8 max-w-md">
             {t("adminFeatures.subtitle")}
           </p>
-          <button className=" bg-brand-blue-bright text-white px-8 py-4 rounded-lg font-black shadow-xl shadow-slate-200/50 hover:bg-brand-blue-bright transition-all transform hover:-translate-y-1 text-sm tracking-widest">
+
+          {/* LINKED BUTTON */}
+          <Link
+            to="/admin/dashboard"
+            className="inline-block bg-brand-blue-bright text-white px-6 py-3 rounded-lg font-medium hover:opacity-95 transition-all text-sm shadow-sm"
+          >
             {t("adminFeatures.button")}
-          </button>
+          </Link>
+
         </div>
 
-        <div className="w-full lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-8">
+        {/* RIGHT GRID */}
+        <div className="w-full lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+
           {adminTools.map((tool, index) => (
-            <div 
-              key={index} 
-              className="group bg-white p-10 rounded-lg border border-slate-200 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 text-left"
+            <div
+              key={index}
+              className="group bg-white p-7 rounded-2xl border border-slate-200 hover:shadow-md transition-all duration-300 text-left"
             >
-              <div className={`w-16 h-16 ${tool.color} rounded-lg flex items-center justify-center mb-8 transition-transform group-hover:scale-110`}>
+
+              {/* ICON */}
+              <div
+                className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-105`}
+              >
                 {tool.isImage ? (
-                  <img 
-                    src={tool.icon} 
-                    alt={tool.title} 
-                    className="w-full h-full object-cover p-3" 
+                  <img
+                    src={tool.icon}
+                    alt={tool.title}
+                    className="w-full h-full object-cover p-2.5"
                   />
                 ) : (
-                  <span className="text-3xl">{tool.icon}</span>
+                  <span className="text-xl">
+                    {tool.icon}
+                  </span>
                 )}
               </div>
 
-              <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">
+              {/* TITLE */}
+              <h3 className="text-base md:text-lg font-semibold text-slate-900 mb-2">
                 {tool.title}
               </h3>
-              <p className="text-black text-lg leading-relaxed">
+
+              {/* DESCRIPTION */}
+              <p className="text-slate-600 text-sm leading-relaxed">
                 {tool.desc}
               </p>
+
             </div>
           ))}
+
         </div>
 
       </div>

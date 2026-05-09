@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { HiOutlineArrowNarrowRight, HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import {
+  HiOutlineArrowNarrowRight,
+  HiChevronLeft,
+  HiChevronRight
+} from "react-icons/hi";
+
 import { useLanguage } from '../../context/LanguageContext';
 
 const News = () => {
@@ -13,8 +18,7 @@ const News = () => {
       date: "Feb 18, 2026",
       title: t("newsSection.article1Title"),
       desc: t("newsSection.article1Desc"),
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1073&auto=format&fit=crop",
-      gradient: "from-cyan-500/90 to-blue-800/90"
+      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1073&auto=format&fit=crop"
     },
     {
       id: 2,
@@ -22,8 +26,7 @@ const News = () => {
       date: "Feb 10, 2026",
       title: t("newsSection.article2Title"),
       desc: t("newsSection.article2Desc"),
-      image: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?q=80&w=687&auto=format&fit=crop",
-      gradient: "from-blue-600/90 to-indigo-950/90"
+      image: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?q=80&w=687&auto=format&fit=crop"
     },
     {
       id: 3,
@@ -31,125 +34,106 @@ const News = () => {
       date: "Jan 25, 2026",
       title: t("newsSection.article3Title"),
       desc: t("newsSection.article3Desc"),
-      image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1170&auto=format&fit=crop",
-      gradient: "from-blue-800/95 to-blue-900/95"
-    },
-    {
-      id: 4,
-      category: t("newsSection.legal"),
-      date: "Jan 12, 2026",
-      title: t("newsSection.article4Title"),
-      desc: t("newsSection.article4Desc"),
-      image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=1170&auto=format&fit=crop",
-      gradient: "from-slate-700/90 to-slate-950/90"
-    },
-    {
-      id: 5,
-      category: t("newsSection.community"),
-      date: "Jan 05, 2026",
-      title: t("newsSection.article5Title"),
-      desc: t("newsSection.article5Desc"),
-      image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1170&auto=format&fit=crop",
-      gradient: "from-emerald-600/90 to-blue-900/90"
-    },
-    {
-      id: 6,
-      category: t("newsSection.finance"),
-      date: "Dec 28, 2025",
-      title: t("newsSection.article6Title"),
-      desc: t("newsSection.article6Desc"),
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1170&auto=format&fit=crop",
-      gradient: "from-blue-500/90 to-indigo-800/90"
+      image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1170&auto=format&fit=crop"
     }
   ];
 
-  const totalPages = Math.ceil(articles.length / 3);
-
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentPage((prev) => (prev + 1) % totalPages);
-    }, 5000); 
+      setCurrentPage((prev) => (prev + 1) % articles.length);
+    }, 5000);
+
     return () => clearInterval(timer);
-  }, [totalPages]);
+  }, [articles.length]);
 
   return (
-    <section className="w-full py-24 bg-white font-sans overflow-hidden">
-      <div className="w-full px-6 md:px-12 mb-16 flex flex-col items-start gap-8">
-        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight text-left">
-          {t("newsSection.title")}
-        </h2>
-        
-        <div className="flex gap-4">
-          <button 
-            onClick={() => setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)}
-            className="w-12 h-12 rounded-lg border border-slate-200 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-md shadow-slate-200/50"
+    <section className="w-full py-20 bg-white overflow-hidden">
+
+      {/* HEADER */}
+      <div className="w-full px-6 md:px-12 mb-12 flex items-center justify-between gap-4 flex-wrap">
+
+        <div>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 leading-snug mb-5">
+            {t("newsSection.title")}
+          </h2>
+        </div>
+
+        <div className="flex gap-3">
+
+          <button
+            onClick={() =>
+              setCurrentPage((prev) =>
+                (prev - 1 + articles.length) % articles.length
+              )
+            }
+            className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition"
           >
-            <HiChevronLeft className="text-2xl" />
+            <HiChevronLeft className="text-xl" />
           </button>
-          <button 
-            onClick={() => setCurrentPage((prev) => (prev + 1) % totalPages)}
-            className="w-12 h-12 rounded-lg border border-slate-200 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-md shadow-slate-200/50"
+
+          <button
+            onClick={() =>
+              setCurrentPage((prev) =>
+                (prev + 1) % articles.length
+              )
+            }
+            className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition"
           >
-            <HiChevronRight className="text-2xl" />
+            <HiChevronRight className="text-xl" />
           </button>
+
         </div>
       </div>
 
+      {/* ARTICLES */}
       <div className="w-full px-6 md:px-12">
-        <div 
-          className="flex transition-transform duration-1000 ease-in-out"
-          style={{ transform: `translateX(-${currentPage * 100}%)` }}
-        >
-          <div className="flex min-w-full gap-8">
-            {articles.map((post) => (
-              <article 
-                key={post.id} 
-                className="group relative h-[520px] w-1/3 min-w-[calc(33.333%-22px)] rounded-lg border border-slate-200 shadow-xl shadow-slate-200/40 overflow-hidden cursor-pointer flex flex-col"
-              >
-                <img 
-                  src={post.image} 
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  alt=""
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {articles.map((post) => (
+            <article
+              key={post.id}
+              className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300"
+            >
+
+              {/* IMAGE */}
+              <div className="relative h-56 overflow-hidden">
+
+                <img
+                  src={post.image}
+                  alt={post.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
-                <div className={`absolute inset-0 bg-gradient-to-b ${post.gradient} opacity-90 group-hover:opacity-85 transition-opacity`}></div>
-                
-                <div className="relative h-full w-full flex flex-col p-10 text-white z-10 text-left">
-                  <span className="text-xs font-black uppercase tracking-[0.2em] mb-6 opacity-80">
-                    {post.category} • {post.date}
-                  </span>
-                  
-                  <h3 className="text-3xl font-black mb-6 leading-tight tracking-tight">
-                    {post.title}
-                  </h3>
-                  
-                  <p className="text-lg font-medium leading-relaxed opacity-90 mb-8">
-                    {post.desc}
-                  </p>
+              </div>
 
-                  <div className="mt-auto -mx-10 -mb-10 overflow-hidden">
-                    <div className="transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                      <button className="w-full bg-slate-900/90 backdrop-blur-md text-white py-6 px-10 flex items-center justify-between font-black text-sm uppercase tracking-widest border-t border-white/10">
-                        {t("newsSection.readMore")}
-                        <HiOutlineArrowNarrowRight className="text-2xl" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+              {/* CONTENT */}
+              <div className="p-6">
+
+                <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                  {post.category} • {post.date}
+                </span>
+
+                <h3 className="text-xl font-semibold text-slate-900 mt-3 mb-3 leading-snug">
+                  {post.title}
+                </h3>
+
+                <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                  {post.desc}
+                </p>
+
+                <button className="flex items-center gap-2 text-brand-blue-bright font-medium text-sm hover:gap-3 transition-all">
+                  {t("newsSection.readMore")}
+                  <HiOutlineArrowNarrowRight className="text-lg" />
+                </button>
+
+              </div>
+
+            </article>
+          ))}
+
         </div>
       </div>
 
-      <div className="w-full px-6 md:px-12 flex justify-start gap-2 mt-12">
-        {[...Array(totalPages)].map((_, i) => (
-          <div 
-            key={i} 
-            className={`h-1.5 transition-all duration-500 rounded-full ${currentPage === i ? 'w-8 bg-slate-900' : 'w-2 bg-slate-200'}`}
-          />
-        ))}
-      </div>
     </section>
   );
 };
