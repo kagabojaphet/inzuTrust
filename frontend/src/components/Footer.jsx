@@ -1,109 +1,209 @@
-import React from 'react';
-import { FaXTwitter, FaInstagram, FaFacebookF } from "react-icons/fa6";
-import { HiOutlineMail } from "react-icons/hi";
-import Logo from "../assets/logo/logo.jpeg"; 
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  FaXTwitter,
+  FaInstagram,
+  FaFacebookF,
+  FaLinkedinIn
+} from "react-icons/fa6";
+
+import {
+  HiOutlineMail,
+  HiOutlineLocationMarker,
+  HiOutlinePhone,
+  HiOutlineClock
+} from "react-icons/hi";
+
+import Logo from "../assets/logo/logo.jpeg";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+
   const footerSections = [
     {
-      title: "Product",
-      links: ["Features", "Pricing", "Trust Score", "Integrations"]
+      title: "Platform",
+      links: [
+        { name: "Properties", path: "/properties" },
+        { name: "Pricing", path: "/prices" },
+        { name: "About Us", path: "/about" },
+        { name: "Contact Us", path: "/contact-us" }
+      ]
     },
+
     {
-      title: "Resources",
-      links: ["Documentation", "Media Kit", "API Status", "Safety"]
+      title: "Become",
+      links: [
+        { name: "Become an Agent", path: "/register/agent" },
+        { name: "Become a Landlord", path: "/register/landlord" },
+        { name: "Register as Tenant", path: "/register/tenant" }
+      ]
     },
+
     {
       title: "Company",
-      links: ["About Us", "Careers", "Press", "Contact"]
+      links: [
+        { name: "Careers", path: "/careers" },
+        { name: "News", path: "/news" },
+        { name: "Board of Directors", path: "/board" },
+        { name: "Support", path: "/contact-us" }
+      ]
     },
+
     {
-      title: "Support",
-      links: ["Help Center", "Privacy Policy", "Terms of Service", "Trust Center"]
+      title: "Resources",
+      links: [
+        { name: "Help Center", path: "/help-center" },
+        { name: "Documentation", path: "/documentation" },
+        { name: "Terms & Conditions", path: "/terms-and-conditions" },
+        { name: "Services", path: "/services" }
+      ]
     }
   ];
 
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+
+    if (!email.trim()) return;
+
+    console.log("Subscribed email:", email);
+
+    // later: connect to backend / email service
+    alert("Subscribed successfully!");
+    setEmail("");
+  };
+
   return (
-    <footer className="w-full bg-white border-t border-slate-100 pt-20 pb-10 px-6 md:px-12 font-sans">
-      
-      {/* Newsletter Section */}
-      <div className="w-full mb-20 p-8 md:p-12 bg-slate-50 rounded-lg flex flex-col lg:flex-row items-center justify-between gap-8 border border-slate-100 shadow-xl shadow-slate-200/30">
-        <div className="max-w-md text-left">
-          <h3 className="text-2xl font-black text-slate-900 mb-2">Subscribe to our newsletter</h3>
-          <p className="text-black font-semibold">Join our community for property insights and digital rental tips.</p>
-        </div>
-        <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-3">
-          <div className="relative">
-            <HiOutlineMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl" />
-            <input 
-              type="email" 
-              placeholder="Your email address" 
-              className="w-full sm:w-72 pl-12 pr-4 py-4 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all font-bold text-black"
-            />
-          </div>
-          {/* Removed uppercase and tracking from button */}
-          <button className="bg-brand-blue-bright text-white px-8 py-4 rounded-lg font-bold hover:bg-blue-700 transition-all shadow-lg text-md">
-            Subscribe
-          </button>
-        </div>
-      </div>
+    <footer className="w-full bg-white border-t border-slate-200 pt-20 pb-10 px-6 md:px-12">
 
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-12 mb-16">
-        
-        {/* Brand Column */}
-        <div className="space-y-6 md:col-span-1 text-left">
-          <div className="flex items-center gap-2">
-            <img 
-              src={Logo} 
-              alt="InzuTrust Logo" 
-              className="h-9 w-auto object-contain rounded" 
+      {/* TOP GRID */}
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
+
+        {/* BRAND */}
+        <div className="lg:col-span-2 text-left">
+
+          <Link to="/" className="flex items-center gap-3 mb-6">
+            <img
+              src={Logo}
+              alt="InzuTrust Logo"
+              className="h-10 w-10 object-cover rounded-xl"
             />
-            <span className="text-black font-black text-xl tracking-tighter">InzuTrust</span>
-          </div>
-          <p className="text-black text-sm leading-relaxed max-w-xs font-bold opacity-80">
-            Making renting secure, transparent, and easy for everyone in East Africa.
+            <span className="text-slate-900 font-semibold text-2xl">
+              InzuTrust
+            </span>
+          </Link>
+
+          <p className="text-slate-600 text-sm leading-7 mb-6 max-w-sm">
+            Making renting secure, transparent, and simple for tenants,
+            landlords, and agents across Rwanda and East Africa.
           </p>
+
+          {/* CONTACT */}
+          <div className="space-y-3">
+
+            <div className="flex items-center gap-3 text-slate-600 text-sm">
+              <HiOutlineMail className="text-brand-blue-bright" />
+              support@inzutrust.com
+            </div>
+
+            <div className="flex items-center gap-3 text-slate-600 text-sm">
+              <HiOutlinePhone className="text-brand-blue-bright" />
+              +250 788 000 000
+            </div>
+
+            <div className="flex items-center gap-3 text-slate-600 text-sm">
+              <HiOutlineLocationMarker className="text-brand-blue-bright" />
+              Kigali, Rwanda
+            </div>
+
+            <div className="flex items-center gap-3 text-slate-600 text-sm">
+              <HiOutlineClock className="text-brand-blue-bright" />
+              Mon - Fri: 08:00 - 18:00
+            </div>
+
+          </div>
         </div>
 
-        {/* Links Columns */}
+        {/* LINKS */}
         {footerSections.map((section) => (
           <div key={section.title} className="text-left">
-            {/* Title: Removed uppercase and tracking */}
-            <h4 className="font-black text-black mb-8 text-lg">
+
+            <h4 className="text-slate-900 font-semibold text-lg mb-6">
               {section.title}
             </h4>
-            <ul className="space-y-4 text-black text-sm font-bold">
+
+            <ul className="space-y-4">
               {section.links.map((link) => (
-                <li key={link}>
-                  <a href="#" className="hover:text-brand-blue-bright transition-colors duration-300">
-                    {link}
-                  </a>
+                <li key={link.name}>
+                  <Link
+                    to={link.path}
+                    className="text-slate-600 text-sm hover:text-brand-blue-bright transition"
+                  >
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
+
           </div>
         ))}
+
+       {/* NEWSLETTER */}
+<div className="lg:col-span-2 text-left">
+
+  <h4 className="text-slate-900 font-semibold text-lg mb-6">
+    Newsletter
+  </h4>
+
+  <p className="text-slate-600 text-sm mb-4">
+    Get updates about properties, rentals, and market insights.
+  </p>
+
+  {/* 🔥 FIXED: input + button in same row */}
+  <form onSubmit={handleSubscribe} className="w-full">
+
+    <div className="flex flex-col sm:flex-row gap-3">
+
+      <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="flex-1 px-4 py-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-blue-bright"
+      />
+
+      <button
+        type="submit"
+        className="px-6 py-3 bg-brand-blue-bright text-white rounded-lg font-medium hover:bg-blue-700 transition whitespace-nowrap"
+      >
+        Subscribe
+      </button>
+
+    </div>
+
+  </form>
+
+</div>
+
       </div>
 
-      {/* Bottom Bar */}
-      <div className="w-full pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="flex items-center gap-3 text-black text-[13px] font-bold">
-          <div className="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-[10px]">
-            ©
-          </div>
-          <span>
-            2026 Inzu Trust Rwanda. All rights reserved
-          </span>
+      {/* BOTTOM */}
+      <div className="w-full pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
+
+        <div className="text-slate-500 text-sm">
+          © 2026 InzuTrust Rwanda. All rights reserved.
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex gap-6 text-black/60 text-xl">
-            <a href="#" className="hover:text-brand-blue-bright transition-all"><FaXTwitter /></a>
-            <a href="#" className="hover:text-brand-blue-bright transition-all"><FaInstagram /></a>
-            <a href="#" className="hover:text-brand-blue-bright transition-all"><FaFacebookF /></a>
-          </div>
+        <div className="flex items-center gap-5 text-lg text-slate-500">
+
+          <a href="#" className="hover:text-brand-blue-bright"><FaXTwitter /></a>
+          <a href="#" className="hover:text-brand-blue-bright"><FaInstagram /></a>
+          <a href="#" className="hover:text-brand-blue-bright"><FaFacebookF /></a>
+          <a href="#" className="hover:text-brand-blue-bright"><FaLinkedinIn /></a>
+
         </div>
+
       </div>
+
     </footer>
   );
 }

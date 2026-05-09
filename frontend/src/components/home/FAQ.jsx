@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HiChevronDown } from "react-icons/hi";
 import { useLanguage } from '../../context/LanguageContext';
+import { Link } from 'react-router-dom';
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -17,71 +18,150 @@ const FAQ = () => {
   const contactIndex = faqs.length;
 
   return (
-    <section className="w-full py-20 bg-white font-sans">
+    <section className="w-full py-20 bg-white">
       <div className="w-full px-6 md:px-12 text-left">
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-4">
+
+        {/* HEADER */}
+        <div className="mb-12 max-w-4xl">
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 leading-snug mb-5">
             {t("faq.title")}
           </h2>
-          <p className="text-black text-lg font-medium max-w-3xl opacity-80">
+
+          <p className="text-slate-600 text-base md:text-lg leading-relaxed font-normal">
             {t("faq.subtitle")}
           </p>
         </div>
 
+        {/* FAQ LIST */}
         <div className="w-full flex flex-col gap-4">
+
           {faqs.map((faq, index) => (
-            <div 
-              key={index} 
-              className={`bg-white rounded-lg border border-slate-200 transition-all duration-300 ${openIndex === index ? 'shadow-lg border-brand-blue-bright/30' : 'hover:border-slate-300'}`}
+            <div
+              key={index}
+              className={`w-full bg-white rounded-2xl border transition-all duration-300 ${
+                openIndex === index
+                  ? 'border-brand-blue-bright shadow-lg shadow-slate-200/60'
+                  : 'border-slate-200 hover:border-slate-300'
+              }`}
             >
-              <button 
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full flex items-center justify-between p-5 md:p-6 text-left"
+
+              {/* QUESTION */}
+              <button
+                onClick={() =>
+                  setOpenIndex(openIndex === index ? null : index)
+                }
+                className="w-full flex items-center justify-between gap-5 px-5 md:px-7 py-4 md:py-5 text-left"
               >
-                <span className={`text-lg font-bold leading-snug transition-colors duration-300 ${openIndex === index ? 'text-brand-blue-bright opacity-100' : 'text-slate-900 opacity-90'}`}>
+
+                <span
+                  className={`flex-1 text-sm md:text-base font-medium leading-7 transition-colors duration-300 ${
+                    openIndex === index
+                      ? 'text-brand-blue-bright'
+                      : 'text-slate-800'
+                  }`}
+                >
                   {faq.q}
                 </span>
-                
-                <div className={`flex-shrink-0 ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${openIndex === index ? 'bg-brand-blue-bright text-white rotate-180' : 'bg-slate-100 text-slate-500'}`}>
-                  <HiChevronDown className="text-xl" />
+
+                <div
+                  className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    openIndex === index
+                      ? 'bg-brand-blue-bright text-white rotate-180'
+                      : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  <HiChevronDown className="text-lg" />
                 </div>
+
               </button>
-              
-              <div 
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+
+              {/* ANSWER */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  openIndex === index
+                    ? 'max-h-[500px] opacity-100'
+                    : 'max-h-0 opacity-0'
+                }`}
               >
-                <div className="px-6 pb-6 text-slate-600 text-lg leading-relaxed font-medium">
+
+                <div className="px-5 md:px-7 pb-6 text-slate-600 text-sm md:text-[15px] leading-7 font-normal">
                   {faq.a}
                 </div>
+
               </div>
+
             </div>
           ))}
 
-          <div className={`bg-slate-50 rounded-lg border border-slate-200 transition-all duration-300 ${openIndex === contactIndex ? 'shadow-lg border-brand-blue-bright/30' : 'hover:border-slate-300'}`}>
-            <button 
-              onClick={() => setOpenIndex(openIndex === contactIndex ? null : contactIndex)}
-              className="w-full flex items-center justify-between p-5 md:p-6 text-left"
+          {/* CONTACT SUPPORT */}
+          <div
+            className={`w-full bg-slate-50 rounded-2xl border transition-all duration-300 ${
+              openIndex === contactIndex
+                ? 'border-brand-blue-bright shadow-lg shadow-slate-200/60'
+                : 'border-slate-200 hover:border-slate-300'
+            }`}
+          >
+
+            <button
+              onClick={() =>
+                setOpenIndex(
+                  openIndex === contactIndex ? null : contactIndex
+                )
+              }
+              className="w-full flex items-center justify-between gap-5 px-5 md:px-7 py-4 md:py-5 text-left"
             >
-              <span className={`text-lg font-bold leading-snug transition-colors duration-300 ${openIndex === contactIndex ? 'text-brand-blue-bright' : 'text-slate-900'}`}>
+
+              <span
+                className={`flex-1 text-sm md:text-base font-medium leading-7 transition-colors duration-300 ${
+                  openIndex === contactIndex
+                    ? 'text-brand-blue-bright'
+                    : 'text-slate-800'
+                }`}
+              >
                 {t("faq.stillQuestions")}
               </span>
-              
-              <div className={`flex-shrink-0 ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${openIndex === contactIndex ? 'bg-brand-blue-bright text-white rotate-180' : 'bg-slate-200 text-slate-500'}`}>
-                <HiChevronDown className="text-xl" />
+
+              <div
+                className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  openIndex === contactIndex
+                    ? 'bg-brand-blue-bright text-white rotate-180'
+                    : 'bg-slate-200 text-slate-500'
+                }`}
+              >
+                <HiChevronDown className="text-lg" />
               </div>
+
             </button>
-            
-            <div 
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === contactIndex ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}
+
+            {/* CONTACT CONTENT */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                openIndex === contactIndex
+                  ? 'max-h-[300px] opacity-100'
+                  : 'max-h-0 opacity-0'
+              }`}
             >
-              <div className="px-6 pb-8 text-left">
-                <p className="text-lg font-medium text-slate-600 mb-6">{t("faq.supportText")}</p>
-                <button className="bg-brand-blue-bright text-white px-10 py-4 rounded-xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95 text-md">
+
+              <div className="px-5 md:px-7 pb-8 text-left">
+
+                <p className="text-slate-600 text-sm md:text-[15px] leading-7 font-normal mb-6 max-w-2xl">
+                  {t("faq.supportText")}
+                </p>
+
+                {/* FIXED BUTTON → LINK */}
+                <Link
+                  to="/contact-us"
+                  className="bg-brand-blue-bright text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-600/20 inline-block"
+                >
                   {t("faq.contactSupport")}
-                </button>
+                </Link>
+
               </div>
+
             </div>
+
           </div>
+
         </div>
       </div>
     </section>

@@ -1,15 +1,14 @@
-import React from 'react';
 import Hero from '../components/home/Hero';
-import Partners from '../components/home/Partners'; 
+import FeaturedProperties from '../components/home/FeaturedProperties';
 import Features from '../components/home/Features';
-import Ratings from '../components/home/Ratings'; 
 import HowItWorks from '../components/home/HowItWorks';
-import FAQ from '../components/home/FAQ';           
-import CTA from '../components/home/CTA';
-import News from '../components/home/News'; 
+import Partners from '../components/home/Partners';
 import AdminFeatures from '../components/home/AdminFeatures';
 import AdminAnalytics from '../components/home/AdminAnalytics';
-
+import Ratings from '../components/home/Ratings';
+import News from '../components/home/News';
+import FAQ from '../components/home/FAQ';
+import CTA from '../components/home/CTA';
 
 import oneHouse from '../assets/image/One.jpg';
 import oneTwo from '../assets/image/Two.jpg';
@@ -21,19 +20,26 @@ const Home = () => {
 
   return (
     <main className="w-full">
+
       <Hero images={heroImages} />
-      <Features />
-      <HowItWorks />
-      <Partners />
-      <AdminFeatures />
+
+      {/* 🔥 CRITICAL MARKETPLACE SECTION */}
+      <FeaturedProperties />
+ <Partners />
+ <AdminFeatures />
       <AdminAnalytics />
+      {/* <Features /> */}
+
+      {/* <HowItWorks /> */}
+     
+      
       <Ratings />
-      <News /> 
+      <News />
       <FAQ />
       <CTA />
+
     </main>
   );
 };
 
 export default Home;
-
