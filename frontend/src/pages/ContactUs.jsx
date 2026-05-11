@@ -32,7 +32,7 @@ const INFO_CARDS = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
-    label: "LOCATION", lines: ["121 Rock Street, 21 Avenue,", "New York, NY 92103-9000"], bg: "#1863c2",
+    label: "LOCATION", lines: ["Kigali, Rwanda", "21 Avenue, Kigali"], bg: "#1863c2",
   },
   {
     icon: (

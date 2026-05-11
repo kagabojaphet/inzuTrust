@@ -9,17 +9,17 @@ const Board = () => {
 
   const boardMembers = [
     {
-      name: "INEMA Henry",
-      title: "Founder & CEO",
-      focus: "Product Vision & Strategy",
-      bio: "Founder of InzuTrust focused on transforming Rwanda’s rental ecosystem through digital trust infrastructure.",
+      name: "INEMA Henry ",
+      title: "Co-Founder & CEO",
+      focus: "Finance & Product Strategy",
+      bio: "Founder of InzuTrust focused on transforming Rwanda’s rental ecosystem through digital trust infrastructure with 2 years of experience in fintech and as a quality engineer.",
       desc: "Henry leads the vision, partnerships, and strategic growth of InzuTrust. His mission is to modernize Rwanda’s housing ecosystem through transparency, digital trust, and secure rental infrastructure.",
       img: "/images/dx.jpeg",
     },
 
     {
       name: "IRADUKUNDA Japhet",
-      title: "Chief Technology Officer",
+      title: "Co-Founder& Chief Technology Officer",
       focus: "Technology & Platform Engineering",
       bio: "Full-stack developer responsible for platform architecture and infrastructure scalability.",
       desc: "Japhet oversees backend systems, dashboard infrastructure, platform security, and engineering scalability to ensure a reliable and secure user experience.",
@@ -51,7 +51,7 @@ const Board = () => {
             transition={{ duration: 0.6 }}
             className="text-5xl md:text-6xl font-black tracking-tight text-slate-900"
           >
-            NEXT-GEN Tech Limited
+            NEXT-GEN Tech Ltd
           </motion.h1>
 
           <motion.p
