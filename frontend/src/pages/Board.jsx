@@ -1,181 +1,204 @@
-import React, { useState } from 'react';
-import { HiShieldCheck, HiScale, HiTrendingUp, HiBadgeCheck, HiX } from "react-icons/hi";
+import React, { useState } from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { motion } from "framer-motion";
 
 const Board = () => {
+
   const [selectedMember, setSelectedMember] = useState(null);
 
   const boardMembers = [
     {
-      name: "Jean-Paul Munyaneza",
-      title: "Executive Chairman",
-      focus: "Strategic Oversight",
-      bio: "20+ years of regional leadership in property development.",
-      desc: "Jean-Paul leads the mission to digitize Rwanda's property market. He ensures that InzuTrust aligns with national urban development goals while maintaining the highest standards of executive governance.",
-      img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&h=500&fit=crop"
+      name: "INEMA Henry",
+      title: "Founder & CEO",
+      focus: "Product Vision & Strategy",
+      bio: "Founder of InzuTrust focused on transforming Rwanda’s rental ecosystem through digital trust infrastructure.",
+      desc: "Henry leads the vision, partnerships, and strategic growth of InzuTrust. His mission is to modernize Rwanda’s housing ecosystem through transparency, digital trust, and secure rental infrastructure.",
+      img: "/images/dx.jpeg",
     },
-    {
-      name: "Alice Umutoni",
-      title: "Legal Director",
-      focus: "Regulatory Compliance",
-      bio: "Senior consultant in Rwandan Civil and Property Law.",
-      desc: "Alice ensures all digital leases and trust frameworks align perfectly with local laws. She protects the rights of both parties within the InzuTrust ecosystem through rigorous legal auditing.",
-      img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=400&h=500&fit=crop"
-    },
-    {
-      name: "Dr. Marc Uwimana",
-      title: "Fintech Advisor",
-      focus: "Financial Innovation",
-      bio: "Blockchain and Mobile Money infrastructure expert.",
-      desc: "Dr. Marc oversees the integration of secure payment gateways. His focus is on ensuring that verified payments remain tamper-proof and accessible for every user in Rwanda.",
-      img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&h=500&fit=crop"
-    },
-    {
-      name: "Sonia Kalisa",
-      title: "Operations Director",
-      focus: "Customer Trust",
-      bio: "Operations specialist with a focus on community scalability.",
-      desc: "Sonia manages the day-to-day ecosystem health. She is responsible for ensuring the 2,000+ members have a seamless experience from onboarding to final payment.",
-      img: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=400&h=500&fit=crop"
-    },
-    {
-      name: "Emmanuel Gakwaya",
-      title: "Technology Lead",
-      focus: "System Security",
-      bio: "Full-stack architect specializing in algorithmic fairness.",
-      desc: "Emmanuel is the brain behind the Trust Score. He ensures the technology stack is secure, fast, and that the data privacy of our users is never compromised.",
-      img: "https://images.unsplash.com/photo-1540560085032-7f4464c39938?q=80&w=400&h=500&fit=crop"
-    },
-    {
-      name: "Divine Iradukunda",
-      title: "External Auditor",
-      focus: "Financial Integrity",
-      bio: "Chartered accountant with expertise in fintech transparency.",
-      desc: "Divine provides independent oversight of our financial workflows. She ensures that rental deposits and automated payments are handled with absolute transparency.",
-      img: "https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?q=80&w=400&h=500&fit=crop"
-    }
-  ];
 
-  const committees = [
     {
-      title: "Audit & Risk Committee",
-      desc: "Overseeing the security protocols for 'Verified Payments' and ensuring financial data integrity for all transactions in Kigali.",
-      icon: <HiShieldCheck />
+      name: "IRADUKUNDA Japhet",
+      title: "Chief Technology Officer",
+      focus: "Technology & Platform Engineering",
+      bio: "Full-stack developer responsible for platform architecture and infrastructure scalability.",
+      desc: "Japhet oversees backend systems, dashboard infrastructure, platform security, and engineering scalability to ensure a reliable and secure user experience.",
+      img: "/images/japhet.jpeg",
     },
+
     {
-      title: "Ethics & Trust Governance",
-      desc: "Ensuring the 'Trust Score' algorithm remains fair, objective, and unbiased, protecting the rights of both landlords and tenants.",
-      icon: <HiScale />
+      name: "Hadidja",
+      title: "Chief Operations Officer",
+      focus: "Operations & User Experience",
+      bio: "Operations lead focused on onboarding systems, ecosystem coordination, and user experience.",
+      desc: "Hadidja coordinates platform operations, user workflows, onboarding systems, and ensures smooth interaction between tenants, landlords, and agents.",
+      img: "/images/hadidja.jpeg",
     },
-    {
-      title: "Innovation & Growth",
-      desc: "Guiding the technological expansion of InzuTrust as we scale our services to secondary cities across Rwanda.",
-      icon: <HiTrendingUp />
-    }
   ];
 
   return (
-    <div className="bg-white min-h-screen relative">
-      {/* 1. Header Section */}
-      <section className="pt-32 pb-20 px-6 md:px-12 bg-slate-50 border-b border-slate-100 text-left">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-brand-blue-bright/10 text-brand-blue-bright px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-6 inline-block">
-            Leadership
-          </div>
-          <h1 className="text-5xl md:text-7xl font-black text-black mb-8 leading-tight">
-            Governed by <br /> Integrity & Experience.
-          </h1>
-          <p className="text-xl md:text-2xl text-black leading-relaxed max-w-3xl font-medium">
-            Our board consists of industry veterans who provide the strategic oversight for the InzuTrust ecosystem.
-          </p>
-        </div>
-      </section>
+    <>
+      <Navbar />
 
-      {/* 2. Board Grid */}
-      <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-black text-black mb-16">The Board of Directors</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      <div className="min-h-screen bg-[#f8fafc] pt-32 px-6 md:px-12 lg:px-20">
+
+        {/* HEADER */}
+        <div className="max-w-7xl mx-auto mb-20 text-center">
+
+          <motion.h1
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-5xl md:text-6xl font-black tracking-tight text-slate-900"
+          >
+            NEXT-GEN Tech Limited
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-slate-500 text-lg mt-6 max-w-3xl mx-auto leading-relaxed"
+          >
+            Meet the people building trusted digital rental infrastructure
+            for Rwanda through innovation, transparency, and secure technology.
+          </motion.p>
+
+        </div>
+
+        {/* BOARD MEMBERS */}
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-10 pb-24">
+
           {boardMembers.map((member, index) => (
-            <div 
-              key={index} 
-              onClick={() => setSelectedMember(member)}
-              className="flex flex-col items-start group cursor-pointer"
-            >
-              <div className="w-full aspect-[4/5] bg-slate-100 rounded-[32px] overflow-hidden mb-6 border-2 border-slate-50 group-hover:border-brand-blue-bright transition-all shadow-sm">
-                <img src={member.img} alt={member.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-              </div>
-              <h3 className="text-2xl font-black text-black mb-1">{member.name}</h3>
-              <p className="text-brand-blue-bright font-bold text-sm uppercase tracking-widest">{member.title}</p>
-              <button className="mt-4 text-xs font-black uppercase tracking-tighter text-black/40 group-hover:text-black transition-colors">View Profile →</button>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      {/* 3. Modal System */}
-      {selectedMember && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setSelectedMember(null)} />
-          <div className="relative bg-white w-full max-w-5xl rounded-[40px] overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in fade-in zoom-in duration-300">
-            <button 
-              onClick={() => setSelectedMember(null)}
-              className="absolute top-6 right-6 z-10 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 transition-all"
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 35 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8 }}
+              className="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-[0_25px_60px_rgba(15,23,42,0.08)] transition-all duration-300"
             >
-              <HiX className="text-2xl" />
-            </button>
-            <div className="w-full md:w-5/12 h-80 md:h-auto">
-              <img src={selectedMember.img} alt={selectedMember.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="w-full md:w-7/12 p-8 md:p-16 text-left self-center">
-              <span className="text-brand-blue-bright font-black text-xs uppercase tracking-[0.2em]">{selectedMember.focus}</span>
-              <h2 className="text-4xl md:text-5xl font-black text-black mt-2 mb-1">{selectedMember.name}</h2>
-              <p className="text-xl font-bold text-slate-400 mb-8">{selectedMember.title}</p>
-              <div className="space-y-6">
-                <div>
-                  <h4 className="text-xs font-black uppercase text-black mb-2 tracking-widest">Short Bio</h4>
-                  <p className="text-lg text-black font-bold leading-tight">{selectedMember.bio}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-black uppercase text-black mb-2 tracking-widest">Description</h4>
-                  <p className="text-black font-medium leading-relaxed opacity-80">{selectedMember.desc}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* 4. Pillars Section (Updated to Primary Blue & White Cards) */}
-      <section className="py-24 px-6 md:px-12 bg-brand-blue-bright overflow-hidden relative">
-        <div className="max-w-7xl mx-auto flex flex-col items-start relative z-10">
-          <h2 className="text-4xl md:text-5xl font-black mb-16 text-left text-white">The Pillars of <br />Our Governance</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {committees.map((item, i) => (
-              <div key={i} className="p-10 bg-white rounded-[40px] shadow-xl flex flex-col items-start text-left border border-white/10 hover:translate-y-[-8px] transition-transform">
-                <div className="text-brand-green-mid text-4xl mb-6">{item.icon}</div>
-                <h3 className="text-2xl font-black mb-4 text-black">{item.title}</h3>
-                <p className="text-black/70 font-medium leading-relaxed">
-                  {item.desc}
+              {/* IMAGE */}
+              <div className="relative overflow-hidden">
+
+                <img
+                  src={member.img}
+                  alt={member.name}
+                  className="w-full h-[420px] object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+              </div>
+
+              {/* CONTENT */}
+              <div className="p-8">
+
+                <h2 className="text-3xl font-black tracking-tight text-slate-900">
+                  {member.name}
+                </h2>
+
+                <p className="text-blue-600 font-bold uppercase tracking-wide text-sm mt-3">
+                  {member.title}
                 </p>
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Decorative Green Glow */}
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-brand-green-mid opacity-30 rounded-full blur-[100px]" />
-      </section>
 
-      {/* 5. Final Accountability */}
-      <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto text-center">
-        <div className="max-w-3xl mx-auto">
-          <HiBadgeCheck className="text-6xl text-brand-blue-bright mx-auto mb-8" />
-          <h2 className="text-4xl font-black text-black mb-6">A Shared Responsibility</h2>
-          <p className="text-xl text-black font-medium leading-relaxed">
-            The board is committed to the highest standards of transparency. We meet quarterly to review the security of our user data and the performance of the InzuTrust ecosystem for the 2,000+ members we serve.
-          </p>
+                <p className="text-slate-500 mt-5 leading-relaxed">
+                  {member.bio}
+                </p>
+
+                <button
+                  onClick={() => setSelectedMember(member)}
+                  className="mt-8 inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-all"
+                >
+                  View Profile →
+                </button>
+
+              </div>
+
+            </motion.div>
+
+          ))}
+
         </div>
-      </section>
-    </div>
+
+        {/* MODAL */}
+        {selectedMember && (
+
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-[2rem] max-w-2xl w-full overflow-hidden shadow-2xl"
+            >
+
+              {/* IMAGE */}
+              <div className="relative">
+
+                <img
+                  src={selectedMember.img}
+                  alt={selectedMember.name}
+                  className="w-full h-[350px] object-cover"
+                />
+
+                <button
+                  onClick={() => setSelectedMember(null)}
+                  className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/90 text-slate-800 font-bold hover:bg-white"
+                >
+                  ✕
+                </button>
+
+              </div>
+
+              {/* CONTENT */}
+              <div className="p-10">
+
+                <h2 className="text-4xl font-black tracking-tight text-slate-900">
+                  {selectedMember.name}
+                </h2>
+
+                <p className="text-blue-600 font-bold uppercase tracking-wide text-sm mt-3">
+                  {selectedMember.title}
+                </p>
+
+                <div className="mt-8">
+
+                  <h3 className="font-bold text-lg text-slate-900">
+                    Focus Area
+                  </h3>
+
+                  <p className="text-slate-500 mt-2">
+                    {selectedMember.focus}
+                  </p>
+
+                </div>
+
+                <div className="mt-8">
+
+                  <h3 className="font-bold text-lg text-slate-900">
+                    Biography
+                  </h3>
+
+                  <p className="text-slate-500 mt-2 leading-relaxed">
+                    {selectedMember.desc}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </motion.div>
+
+          </div>
+
+        )}
+
+      </div>
+
+      <Footer />
+    </>
   );
 };
 

@@ -32,6 +32,8 @@ import HelpCenter from './pages/HelpCenter';
 import ContactUs from './pages/ContactUs';
 import Documentation from './pages/Documentation';
 import TermsAndConditions from './pages/TermsAndConditions';
+import BecomeAgent from "./pages/BecomeAgent";
+import BecomeLandlord from "./pages/BecomeLandlord";
 
 // Layout
 function PublicLayout({ children, showFooter = true }) {
@@ -72,6 +74,7 @@ export default function App() {
           <Route path="/properties/:id" element={<PublicLayout><PropertyDetail /></PublicLayout>} />
 
           <Route path="/about" element={<PublicLayout><AboutUs /></PublicLayout>} />
+          
           <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
           <Route path="/board" element={<PublicLayout><Board /></PublicLayout>} />
           <Route path="/careers" element={<PublicLayout><Careers /></PublicLayout>} />
@@ -112,9 +115,12 @@ export default function App() {
               <AgentDashboard />
             </ProtectedRoute>
           } />
+          <Route path="/become-agent" element={<BecomeAgent />} />
+          <Route path="/become-landlord" element={<BecomeLandlord />} />
 
           {/* fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
+          
 
         </Routes>
       </AuthProvider>

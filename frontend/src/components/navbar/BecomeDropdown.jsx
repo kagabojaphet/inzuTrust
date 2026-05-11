@@ -23,7 +23,7 @@ export default function BecomeDropdown({ dropdown }) {
 
           {/* Become Agent */}
           <a
-            href="/become-agent"
+           href="/become-agent"
             onClick={() => dropdown.setOpen(false)}
             className="flex items-center gap-3 px-5 py-3 text-[0.84rem] font-medium text-gray-700 hover:bg-gray-50 hover:text-brand-blue-bright transition-colors rounded-lg"
           >
