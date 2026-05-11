@@ -85,7 +85,7 @@ export default function BecomeLandlord() {
             <div className="flex flex-wrap gap-4 mt-10">
 
               <a
-                href="/register"
+                href="/register/landlord"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold shadow-xl shadow-blue-200 transition-all duration-300 flex items-center gap-2"
               >
                 Become a Landlord
@@ -442,7 +442,7 @@ export default function BecomeLandlord() {
           </p>
 
           <a
-            href="/register"
+            href="/register/landlord"
             className="inline-flex items-center gap-2 mt-10 bg-white text-blue-700 px-10 py-5 rounded-2xl font-bold hover:bg-blue-50 transition-all duration-300 shadow-lg"
           >
             Continue To Registration
