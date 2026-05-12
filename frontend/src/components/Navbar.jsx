@@ -128,8 +128,8 @@ export default function Navbar() {
               />
 
               {/* Get Started */}
-              <a href="/register" className={getStartedClasses}>
-                Get Started
+              <a href="/login" className={getStartedClasses}>
+                Login
               </a>
 
               {/* Hamburger */}

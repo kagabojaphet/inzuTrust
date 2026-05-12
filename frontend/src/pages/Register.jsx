@@ -1,88 +1,181 @@
 import React from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { HiUser, HiHome, HiArrowRight } from "react-icons/hi";
+import {
+  HiUser,
+  HiHome,
+  HiArrowRight
+} from "react-icons/hi";
+
+import { MdHandshake } from "react-icons/md";
+
 import TenantRegister from './TenantRegister';
 import LandlordRegister from './LandlordRegister';
+import AgentRegister from './AgentRegister';
 
 const Register = () => {
   const navigate = useNavigate();
 
-  // This is your selection screen
+  /* =========================
+     Selection Screen
+  ========================== */
   const SelectionScreen = () => (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center px-6 py-12 font-sans">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#203482] mb-3 tracking-tight">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center px-5 sm:px-6 py-12">
+
+      {/* HEADER */}
+      <div className="text-center mb-12 max-w-2xl">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[#203482] tracking-tight mb-4 leading-tight">
           Join InzuTrust
         </h1>
-        <p className="text-slate-500 text-lg font-medium">
+
+        <p className="text-slate-500 text-sm sm:text-base md:text-lg leading-relaxed">
           Select your account type to continue
         </p>
       </div>
 
-      <div className="max-w-4xl w-full grid md:grid-cols-2 gap-8">
-        <RoleCard 
-          title="I am a Tenant" 
+      {/* CARDS */}
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+        {/* TENANT */}
+        <RoleCard
+          title="I am a Tenant"
           desc="I'm looking for a verified home and want to build my rental trust score."
-          icon={<HiUser className="text-2xl text-[#2563eb]" />}
-          iconBg="bg-[#eff6ff]"
-          btnColor="bg-[#2563eb]"
-          onClick={() => navigate('tenant')} // Updates URL to /register/tenant
+          icon={<HiUser className="text-2xl text-brand-blue-bright" />}
+          iconBg="bg-blue-50"
+          btnColor="bg-brand-blue-bright"
+          onClick={() => navigate('tenant')}
         />
-        <RoleCard 
-          title="I am a Landlord" 
+
+        {/* LANDLORD */}
+        <RoleCard
+          title="I am a Landlord"
           desc="I want to list my properties and manage tenants with verified digital history."
-          icon={<HiHome className="text-2xl text-[#27a376]" />}
-          iconBg="bg-[#ecfdf5]"
-          btnColor="bg-[#27a376]"
-          onClick={() => navigate('landlord')} // Updates URL to /register/landlord
+          icon={<HiHome className="text-2xl text-brand-green-mid" />}
+          iconBg="bg-green-50"
+          btnColor="bg-brand-green-mid"
+          onClick={() => navigate('landlord')}
         />
+
+        {/* AGENT */}
+        <RoleCard
+          title="I am an Agent"
+          desc="I help clients find properties and manage rental opportunities professionally."
+          icon={<MdHandshake className="text-2xl text-slate-700" />}
+          iconBg="bg-slate-100"
+          btnColor="bg-slate-800"
+          onClick={() => navigate('/register/agent')}
+        />
+
       </div>
     </div>
   );
 
   return (
     <Routes>
-      {/* Renders at /register */}
-      <Route index element={<SelectionScreen />} />
-      
-      {/* Renders at /register/tenant */}
-      <Route 
-        path="tenant" 
-        element={<TenantRegister onBack={() => navigate('/register')} />} 
+
+      {/* /register */}
+      <Route
+        index
+        element={<SelectionScreen />}
       />
-      
-      {/* Renders at /register/landlord */}
-      <Route 
-        path="landlord" 
-        element={<LandlordRegister onBack={() => navigate('/register')} />} 
+
+      {/* /register/tenant */}
+      <Route
+        path="tenant"
+        element={
+          <TenantRegister onBack={() => navigate('/register')} />
+        }
       />
+
+      {/* /register/landlord */}
+      <Route
+        path="landlord"
+        element={
+          <LandlordRegister onBack={() => navigate('/register')} />
+        }
+      />
+
+      {/* /register/agent */}
+      <Route
+        path="agent"
+        element={
+          <AgentRegister onBack={() => navigate('/register')} />
+        }
+      />
+
     </Routes>
   );
 };
 
-// ... RoleCard component remains the same ...
-const RoleCard = ({ title, desc, icon, iconBg, btnColor, onClick }) => (
-  <div 
+/* =========================
+   ROLE CARD
+========================== */
+const RoleCard = ({
+  title,
+  desc,
+  icon,
+  iconBg,
+  btnColor,
+  onClick
+}) => (
+  <div
     onClick={onClick}
-    className="bg-white p-8 rounded-lg border border-slate-200 shadow-xl shadow-slate-200/40 flex flex-col items-start text-left group transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
+    className="
+      bg-white
+      border border-slate-200
+      rounded-2xl
+      p-6 sm:p-8
+      flex flex-col
+      items-start
+      text-left
+      transition-all
+      duration-300
+      hover:-translate-y-1
+      hover:border-slate-300
+      cursor-pointer
+    "
   >
-    <div className={`w-14 h-14 rounded-lg ${iconBg} flex items-center justify-center mb-6 transition-colors group-hover:bg-slate-900 group-hover:text-white`}>
+
+    {/* ICON */}
+    <div
+      className={`
+        w-14 h-14 rounded-xl
+        ${iconBg}
+        flex items-center justify-center
+        mb-6
+      `}
+    >
       {icon}
     </div>
-    
-    <h3 className="text-2xl font-bold text-[#203482] mb-4">
+
+    {/* TITLE */}
+    <h3 className="text-xl sm:text-2xl font-semibold text-[#203482] mb-3 leading-tight">
       {title}
     </h3>
-    
-    <p className="text-slate-600 text-[1rem] leading-relaxed mb-10 min-h-[60px]">
+
+    {/* DESCRIPTION */}
+    <p className="text-slate-600 text-sm sm:text-[15px] leading-7 mb-8 flex-1">
       {desc}
     </p>
-    
-    <button 
-      className={`w-full ${btnColor} text-white font-bold px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-all active:scale-95`}
+
+    {/* BUTTON */}
+    <button
+      className={`
+        w-full
+        ${btnColor}
+        text-white
+        font-medium
+        px-6 py-3.5
+        rounded-xl
+        flex items-center justify-center gap-2
+        transition-all
+        hover:opacity-95
+      `}
     >
-      GET STARTED <HiArrowRight className="text-xl group-hover:translate-x-1 transition-transform" />
+      Get Started
+
+      <HiArrowRight className="text-lg" />
     </button>
+
   </div>
 );
 

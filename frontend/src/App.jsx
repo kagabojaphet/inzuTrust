@@ -115,8 +115,8 @@ export default function App() {
               <AgentDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/become-agent" element={<BecomeAgent />} />
-          <Route path="/become-landlord" element={<BecomeLandlord />} />
+          <Route path="/become-agent" element={<PublicLayout><BecomeAgent /></PublicLayout>} />
+          <Route path="/become-landlord" element={<PublicLayout><BecomeLandlord /></PublicLayout>} />
 
           {/* fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
