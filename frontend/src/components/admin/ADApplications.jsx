@@ -7,7 +7,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import ADPageHeader  from "./shared/ADPageHeader";
 import ADStatusBadge from "./shared/ADStatusBadge";
 
-const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API  = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const hdrs = tk => ({ Authorization:`Bearer ${tk}` });
 const fmtDate = d => d ? new Date(d).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}) : "—";
 const fmtRWF  = n => n ? `RWF ${Number(n).toLocaleString()}` : "—";

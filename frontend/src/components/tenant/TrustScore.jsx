@@ -19,7 +19,7 @@ const getToken = () =>
 
 // Resolve API URL — handles both "/api" and "http://localhost:5000/api" formats
 const apiUrl = (path) => {
-  const base = API_BASE || import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const base = API_BASE || import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
   return `${base.replace(/\/$/, "")}${path}`;
 };
 

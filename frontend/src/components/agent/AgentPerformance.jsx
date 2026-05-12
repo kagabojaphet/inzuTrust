@@ -13,7 +13,7 @@ import {
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API  = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const hdrs = tk => ({ Authorization: `Bearer ${tk}` });
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 

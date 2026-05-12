@@ -6,7 +6,7 @@ import {
   HiDocumentText, HiX, HiLockClosed,
 } from "react-icons/hi";
 
-const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API  = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const hdrs = tk => ({ Authorization: `Bearer ${tk}` });
 
 const STEPS = [

@@ -69,7 +69,7 @@ const TenantRegister = ({ onSwitchToLandlord }) => {
           authType: 'google',
         };
 
-        const response = await axios.post('http://localhost:5000/api/users/google-auth', payload);
+        const response = await axios.post('https://inzutrust-api.onrender.com/api/users/google-auth', payload);
 
         if (response.data.success) {
           localStorage.setItem('inzu_token', response.data.token);

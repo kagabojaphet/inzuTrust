@@ -6,7 +6,7 @@ const fmtDate = d => d
   ? new Date(d).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })
   : "—";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 
 export default function RespondModal({ application, token, onClose, onDone }) {
   const [status,      setStatus]      = useState("accepted");

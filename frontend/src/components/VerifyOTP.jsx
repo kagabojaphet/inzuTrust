@@ -25,7 +25,7 @@ const VerifyOTP = () => {
     try {
       // 1. Verify OTP — response contains token + user
       const response = await axios.post(
-        'http://localhost:5000/api/users/verify-otp',
+        'https://inzutrust-api.onrender.com/api/users/verify-otp',
         { email, otp }
       );
 

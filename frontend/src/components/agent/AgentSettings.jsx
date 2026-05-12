@@ -5,7 +5,7 @@ import { HiUser, HiLockClosed, HiSave, HiCheckCircle, HiExclamationCircle, HiEye
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API  = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const hdrs = tk => ({ Authorization: `Bearer ${tk}`, "Content-Type": "application/json" });
 
 function Alert({ type, msg }) {
