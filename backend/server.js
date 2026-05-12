@@ -63,7 +63,7 @@ const startServer = async () => {
     await db.sequelize.sync({ alter: true });
     console.log("✔ Database synced — all new tables created.");
 
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 3306;
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
     console.error("✘ Server failed to start:", err.message);
