@@ -8,7 +8,7 @@ import AppRow        from "./applications/AppRow";
 import DetailDrawer  from "./applications/DetailDrawer";
 import RespondModal  from "./applications/RespondModal";
 
-const API    = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API    = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const FILTERS = [
   { key:"all",      label:"All"      },
   { key:"pending",  label:"Pending"  },

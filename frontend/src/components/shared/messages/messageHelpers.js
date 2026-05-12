@@ -4,7 +4,7 @@ import { API_BASE } from "../../../config";
 export const API_BASE_URL = (() => {
   const base = API_BASE
     || (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL)
-    || "http://localhost:5000/api";
+    || "https://inzutrust-api.onrender.com/api";
   return base.replace(/\/$/, "");
 })();
 

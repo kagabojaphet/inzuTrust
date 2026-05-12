@@ -9,7 +9,7 @@ import {
   HiEye, HiEyeOff, HiCheck,
 } from "react-icons/hi";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 
 const STEPS = [
   { id: 1, label: "Personal",      sub: "Your basic contact information" },

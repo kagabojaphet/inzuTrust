@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { HiX, HiExclamationCircle, HiCheck, HiClock } from "react-icons/hi";
 
-const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API  = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const hdrs = tk => ({ Authorization:`Bearer ${tk}`, "Content-Type":"application/json" });
 const fmtDate = d => d ? new Date(d).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}) : "—";
 

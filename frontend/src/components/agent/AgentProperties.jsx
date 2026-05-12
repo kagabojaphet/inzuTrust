@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { HiOfficeBuilding, HiPencil, HiCheck, HiX, HiPhotograph } from "react-icons/hi";
 
-const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API  = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const hdrs = tk => ({ Authorization: `Bearer ${tk}`, "Content-Type": "application/json" });
 
 const PERM_LABELS = {

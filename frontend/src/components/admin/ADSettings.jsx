@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { HiUser, HiLockClosed, HiSave, HiCheckCircle, HiExclamationCircle, HiEye, HiEyeOff, HiShieldCheck } from "react-icons/hi";
 import Skeleton from "react-loading-skeleton";
 
-const API  = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API  = import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api";
 const hdrs = tk => ({ Authorization:`Bearer ${tk}`, "Content-Type":"application/json" });
 const inp  = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition";
 

@@ -36,7 +36,7 @@ export default function CreateAgentModal({ token, properties, onClose, onSuccess
   const handleCreate = async () => {
     setError(""); setLoading(true);
     try {
-      const res  = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/agents/create`, {
+      const res  = await fetch(`${import.meta.env.VITE_API_URL || "https://inzutrust-api.onrender.com/api"}/agents/create`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(form),
