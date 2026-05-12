@@ -7,19 +7,19 @@ export const hdrs = (tk) => ({
 });
 
 export const fmtDate = (d) =>
-  d ? new Date(d).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }) : "—";
+  d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
 export const isOnline = (d) => d && Date.now() - new Date(d) < 3 * 60 * 1000;
 
 // ── Permission metadata ───────────────────────────────────────────────────────
 export const PERM_LABELS = {
-  canEditDetails:       { label:"Edit Details",       color:"blue"   },
-  canManageTenants:     { label:"Manage Tenants",     color:"indigo" },
-  canViewPayments:      { label:"View Payments",      color:"green"  },
-  canHandleMaintenance: { label:"Maintenance",        color:"amber"  },
-  canViewTenants:       { label:"View Tenants",       color:"blue"   },
-  canCreateProperty:    { label:"Create Properties",  color:"indigo" },
-  canRespondDisputes:   { label:"Respond Disputes",   color:"red"    },
+  canEditDetails:       { label: "Edit Details",      color: "blue"   },
+  canManageTenants:     { label: "Manage Tenants",    color: "indigo" },
+  canViewPayments:      { label: "View Payments",     color: "green"  },
+  canHandleMaintenance: { label: "Maintenance",       color: "amber"  },
+  canViewTenants:       { label: "View Tenants",      color: "blue"   },
+  canCreateProperty:    { label: "Create Properties", color: "indigo" },
+  canRespondDisputes:   { label: "Respond Disputes",  color: "red"    },
 };
 
 export const PERM_COLORS = {
@@ -54,7 +54,6 @@ export const fetchAgentDetail = async (token, agentId) => {
 
 // ── Mutation helpers ──────────────────────────────────────────────────────────
 
-/** Create a new agent account (landlord only) */
 export const apiCreateAgent = async (token, payload) => {
   const r = await fetch(`${API_BASE}/agents/create`, {
     method: "POST", headers: hdrs(token), body: JSON.stringify(payload),
@@ -62,7 +61,6 @@ export const apiCreateAgent = async (token, payload) => {
   return r.json();
 };
 
-/** Assign agent to one or more properties */
 export const apiAssign = async (token, payload) => {
   const r = await fetch(`${API_BASE}/agents/assign`, {
     method: "POST", headers: hdrs(token), body: JSON.stringify(payload),
@@ -70,7 +68,6 @@ export const apiAssign = async (token, payload) => {
   return r.json();
 };
 
-/** Revoke agent from a property (soft delete) */
 export const apiRevoke = async (token, agentId, propertyId) => {
   const r = await fetch(`${API_BASE}/agents/revoke`, {
     method: "DELETE", headers: hdrs(token), body: JSON.stringify({ agentId, propertyId }),
@@ -78,7 +75,6 @@ export const apiRevoke = async (token, agentId, propertyId) => {
   return r.json();
 };
 
-/** Update granular permissions for an agent on a property */
 export const apiUpdatePermissions = async (token, payload) => {
   const r = await fetch(`${API_BASE}/agents/permissions`, {
     method: "PUT", headers: hdrs(token), body: JSON.stringify(payload),
