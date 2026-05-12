@@ -13,22 +13,29 @@ const AgentProperty = sequelize.define("AgentProperty", {
   propertyId:   { type: DataTypes.UUID, allowNull: false },
   assignedById: { type: DataTypes.UUID, allowNull: false },
 
-  // ── Granular permissions ──────────────────────────────────────────────────
-  canEditDetails:        { type: DataTypes.BOOLEAN, defaultValue: true  },
-  canManageTenants:      { type: DataTypes.BOOLEAN, defaultValue: true  },
-  canViewPayments:       { type: DataTypes.BOOLEAN, defaultValue: false },
-  canHandleMaintenance:  { type: DataTypes.BOOLEAN, defaultValue: true  },
-  canCreateProperty:     { type: DataTypes.BOOLEAN, defaultValue: false }, // NEW: agent can list new properties (notifies landlord)
-  canViewTenants:        { type: DataTypes.BOOLEAN, defaultValue: true  }, // NEW: see tenant profiles for this property
-  canRespondDisputes:    { type: DataTypes.BOOLEAN, defaultValue: false }, // NEW: respond to disputes on behalf of landlord
+  // ── Granular permissions (used by agentController + authMiddleware) ─────────
+  canEditDetails:       { type: DataTypes.BOOLEAN, defaultValue: true  },
+  canManageTenants:     { type: DataTypes.BOOLEAN, defaultValue: true  },
+  canViewPayments:      { type: DataTypes.BOOLEAN, defaultValue: false },
+  canHandleMaintenance: { type: DataTypes.BOOLEAN, defaultValue: true  },
+  canCreateProperty:    { type: DataTypes.BOOLEAN, defaultValue: false },
+  canViewTenants:       { type: DataTypes.BOOLEAN, defaultValue: true  },
+  canRespondDisputes:   { type: DataTypes.BOOLEAN, defaultValue: false },
 
-  expiresAt: { type: DataTypes.DATE,    allowNull: true },
+  // ── Assignment lifecycle ───────────────────────────────────────────────────
   isActive:  { type: DataTypes.BOOLEAN, defaultValue: true },
+  expiresAt: { type: DataTypes.DATE,    allowNull: true    },
 
 }, {
   tableName:  "agent_properties",
   timestamps: true,
-  indexes:    [],
+  indexes: [
+    {
+      unique: true,
+      fields: ["agentId", "propertyId"],
+      name:   "unique_agent_property",
+    },
+  ],
 });
 
 module.exports = AgentProperty;

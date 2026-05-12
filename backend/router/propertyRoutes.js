@@ -1,53 +1,55 @@
 // router/propertyRoutes.js
-// Updated to enforce agent relationship-based access
 const express = require("express");
 const router  = express.Router();
 const upload  = require("../middleware/uploadMiddleware");
 
 const {
-  createProperty,
-  getAllProperties,
-  getPropertyById,
-  getMyProperties,
-  updateProperty,
-  deleteProperty,
+  createProperty, getAllProperties, getPropertyById,
+  getMyProperties, getAgentOwnListings, getAgentAssignedProperties,
+  updateProperty, deleteProperty,
 } = require("../controllers/propertyController");
 
 const {
-  protect,
-  landlordOnly,
-  canManageProperty,
-  requirePermission,
+  addReview, getReviews, deleteReview,
+} = require("../controllers/propertyReviewController");
+
+const {
+  protect, landlordOnly, canManageProperty, requirePermission,
 } = require("../middleware/authMiddleware");
 
 const {
-  createPropertyValidation,
-  updatePropertyValidation,
+  createPropertyValidation, updatePropertyValidation,
 } = require("../validator/propertyValidator");
 
 // ── Public ────────────────────────────────────────────────────────────────────
 router.get("/", getAllProperties);
 
-// ── IMPORTANT: named routes before /:id wildcard ──────────────────────────────
-router.get("/my/list", protect, landlordOnly, getMyProperties);
+// ── Named routes BEFORE /:id wildcard ─────────────────────────────────────────
+router.get("/my/list",          protect, landlordOnly, getMyProperties);
+router.get("/agent/my-listings", protect, getAgentOwnListings);
+router.get("/agent/assigned",    protect, getAgentAssignedProperties);
 
+// ── Single property (public) ──────────────────────────────────────────────────
 router.get("/:id", getPropertyById);
 
-// ── Landlord only (create + delete) ──────────────────────────────────────────
+// ── Reviews ───────────────────────────────────────────────────────────────────
+router.get("/:id/reviews",  getReviews);
+router.post("/:id/reviews", protect, addReview);
+router.delete("/:propertyId/reviews/:reviewId", protect, deleteReview);
+
+// ── Create: landlord OR agent, role resolved inside service ───────────────────
 router.post(
   "/",
   protect,
-  landlordOnly,
   upload.array("images", 6),
   createPropertyValidation,
   createProperty
 );
 
+// ── Delete: landlord only ─────────────────────────────────────────────────────
 router.delete("/:id", protect, landlordOnly, deleteProperty);
 
-// ── Landlord OR Agent (update) ────────────────────────────────────────────────
-// canManageProperty: landlord owns it, or agent is assigned to it
-// requirePermission("canEditDetails"): agent must also have edit rights
+// ── Update: landlord OR assigned agent with canEditDetails ────────────────────
 router.put(
   "/:id",
   protect,
