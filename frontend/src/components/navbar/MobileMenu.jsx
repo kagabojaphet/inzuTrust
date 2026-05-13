@@ -30,7 +30,7 @@ export default function MobileMenu({ open, onClose }) {
     {
       href: '/become-agent',
       label: 'Become an Agent',
-      icon: <MdHandshake className="text-amber-500 text-lg shrink-0" />,
+      icon: <MdHandshake className="text-amber-500 text-lg text-brand-green-mid" />,
     },
     {
       href: '/become-landlord',
@@ -57,11 +57,11 @@ export default function MobileMenu({ open, onClose }) {
 
         {/* Get Started */}
         <a
-          href="/register"
+          href="/login"
           onClick={onClose}
           className="mt-2 bg-brand-blue-dark hover:bg-brand-blue-bright text-white px-4 py-2.5 rounded-lg text-[0.88rem] font-bold text-center transition-all"
         >
-          Get Started
+          Login
         </a>
 
       </div>

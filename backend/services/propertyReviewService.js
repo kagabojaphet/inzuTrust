@@ -1,28 +1,32 @@
-// services/propertyReviewService.js
 const { PropertyReview, Property, User } = require("../model");
+const { Sequelize } = require("sequelize");
 
-// ── Create or update a review ─────────────────────────────────────────────────
+// ── Create or update a review ────────────────────────────────────────────────
 const upsertReview = async (tenantId, propertyId, { rating, comment }) => {
-  // Validate rating
   const stars = Number(rating);
-  if (!stars || stars < 1 || stars > 5) {
+
+  if (!Number.isFinite(stars) || stars < 1 || stars > 5) {
     throw new Error("Rating must be between 1 and 5");
   }
 
   const property = await Property.findByPk(propertyId);
   if (!property) throw new Error("Property not found");
 
-  // Upsert — one review per tenant per property
   const [review, created] = await PropertyReview.findOrCreate({
     where: { propertyId, tenantId },
-    defaults: { rating: stars, comment: comment || null },
+    defaults: {
+      rating: stars,
+      comment: comment?.trim() || null,
+    },
   });
 
   if (!created) {
-    await review.update({ rating: stars, comment: comment || null });
+    await review.update({
+      rating: stars,
+      comment: comment?.trim() || null,
+    });
   }
 
-  // Recalculate aggregated rating on the property
   await recalcRating(propertyId);
 
   return review;
@@ -46,7 +50,7 @@ const getReviewsByProperty = async (propertyId) => {
   });
 };
 
-// ── Delete a review (tenant deletes own, admin deletes any) ───────────────────
+// ── Delete review ────────────────────────────────────────────────────────────
 const deleteReview = async (reviewId, tenantId, isAdmin = false) => {
   const review = await PropertyReview.findByPk(reviewId);
   if (!review) throw new Error("Review not found");
@@ -55,24 +59,41 @@ const deleteReview = async (reviewId, tenantId, isAdmin = false) => {
     throw new Error("Not authorized to delete this review");
   }
 
-  const { propertyId } = review;
+  const propertyId = review.propertyId;
+
   await review.destroy();
   await recalcRating(propertyId);
+
   return true;
 };
 
-// ── Internal: recalculate and persist aggregated rating ───────────────────────
+// ── Recalculate rating (OPTIMIZED - no full table scan) ──────────────────────
 const recalcRating = async (propertyId) => {
-  const reviews = await PropertyReview.findAll({ where: { propertyId } });
-  const count   = reviews.length;
-  const avg     = count
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / count
-    : 0;
+  const result = await PropertyReview.findOne({
+    where: { propertyId },
+    attributes: [
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "count"],
+      [Sequelize.fn("AVG", Sequelize.col("rating")), "avg"],
+    ],
+    raw: true,
+  });
+
+  const count = Number(result.count || 0);
+  const avg = Number(result.avg || 0);
 
   await Property.update(
-    { rating: parseFloat(avg.toFixed(2)), reviewCount: count },
-    { where: { id: propertyId } }
+    {
+      rating: parseFloat(avg.toFixed(2)),
+      reviewCount: count,
+    },
+    {
+      where: { id: propertyId },
+    }
   );
 };
 
-module.exports = { upsertReview, getReviewsByProperty, deleteReview };
+module.exports = {
+  upsertReview,
+  getReviewsByProperty,
+  deleteReview,
+};

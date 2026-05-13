@@ -27,7 +27,7 @@ export default function BecomeDropdown({ dropdown }) {
             onClick={() => dropdown.setOpen(false)}
             className="flex items-center gap-3 px-5 py-3 text-[0.84rem] font-medium text-gray-700 hover:bg-gray-50 hover:text-brand-blue-bright transition-colors rounded-lg"
           >
-            <MdHandshake className="text-xl text-amber-500 shrink-0" />
+            <MdHandshake className="text-xl text-amber-500 text-brand-green-mid" />
             Become an Agent
           </a>
 

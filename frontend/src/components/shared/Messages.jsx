@@ -1,5 +1,6 @@
 // src/components/shared/Messages.jsx
 import React, { useState, useEffect, useRef } from "react";
+import { HiArrowLeft, HiCalendar } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
 import { apiGet, API_BASE_URL, getInitials, ROLE_META } from "./messages/messageHelpers";
 import ContactList from "./messages/ContactList";
@@ -95,6 +96,9 @@ export default function Messages({ token: propToken, userRole = "tenant" }) {
   const [search,            setSearch]            = useState("");
   const [showNewChat,       setShowNewChat]       = useState(false);
 
+  // ── Mobile panel state: "list" | "chat" | "right" ────────────────────────
+  const [mobilePanel, setMobilePanel] = useState("list");
+
   const pollRef = useRef(null);
 
   // ── Load conversations ────────────────────────────────────────────────────
@@ -118,7 +122,6 @@ export default function Messages({ token: propToken, userRole = "tenant" }) {
       const data = await apiGet(`${API_BASE_URL}/messages/contacts/available`, token);
       if (data.success) {
         setAvailableContacts(data.data || []);
-        console.log(`[Messages] available contacts loaded: ${data.data?.length}`);
       }
     } catch (err) {
       console.error("[Messages] contacts error:", err.message);
@@ -134,7 +137,6 @@ export default function Messages({ token: propToken, userRole = "tenant" }) {
 
   // ── Open new chat modal ───────────────────────────────────────────────────
   const handleOpenNewChat = () => {
-    // Reload contacts fresh every time modal opens
     loadAvailableContacts();
     setShowNewChat(true);
   };
@@ -170,13 +172,15 @@ export default function Messages({ token: propToken, userRole = "tenant" }) {
   const handleSelectContact = (contact) => {
     setActiveContact(contact);
     setMessages([]);
+    // On mobile: selecting a contact takes you to chat panel
+    setMobilePanel("chat");
   };
 
   const handleNewChatSelect = (contact) => {
     setActiveContact(contact);
     setMessages([]);
     setShowNewChat(false);
-    // Add to conversations list if not already there
+    setMobilePanel("chat");
     const exists = conversations.some(c => c.contact.id === contact.id);
     if (!exists) {
       setConversations(prev => [
@@ -195,14 +199,15 @@ export default function Messages({ token: propToken, userRole = "tenant" }) {
           : c
       )
     );
-    // Reload conversations to ensure sidebar is up to date
     loadConversations();
   };
 
-  return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex" style={{ height: "680px" }}>
+  // ── Inject a back button into ChatArea on mobile via wrapper ─────────────
+  // We wrap ChatArea in a div that controls visibility per panel on mobile.
 
-      {/* New Chat Modal — rendered at this level so it works even with no active contact */}
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden" style={{ height: "680px" }}>
+
       {showNewChat && (
         <NewChatModal
           contacts={availableContacts}
@@ -212,37 +217,108 @@ export default function Messages({ token: propToken, userRole = "tenant" }) {
         />
       )}
 
-      <ContactList
-        conversations={conversations}
-        loading={loadingConvs}
-        search={search}
-        setSearch={setSearch}
-        activeContactId={activeContact?.id}
-        onSelect={handleSelectContact}
-        onNewChat={handleOpenNewChat}
-      />
+      {/*
+        Desktop: flex row — all 3 panels visible side by side (unchanged)
+        Mobile:  only one panel visible at a time, controlled by mobilePanel state
+      */}
+      <div className="flex h-full">
 
-      <ChatArea
-        contact={activeContact}
-        messages={messages}
-        loadingThread={loadingThread}
-        token={token}
-        currentUserId={currentUserId}
-        onMessageSent={handleMessageSent}
-        onCallClick={(type) => console.log("call:", type)}
-        onInfoClick={() => {}}
-        availableContacts={availableContacts}
-        showNewChat={false}           // ← modal is now handled at Messages level
-        onCloseNewChat={() => {}}
-        onNewChatSelect={handleNewChatSelect}
-      />
+        {/* ── LEFT: Contact list ── */}
+        {/*
+          Desktop: always visible (w-64 shrink-0)
+          Mobile:  visible only when mobilePanel === "list"
+        */}
+        <div className={`
+          border-r border-gray-200 flex flex-col bg-white shrink-0
+          w-full md:w-64
+          ${mobilePanel === "list" ? "flex" : "hidden"} md:flex
+        `}>
+          <ContactList
+            conversations={conversations}
+            loading={loadingConvs}
+            search={search}
+            setSearch={setSearch}
+            activeContactId={activeContact?.id}
+            onSelect={handleSelectContact}
+            onNewChat={handleOpenNewChat}
+          />
+        </div>
 
-      <RightPanel
-        contact={activeContact}
-        token={token}
-        currentUserId={currentUserId}
-        onJoinCall={() => {}}
-      />
+        {/* ── MIDDLE: Chat area ── */}
+        {/*
+          Desktop: flex-1 (always visible)
+          Mobile:  visible only when mobilePanel === "chat"
+        */}
+        <div className={`
+          flex-1 flex flex-col min-w-0
+          ${mobilePanel === "chat" ? "flex" : "hidden"} md:flex
+        `}>
+          {/* Mobile back button — sits above ChatArea, only on mobile */}
+          {activeContact && (
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-100 bg-white md:hidden shrink-0">
+              <button
+                onClick={() => setMobilePanel("list")}
+                className="flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-800 transition"
+              >
+                <HiArrowLeft className="text-base"/> Back
+              </button>
+              {/* Book a Call shortcut — opens right panel on mobile */}
+              <button
+                onClick={() => setMobilePanel("right")}
+                className="ml-auto flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-blue-600 border border-gray-200 px-3 py-1.5 rounded-xl transition"
+              >
+                <HiCalendar className="text-sm"/> Book Call
+              </button>
+            </div>
+          )}
+
+          <ChatArea
+            contact={activeContact}
+            messages={messages}
+            loadingThread={loadingThread}
+            token={token}
+            currentUserId={currentUserId}
+            onMessageSent={handleMessageSent}
+            onCallClick={(type) => console.log("call:", type)}
+            onInfoClick={() => {}}
+            availableContacts={availableContacts}
+            showNewChat={false}
+            onCloseNewChat={() => {}}
+            onNewChatSelect={handleNewChatSelect}
+          />
+        </div>
+
+        {/* ── RIGHT: RightPanel (Book a Call) ── */}
+        {/*
+          Desktop: always visible (w-64 shrink-0)
+          Mobile:  visible only when mobilePanel === "right"
+        */}
+        <div className={`
+          border-l border-gray-100 bg-white shrink-0
+          w-full md:w-64
+          ${mobilePanel === "right" ? "flex flex-col" : "hidden"} md:flex md:flex-col
+        `}>
+          {/* Mobile back button for right panel */}
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-100 md:hidden shrink-0">
+            <button
+              onClick={() => setMobilePanel("chat")}
+              className="flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-800 transition"
+            >
+              <HiArrowLeft className="text-base"/> Back to Chat
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <RightPanel
+              contact={activeContact}
+              token={token}
+              currentUserId={currentUserId}
+              onJoinCall={() => {}}
+            />
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

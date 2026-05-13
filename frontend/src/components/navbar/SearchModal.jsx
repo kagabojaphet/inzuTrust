@@ -1,34 +1,46 @@
-import { useState, useEffect, useRef } from 'react';
-import { HiSearch, HiX } from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from "react";
+import { HiSearch, HiX } from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
 
-const SUGGESTIONS = ['Kigali', 'Gasabo', 'Nyarutarama', 'Kimironko', 'Remera'];
+const SUGGESTIONS = ["Kigali", "Gasabo", "Nyarutarama", "Kimironko", "Remera"];
 
 export default function SearchModal({ onClose }) {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
   useEffect(() => {
     inputRef.current?.focus();
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
   const go = (q) => {
     onClose();
-    navigate(q ? `/properties?search=${encodeURIComponent(q)}` : '/properties');
+
+    const trimmed = q?.trim();
+
+    // IMPORTANT: always go through backend via query param
+    navigate(
+      trimmed
+        ? `/properties?search=${encodeURIComponent(trimmed)}`
+        : "/properties"
+    );
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    go(query.trim());
+    go(query);
   };
 
   return (
@@ -45,6 +57,7 @@ export default function SearchModal({ onClose }) {
           <span className="text-[0.85rem] font-semibold text-gray-500 uppercase tracking-wider">
             Search Properties
           </span>
+
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700"
@@ -57,6 +70,7 @@ export default function SearchModal({ onClose }) {
         <form onSubmit={handleSubmit} className="p-4">
           <div className="flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-brand-blue-mid">
             <HiSearch className="text-gray-400 text-xl" />
+
             <input
               ref={inputRef}
               value={query}
@@ -64,8 +78,9 @@ export default function SearchModal({ onClose }) {
               placeholder="Search properties..."
               className="flex-1 bg-transparent focus:outline-none"
             />
+
             {query && (
-              <button type="button" onClick={() => setQuery('')}>
+              <button type="button" onClick={() => setQuery("")}>
                 <HiX />
               </button>
             )}
@@ -82,6 +97,7 @@ export default function SearchModal({ onClose }) {
             {SUGGESTIONS.map((term) => (
               <button
                 key={term}
+                type="button"
                 onClick={() => go(term)}
                 className="px-3 py-1.5 bg-gray-50 rounded-lg text-sm"
               >

@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import Typewriter from 'typewriter-effect';
-import { HiArrowRight, HiSearch, HiCheckCircle, HiShieldCheck } from "react-icons/hi";
+import {
+  HiArrowRight,
+  HiSearch,
+  HiCheckCircle,
+  HiShieldCheck
+} from "react-icons/hi";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade } from 'swiper/modules';
 import { useLanguage } from '../../context/LanguageContext';
@@ -14,10 +19,11 @@ const Hero = ({ images }) => {
 
   return (
     <section className="relative w-full pt-16 pb-20 overflow-hidden bg-[#F8FAFC]">
-      <div className="w-full px-6 md:px-12 grid md:grid-cols-2 items-center gap-10">
+
+      <div className="w-full max-w-full px-6 md:px-12 grid md:grid-cols-2 items-center gap-10">
 
         {/* LEFT CONTENT */}
-        <div className="z-10 text-left flex flex-col items-start">
+        <div className="z-10 text-left flex flex-col items-start min-w-0">
 
           <h1 className="text-3xl md:text-5xl font-semibold leading-snug mb-6 text-slate-900">
             {t("hero.titleLine1")} <br />
@@ -61,10 +67,8 @@ const Hero = ({ images }) => {
             {t("hero.subtitle")}
           </p>
 
-          {/* BUTTONS (ONLY CHANGE HERE) */}
           <div className="flex flex-wrap gap-4 justify-start mb-8">
 
-            {/* GET STARTED */}
             <Link
               to="/register"
               className="bg-brand-blue-bright text-white font-medium px-7 py-3 rounded-lg shadow-md flex items-center gap-3 hover:opacity-95 transition"
@@ -72,7 +76,6 @@ const Hero = ({ images }) => {
               {t("hero.getStarted")} <HiArrowRight />
             </Link>
 
-            {/* BROWSE RENTALS */}
             <Link
               to="/properties"
               className="bg-white border border-slate-200 text-slate-700 font-medium px-7 py-3 rounded-lg flex items-center gap-3 hover:bg-slate-50 transition"
@@ -83,7 +86,6 @@ const Hero = ({ images }) => {
 
           </div>
 
-          {/* USERS */}
           <div className="flex items-center gap-3 justify-start">
             <div className="flex -space-x-3">
               {[1, 2, 3].map((i) => (
@@ -91,7 +93,10 @@ const Hero = ({ images }) => {
                   key={i}
                   className="w-9 h-9 rounded-full border-2 border-white bg-slate-200 overflow-hidden ring-1 ring-slate-100"
                 >
-                  <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User avatar" />
+                  <img
+                    src={`https://i.pravatar.cc/100?img=${i + 10}`}
+                    alt="User avatar"
+                  />
                 </div>
               ))}
 
@@ -106,15 +111,17 @@ const Hero = ({ images }) => {
           </div>
         </div>
 
-        {/* RIGHT SIDE (UNCHANGED) */}
-        <div className="relative flex justify-center md:justify-end">
+        {/* RIGHT SIDE (FIXED OVERFLOW) */}
+        <div className="relative flex justify-center md:justify-end min-w-0 overflow-hidden">
 
           <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-brand-blue-bright opacity-25 rounded-full blur-[120px] z-0" />
           <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-brand-green-mid opacity-20 rounded-full blur-[120px] z-0" />
 
-          <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl border-4 border-white">
+          {/* CRITICAL FIX: min-w-0 + max-w-full + overflow-hidden */}
+          <div className="relative z-10 w-full max-w-full md:max-w-2xl overflow-hidden rounded-2xl shadow-2xl border-4 border-white min-w-0">
 
-            <div className="absolute top-6 right-6 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3 min-w-[160px]">
+            {/* TOP BADGE */}
+            <div className="absolute top-6 right-6 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3 min-w-[160px] max-w-full">
               <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
                 <HiShieldCheck className="text-brand-blue-bright text-2xl" />
               </div>
@@ -136,13 +143,18 @@ const Hero = ({ images }) => {
               className="w-full h-[300px] md:h-[450px]"
             >
               {images.map((img, i) => (
-                <SwiperSlide key={i}>
-                  <img src={img} className="w-full h-full object-cover" alt="Property" />
+                <SwiperSlide key={i} className="w-full min-w-0">
+                  <img
+                    src={img}
+                    className="w-full h-full object-cover block"
+                    alt="Property"
+                  />
                 </SwiperSlide>
               ))}
             </Swiper>
 
-            <div className="absolute bottom-6 left-6 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3 min-w-[180px]">
+            {/* BOTTOM BADGE */}
+            <div className="absolute bottom-6 left-6 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3 min-w-[180px] max-w-full">
               <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
                 <HiCheckCircle className="text-brand-green-mid text-2xl" />
               </div>

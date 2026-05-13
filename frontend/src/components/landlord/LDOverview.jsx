@@ -1,5 +1,4 @@
 // src/components/landlord/LDOverview.jsx
-// Real data only — no mock/static fallbacks. Layout/style/design unchanged.
 import React, { useEffect, useState, useCallback } from "react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -8,12 +7,12 @@ import {
 import {
   HiCheckCircle, HiCash, HiExclamation, HiPlus,
   HiDocumentAdd, HiCog, HiRefresh, HiChevronRight, HiX,
+  HiShieldCheck, HiExclamationCircle,
 } from "react-icons/hi";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { API_BASE } from "../../config";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 const formatRWF = (n) => {
   if (!n || isNaN(n)) return "0 RWF";
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M RWF`;
@@ -23,13 +22,8 @@ const formatRWF = (n) => {
 
 const hdrs = tk => ({ Authorization: `Bearer ${tk}` });
 
-/**
- * Generate the last N months relative to a reference date.
- * Returns array of { month: "Apr", year: 2026, mon: 3, revenue: 0 }
- * Uses the REAL current date so months are always accurate.
- */
 const makeMonthBuckets = (n = 6) => {
-  const now = new Date(); // real today
+  const now = new Date();
   return Array.from({ length: n }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - (n - 1 - i), 1);
     return {
@@ -41,48 +35,32 @@ const makeMonthBuckets = (n = 6) => {
   });
 };
 
-/**
- * Build chart data from real API data.
- * Priority 1: actual paid payment records (paidAt / createdAt bucketed by month).
- * Priority 2: signed agreements — rent counted for every month within the lease term.
- * Never injects fake numbers.
- */
 const buildChart = (paidPayments, agreements) => {
   const months = makeMonthBuckets(6);
-
   if (paidPayments.length > 0) {
-    // Use actual payment dates
     paidPayments.forEach(p => {
       const d = new Date(p.paidAt || p.createdAt);
-      const bucket = months.find(
-        m => m.year === d.getFullYear() && m.mon === d.getMonth()
-      );
+      const bucket = months.find(m => m.year === d.getFullYear() && m.mon === d.getMonth());
       if (bucket) bucket.revenue += Number(p.amount || 0);
     });
   } else {
-    // Estimate: for each signed agreement, add rent to every month it covers
     agreements
       .filter(a => a.status === "signed" && a.rentAmount)
       .forEach(a => {
-        // Lease active from signedAt (or startDate) through endDate
         const leaseStart = new Date(a.startDate || a.signedAt || a.createdAt);
         const leaseEnd   = new Date(a.endDate   || "2099-12-31");
-
         months.forEach(m => {
-          // The first day of this bucket month
           const bucketDate = new Date(m.year, m.mon, 1);
-          // Bucket is within lease window → count rent
           if (leaseStart <= bucketDate && bucketDate <= leaseEnd) {
             m.revenue += Number(a.rentAmount);
           }
         });
       });
   }
-
   return months.map(m => ({ month: m.month, revenue: m.revenue }));
 };
 
-// ── Skeleton pieces (unchanged) ───────────────────────────────────────────────
+// ── Skeletons ─────────────────────────────────────────────────────────────────
 const StatCardSkeleton = () => (
   <div className="bg-white rounded-2xl border border-gray-200 p-5">
     <div className="flex justify-between items-start mb-3">
@@ -151,7 +129,6 @@ const TenantRowSkeleton = () => (
   </div>
 );
 
-// ── Risk / status styling (unchanged) ────────────────────────────────────────
 const riskColor   = { Low:"text-green-600", Medium:"text-yellow-600", High:"text-red-500" };
 const riskBar     = { Low:"bg-green-500",   Medium:"bg-yellow-400",   High:"bg-red-500"   };
 const riskBarW    = { Low:"35%",            Medium:"65%",             High:"90%"          };
@@ -168,13 +145,48 @@ const riskFromScore = score => {
   return "High";
 };
 
-// ── Custom Y-axis tick: shows "300k" or "1.2M", never "0.0M" for zero ────────
 const formatYAxis = v => {
   if (v === 0) return "0";
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
   if (v >= 1_000)     return `${(v / 1_000).toFixed(0)}k`;
   return `${v}`;
 };
+
+// ── Agreement Banner — shows only if landlord hasn't signed ──────────────────
+function AgreementBanner({ token, setActive }) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    fetch(`${API_BASE}/platform-agreement/status`, { headers: hdrs(token) })
+      .then(r => r.json())
+      .then(d => { if (d.success) setShow(!d.data?.hasSigned); })
+      .catch(() => {}); // non-fatal — banner just won't show
+  }, [token]);
+
+  if (!show) return null;
+
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+          <HiExclamationCircle className="text-amber-600 text-xl"/>
+        </div>
+        <div>
+          <p className="text-sm font-black text-amber-900">Platform Agreement Required</p>
+          <p className="text-xs text-amber-700 mt-0.5">
+            Sign the InzuTrust Listing Agreement to publish properties and unlock all features.
+          </p>
+        </div>
+      </div>
+      <button
+        onClick={() => setActive("settings")}
+        className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-black hover:bg-amber-700 transition">
+        <HiShieldCheck/> Sign Now
+      </button>
+    </div>
+  );
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function LDOverview({ token, setActive }) {
@@ -190,7 +202,6 @@ export default function LDOverview({ token, setActive }) {
   const fetchAll = useCallback(async () => {
     if (!token) return;
     setError(null);
-    // Reset so skeletons show while re-fetching
     setStats(null); setTenants(null);
 
     try {
@@ -213,18 +224,13 @@ export default function LDOverview({ token, setActive }) {
       const agreements = agreementsD.data || [];
       const payments   = paymentsD.data   || paymentsD.rows || [];
 
-      // ── Portfolio ─────────────────────────────────────────────────────────
       const occupied = props.filter(p => p.status === "occupied").length;
       const total    = props.length;
       setPortfolio({ occupied, vacant: total - occupied, total });
 
-      // ── Revenue figures ───────────────────────────────────────────────────
       const paidPayments    = payments.filter(p => p.status === "paid");
       const pendingPayments = payments.filter(p => ["pending","overdue"].includes(p.status));
 
-      // Rent collected:
-      //   - If payments exist: sum paid amounts
-      //   - Else: sum signed-agreement rent amounts (real, not fake)
       const rentCollected = paidPayments.length > 0
         ? paidPayments.reduce((s, p) => s + Number(p.amount || 0), 0)
         : agreements
@@ -233,11 +239,10 @@ export default function LDOverview({ token, setActive }) {
 
       const pendingTotal = pendingPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
 
-      // ── Month-over-month growth (payments only — 0 if no payment history) ──
-      const now = new Date();
-      const thisM = now.getMonth(),  thisY = now.getFullYear();
+      const now    = new Date();
+      const thisM  = now.getMonth(), thisY = now.getFullYear();
       const prevDate = new Date(thisY, thisM - 1, 1);
-      const prevM = prevDate.getMonth(), prevY = prevDate.getFullYear();
+      const prevM  = prevDate.getMonth(), prevY = prevDate.getFullYear();
 
       const thisMonRev = paidPayments
         .filter(p => { const d = new Date(p.paidAt||p.createdAt); return d.getMonth()===thisM && d.getFullYear()===thisY; })
@@ -259,14 +264,11 @@ export default function LDOverview({ token, setActive }) {
         pendingPayments:  pendingTotal,
         occupancyRate:    occRate,
         rentGrowth,
-        // surface whether revenue comes from payments or estimate
         revenueSource: paidPayments.length > 0 ? "payments" : "agreements",
       });
 
-      // ── Chart — always uses current real months ───────────────────────────
       setChart(buildChart(paidPayments, agreements));
 
-      // ── Tenant overview rows ──────────────────────────────────────────────
       const signedAgreements = agreements.filter(a => a.status === "signed" && a.tenant);
 
       if (signedAgreements.length > 0) {
@@ -317,7 +319,10 @@ export default function LDOverview({ token, setActive }) {
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
       <div className="space-y-6">
 
-        {/* Error banner */}
+        {/* ── Agreement banner — only shows if not signed ── */}
+        <AgreementBanner token={token} setActive={setActive}/>
+
+        {/* ── Error banner ── */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl flex items-center justify-between">
             <span>{error}</span>
@@ -394,7 +399,6 @@ export default function LDOverview({ token, setActive }) {
               </div>
 
               {chartIsEmpty ? (
-                /* ── Empty state: no chart noise, just a clear message ── */
                 <div className="h-[220px] flex flex-col items-center justify-center gap-3">
                   <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center">
                     <HiCash className="text-gray-300 text-3xl"/>
@@ -420,8 +424,7 @@ export default function LDOverview({ token, setActive }) {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
                     <XAxis dataKey="month" tick={{ fontSize:11, fill:"#94a3b8" }} axisLine={false} tickLine={false}/>
-                    <YAxis tick={{ fontSize:11, fill:"#94a3b8" }} axisLine={false} tickLine={false}
-                      tickFormatter={formatYAxis}/>
+                    <YAxis tick={{ fontSize:11, fill:"#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={formatYAxis}/>
                     <Tooltip
                       formatter={v => [formatRWF(v), "Revenue"]}
                       contentStyle={{ borderRadius:"12px", border:"1px solid #e2e8f0", fontSize:"12px" }}/>
@@ -435,7 +438,6 @@ export default function LDOverview({ token, setActive }) {
             </div>
           )}
 
-          {/* Right panel */}
           <div className="space-y-5">
             {loading ? (
               <><QuickActionsSkeleton/><PortfolioSkeleton/></>
@@ -513,7 +515,6 @@ export default function LDOverview({ token, setActive }) {
             )}
           </div>
 
-          {/* Table header */}
           <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100
             text-[10px] font-black uppercase tracking-wider text-gray-400">
             <div className="col-span-3">Tenant</div>

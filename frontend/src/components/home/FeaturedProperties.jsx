@@ -1,91 +1,15 @@
-import { useState } from "react";
-import { HiHeart, HiStar, HiOutlineLocationMarker } from "react-icons/hi";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  HiHeart,
+  HiStar,
+  HiOutlineLocationMarker,
+  HiShieldCheck
+} from "react-icons/hi";
 
-/* MOCK DATA (expanded) */
-const allProperties = [
-  {
-    id: 1,
-    title: "Modern Apartment in Kigali",
-    location: "Kacyiru, Kigali",
-    price: 450,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"
-  },
-  {
-    id: 2,
-    title: "Luxury House with Garden",
-    location: "Nyarutarama, Kigali",
-    price: 1200,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
-  },
-  {
-    id: 3,
-    title: "Cozy Studio Near City Center",
-    location: "Downtown, Kigali",
-    price: 300,
-    rating: 4.6,
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688"
-  },
-  {
-    id: 4,
-    title: "Family Home with Parking",
-    location: "Kimironko, Kigali",
-    price: 700,
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be"
-  },
-  {
-    id: 5,
-    title: "Minimalist Apartment",
-    location: "Kigali Heights",
-    price: 550,
-    rating: 4.5,
-    image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994"
-  },
-  {
-    id: 6,
-    title: "Modern Villa with Pool",
-    location: "Rebero, Kigali",
-    price: 1500,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1613977257363-707ba9348227"
-  },
-  {
-    id: 7,
-    title: "City Apartment View",
-    location: "Downtown, Kigali",
-    price: 600,
-    rating: 4.4,
-    image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb"
-  },
-  {
-    id: 8,
-    title: "Elegant Family House",
-    location: "Gacuriro, Kigali",
-    price: 900,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c"
-  },
-   {
-    id: 9,
-    title: "Modern Apartment in Kigali",
-    location: "Kacyiru, Kigali",
-    price: 450,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"
-  },
-   {
-    id: 10,
-    title: "Modern Apartment in Kigali",
-    location: "Kacyiru, Kigali",
-    price: 450,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"
-  },
-];
+import { API_BASE } from "../../config";
 
-/* 🔹 Skeleton Card */
+/* Skeleton */
 function SkeletonCard() {
   return (
     <div className="border border-slate-200 rounded-xl overflow-hidden animate-pulse">
@@ -102,83 +26,165 @@ function SkeletonCard() {
   );
 }
 
-export default function FeaturedProperties() {
-  const [visibleCount, setVisibleCount] = useState(6);
-  const [loading, setLoading] = useState(false);
+/* image parser */
+function parseImages(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
 
-  const visibleProperties = allProperties.slice(0, visibleCount);
-  const hasMore = visibleCount < allProperties.length;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export default function FeaturedProperties() {
+  const navigate = useNavigate();
+
+  const [properties, setProperties] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [liked, setLiked] = useState({});
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      setLoading(true);
+
+      try {
+        const res = await fetch(`${API_BASE}/properties`);
+        if (!res.ok) throw new Error("Failed to fetch");
+
+        const data = await res.json();
+
+        const incoming = data?.data
+          ? data.data
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        setProperties(incoming);
+      } catch (err) {
+        console.error(err);
+        setProperties([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
+  const visibleProperties = properties.slice(0, visibleCount);
+  const hasMore = visibleCount < properties.length;
 
   const loadMore = () => {
-    setLoading(true);
-
+    setLoadingMore(true);
     setTimeout(() => {
       setVisibleCount((prev) => prev + 3);
-      setLoading(false);
-    }, 800);
+      setLoadingMore(false);
+    }, 600);
+  };
+
+  const toggleLike = (e, id) => {
+    e.stopPropagation(); // IMPORTANT: prevent navigation
+    setLiked((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   return (
     <section className="w-full px-6 md:px-12 py-12 bg-white">
 
-      {/* GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        {visibleProperties.map((p) => (
-          <div
-            key={p.id}
-            className="border border-slate-200 rounded-xl overflow-hidden transition-all"
-          >
+        {loading
+          ? Array.from({ length: 8 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))
+          : visibleProperties.map((p) => {
+              const images = parseImages(p.images);
 
-            {/* IMAGE */}
-            <div className="relative h-48 overflow-hidden">
-              <img
-                src={p.image}
-                alt={p.title}
-                className="w-full h-full object-cover"
-              />
+              const image =
+                images[0] ||
+                p.mainImage ||
+                "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267";
 
-              <button className="absolute top-3 right-3 w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center">
-                <HiHeart className="text-slate-600" />
-              </button>
-            </div>
+              const isVerified =
+                p.verificationStatus === "verified" ||
+                p.isVerified === true;
 
-            {/* CONTENT */}
-            <div className="p-4">
+              const isLiked = liked[p.id];
 
-              <h3 className="font-medium text-slate-900 text-sm mb-1">
-                {p.title}
-              </h3>
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => navigate(`/properties/${p.id}`)}
+                  className="border border-slate-200 rounded-xl overflow-hidden transition-all cursor-pointer"
+                >
 
-              <div className="flex items-center gap-1 text-slate-500 text-xs mb-2">
-                <HiOutlineLocationMarker />
-                {p.location}
-              </div>
+                  {/* IMAGE */}
+                  <div className="relative h-48 overflow-hidden">
 
-              <div className="flex items-center justify-between">
+                    <img
+                      src={image}
+                      alt={p.title}
+                      className="w-full h-full object-cover"
+                    />
 
-                <p className="text-brand-blue-bright font-semibold">
-                  ${p.price}/mo
-                </p>
+                    {/* VERIFIED BADGE */}
+                    {isVerified && (
+                      <div className="absolute top-3 left-3 bg-green-600 text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1">
+                        <HiShieldCheck />
+                        VERIFIED
+                      </div>
+                    )}
 
-                <div className="flex items-center gap-1 text-sm text-slate-600">
-                  <HiStar className="text-yellow-400" />
-                  {p.rating}
+                    {/* HEART */}
+                    <button
+                      onClick={(e) => toggleLike(e, p.id)}
+                      className="absolute top-3 right-3 w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center"
+                    >
+                      <HiHeart
+                        className={
+                          isLiked ? "text-red-500" : "text-slate-600"
+                        }
+                      />
+                    </button>
+
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="p-4">
+
+                    <h3 className="font-medium text-slate-900 text-sm mb-1">
+                      {p.title}
+                    </h3>
+
+                    <div className="flex items-center gap-1 text-slate-500 text-xs mb-2">
+                      <HiOutlineLocationMarker />
+                      {p.district || "Kigali"}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+
+                      <p className="text-brand-blue-bright font-semibold">
+                        RWF {Number(p.rentAmount || 0).toLocaleString()}/mo
+                      </p>
+
+                      <div className="flex items-center gap-1 text-sm text-slate-600">
+                        <HiStar className="text-yellow-400" />
+                        {Number(p.rating || 0).toFixed(1)}
+                      </div>
+
+                    </div>
+
+                  </div>
+
                 </div>
-
-              </div>
-
-            </div>
-          </div>
-        ))}
-
-        {/* SKELETON LOADING */}
-        {loading &&
-          Array.from({ length: 3 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))
-        }
-
+              );
+            })}
       </div>
 
       {/* LOAD MORE */}
@@ -186,10 +192,10 @@ export default function FeaturedProperties() {
         <div className="flex justify-center mt-10">
           <button
             onClick={loadMore}
-            disabled={loading}
+            disabled={loadingMore}
             className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition"
           >
-            {loading ? "Loading..." : "Load More"}
+            {loadingMore ? "Loading..." : "Load More"}
           </button>
         </div>
       )}
